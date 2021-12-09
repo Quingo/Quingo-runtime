@@ -1,0 +1,59 @@
+// Base
+opaque X(q: qubit) : unit;
+opaque X2P(q: qubit) : unit;
+opaque X2M(q: qubit) : unit;
+opaque Y(q: qubit) : unit;
+opaque Y2P(q: qubit) : unit;
+opaque Y2M(q: qubit) : unit;
+opaque XY(q: qubit) : unit;
+opaque XY2P(q: qubit) : unit;
+opaque XY2M(q: qubit) : unit;
+opaque Z(q: qubit) : unit;
+opaque S(q: qubit) : unit;
+opaque SD(q: qubit) : unit;
+opaque T(q: qubit) : unit;
+opaque TD(q: qubit) : unit;
+opaque RZ(q: qubit, angle: double) : unit;
+opaque CZ(q1: qubit, q2: qubit) : unit;
+opaque measure(q: qubit): bool;
+
+// Extension
+opaque H(q: qubit) : unit;
+opaque RX(q: qubit, angle: double) : unit;
+opaque RY(q: qubit, angle: double) : unit;
+opaque RXY(q: qubit, azimuth: double, theta: double) : unit;
+opaque CNOT(q1: qubit, q2: qubit) : unit;
+opaque SWP(q1: qubit, q2: qubit) : unit;
+opaque SSWP(q1: qubit, q2: qubit) : unit;
+opaque ISWP(q1: qubit, q2: qubit) : unit;
+opaque SISWP(q1: qubit, q2: qubit) : unit;
+opaque CP(q1: qubit, q2: qubit, angle: double) : unit;
+opaque FSIM(q1: qubit, q2: qubit, index: int) : unit;
+
+
+operation CZ00(q0: qubit, q1: qubit): unit {
+    X(q0);
+    X(q1);
+    CZ(q0, q1);
+    X(q0);
+    X(q1);
+    return;
+}
+
+operation grover_2q(): unit {
+    using(q: qubit[2]) {
+        H(q[0]);
+        H(q[1]);
+        // oracle
+        CZ00(q[0], q[1]);
+
+        // inversion about mean
+        H(q[0]);
+        H(q[1]);
+        CZ00(q[0], q[1]);
+        H(q[0]);
+        H(q[1]);
+        measure(q[0]);
+        measure(q[1]);
+    }
+}
