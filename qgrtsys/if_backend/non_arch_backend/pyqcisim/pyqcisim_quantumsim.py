@@ -1,11 +1,7 @@
-import os
-import platform
-import subprocess
 from pathlib import Path
 from qgrtsys.if_backend.if_backend import If_backend
 import qgrtsys.global_config as gc
 from qgrtsys.core.utils import *
-
 from pyqcisim.simulator import PyQCISim
 
 logger = get_logger((__name__).split('.')[-1])

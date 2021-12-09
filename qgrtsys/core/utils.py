@@ -12,6 +12,10 @@ cm.init()
 # Style: DIM, NORMAL, BRIGHT, RESET_ALL
 
 
+def quingo_info(arg, **kwargs):
+    print(arg, **kwargs)
+
+
 def quingo_msg(arg, **kwargs):
     print(tc.colored(arg, 'green'), **kwargs)
 

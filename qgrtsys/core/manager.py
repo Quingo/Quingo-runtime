@@ -7,8 +7,9 @@ import re
 import platform
 import subprocess
 import logging
+import distutils.spawn
 from pathlib import Path
-from qgrtsys.core.utils import quingo_err, quingo_msg, quingo_warning, get_logger
+from qgrtsys.core.utils import quingo_err, quingo_msg, quingo_warning, get_logger, quingo_info
 logger = get_logger((__name__).split('.')[-1])
 
 
@@ -59,14 +60,15 @@ class Runtime_system_manager():
               - xtext
               - mlir
         """
-        self.compiler_path = {
-            "xtext": gc.xtext_compiler_path,
-            "mlir": gc.mlir_compiler_path
-        }
-        self.compiler_name = kwargs.pop('compiler', "xtext")
-        if (self.compiler_name not in self.compiler_path):
-            raise ValueError(
-                "Found unsupported compiler: {}".format(self.compiler_name))
+        self.supported_compilers = ["xtext", "mlir"]
+        # self.compiler_path = {
+        #     "xtext": gc.xtext_compiler_path,
+        #     "mlir": gc.mlir_compiler_path
+        # }
+        # self.compiler_name = kwargs.pop('compiler', "xtext")
+        # if (self.compiler_name not in self.compiler_path):
+        #     raise ValueError(
+        #         "Found unsupported compiler: {}".format(self.compiler_name))
 
         # define verbose & log_level here which will be used by backends
         self.verbose = verbose
@@ -74,6 +76,7 @@ class Runtime_system_manager():
 
         self.config_execution('one_shot', 1)
 
+        self.compiler_name = None  # to be set
         self.backend = None  # to be connected
 
         self.set_verbose(verbose)
@@ -108,8 +111,9 @@ class Runtime_system_manager():
         self.log_level = log_level
         logger.setLevel(self.log_level)
 
-        if self.backend is not None:
-            self.backend.set_log_level(log_level)
+        backend = self.get_backend()
+        if backend is not None:
+            backend.set_log_level(log_level)
 
     def set_verbose(self, v: bool = False):
         """Set the message level to verbose or not.
@@ -119,8 +123,15 @@ class Runtime_system_manager():
         """
         assert(isinstance(v, bool))
         self.verbose = v
-        if self.backend is not None:
-            self.backend.set_verbose(v)
+        backend = self.get_backend()
+        if backend is not None:
+            backend.set_verbose(v)
+
+    def get_compiler(self):
+        """Get the name of the compiler that has been set.
+        If not compiler has been set, return None.
+        """
+        return self.compiler_name
 
     def set_compiler(self, compiler_name):
         """Set the compiler used to compiler the quingo program.
@@ -131,17 +142,27 @@ class Runtime_system_manager():
               - xtext
               - mlir
         """
-        if (compiler_name not in self.compiler_path):
-            raise ValueError(
-                "Found unsupported compiler: {}".format(compiler_name))
+        if (compiler_name not in self.supported_compilers):
+            raise ValueError("Found unsupported compiler: {}".format(compiler_name))
+
         self.compiler_name = compiler_name
 
-    def get_backend_name(self):
-        if self.backend is None:
-            quingo_err("No backend has been connected yet. Abort")
-            return None
+    def get_backend(self):
+        return self.backend
 
-        return "{}".format(self.backend.name())
+    def get_backend_or_connect_default(self):
+        if self.backend is None:
+            quingo_info("No backend has been connected. "
+                        "Trying to connect the default PyCACTUS backend...")
+            if not self.connect_backend('pycactus_quantumsim'):
+                return None
+        return self.backend
+
+    def get_backend_name(self):
+        backend = self.get_backend()
+        if backend is None:
+            return ""
+        return "{}".format(backend.name())
 
     def connect_backend(self, backend_name: str):
         """This function set the backend to execute the quantum application.
@@ -162,7 +183,18 @@ class Runtime_system_manager():
 
             raise ValueError('Undefined backend ({})'.format(backend_name))
 
-        self.backend = backend_hub.get_instance(backend_name)
+        try:
+            self.backend = backend_hub.get_instance(backend_name)
+        except:
+            quingo_err("Cannot connect the backend: {}".format(backend_name))
+            quingo_info("To fix this problem, you could explicitly connect another "
+                        "backend use the the following method: \n"
+                        "        `if_quingo.connect_backend(<backend_name>)`\n"
+                        "    or, install the corresponding simulation backend using:\n"
+                        "        `pip install pycactus`\n"
+                        "    or\n"
+                        "        `pip install pyqcisim`\n")
+            return False
 
         if self.backend is None:
             msg = "Failed to connect the backend: " + backend_name
@@ -174,23 +206,11 @@ class Runtime_system_manager():
 
         self.backend.set_log_level(self.log_level)
         self.backend.set_verbose(self.verbose)
+        return True
 
     def call_quingo(self, qg_filename: str, qg_func_name: str, *args):
         """This function triggers the main process."""
         self.set_call_kernel_success(False)
-        if self.backend is None:
-            quingo_msg("No backend has been connected. "
-                       "Trying to connect the default PyCACTUS backend...")
-            try:
-                self.connect_backend('pycactus_quantumsim')
-            except:
-                quingo_err("Cannot connect the default PyCACTUS backend.")
-                print("To fix this problem, you could explicitly connect a "
-                      "backend at first use the the following method: \n"
-                      "        `if_quingo.connect_backend(<backend_name>)`\n"
-                      "    or, install the default PyCACTUS simulator backend:\n"
-                      "        `pip install pycactus`")
-                return False
         success = self.main_process(qg_filename, qg_func_name, *args)
         self.set_call_kernel_success(success)
 
@@ -209,7 +229,6 @@ class Runtime_system_manager():
 
         # ensure there is a build directory in the same directory as the source file.
         self.prj_root_dir = Path(self.resolved_qg_filename).parent
-
         self.build_dir = self.prj_root_dir / gc.build_dirname
 
         if self.build_dir.exists():  # clear the existing build directory to remove old files.
@@ -223,14 +242,19 @@ class Runtime_system_manager():
             gc.quingo_suffix)
 
         qasm_fn_no_ext = self.build_dir / qg_func_name
-        qisa_used = self.backend.get_qisa()
+        backend = self.get_backend_or_connect_default()
+        if backend is None:
+            return False
+
+        qisa_used = backend.get_qisa()
         if qisa_used == 'eqasm':
             self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.eqasm_suffix)
         elif qisa_used == 'qcis':
             self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.qcis_suffix)
         else:
-            raise ValueError(
-                "Found unsupported QISA to use: {}".format(qisa_used))
+            quingo_err("Found unsupported QISA to use: {}".format(qisa_used))
+            return False
+        return True
 
     def get_last_qasm(self):
         if self.qasm_file_path is None or not self.qasm_file_path.is_file():
@@ -252,7 +276,8 @@ class Runtime_system_manager():
             args: a variable length of parameters passed to the quantum function
         """
 
-        self.config_path(qg_filename, qg_func_name)
+        if not self.config_path(qg_filename, qg_func_name):
+            return False
 
         if self.verbose:
             quingo_msg("Start compilation ... ", end='')
@@ -284,7 +309,7 @@ class Runtime_system_manager():
             quingo_msg('Execution finished.')
 
         # read back the results
-        self.result = self.backend.read_result()
+        self.result = self.get_backend().read_result()
 
         return True
 
@@ -293,34 +318,31 @@ class Runtime_system_manager():
         to the backend, and executes it.
         After the execution, the result can be fetched via `read_result()`.
         """
-
-        if self.backend.available is False:
+        backend = self.get_backend_or_connect_default()
+        if backend.available is False:
             raise EnvironmentError(
-                "The backend{} is not available.".format(self.backend.name()))
+                "The backend {} is not available.".format(backend.name()))
 
-        if self.mode == 'state_vector' and not self.backend.is_simulator():
+        if self.mode == 'state_vector' and not backend.is_simulator():
             raise ValueError("Cannot retrieve state vector from a non-simulator backend.")
 
         if self.verbose:
-            quingo_msg("Uploading the program to the backend {}...".format(
-                self.backend.name()))
+            quingo_msg("Uploading the program to the backend {}...".format(backend.name()))
 
-        if not self.backend.upload_program(self.qasm_file_path):
-            quingo_err("Failed to upload the program to the backend {}.".format(
-                self.backend.name()))
-            print("  Suggestion: are you uploading QCIS program to an eQASM backend "
-                  "or eQASM program to a QCIS backend?\n"
-                  "    If so, please specify the compiler and backend accordingly.")
+        if not backend.upload_program(self.qasm_file_path):
+            quingo_err("Failed to upload the program to the backend {}.".format(backend.name()))
+            quingo_info("  Suggestion: are you uploading QCIS program to an eQASM backend "
+                        "or eQASM program to a QCIS backend?\n"
+                        "    If so, please specify the compiler and backend accordingly.")
             return False
 
         if self.verbose:
-            quingo_msg("Start execution with {}... ".format(
-                self.backend.name()))
+            quingo_msg("Start execution with {}... ".format(backend.name()))
 
-        if self.backend.name() == "PyQCISim_QuantumSim":
-            return self.backend.execute(self.mode, self.num_shots)
+        if backend.name() == "PyQCISim_QuantumSim":
+            return backend.execute(self.mode, self.num_shots)
         else:
-            return self.backend.execute()
+            return backend.execute()
 
     def get_imported_qu_fns(self, prj_dir):
         """This function recursively scans the project root directory, and
@@ -337,25 +359,53 @@ class Runtime_system_manager():
 
         return valid_file_list
 
+    def get_xtext_path(self):
+        # TODO: add support of searching quingo.jar
+        pass
+
+    def get_compiler_cmd(self, compiler_name):
+        assert(compiler_name in self.supported_compilers)
+
+        if compiler_name == 'mlir':
+            quingoc_path = distutils.spawn.find_executable('quingoc')
+            if quingoc_path is None:
+                quingo_err("Cannot find the mlir-based quingoc compiler in the system path.")
+                quingo_info("To resolve this problem, you can download quingoc from xxxxx and save "
+                            "it at a directory in the system path.")
+                return None
+            else:
+                return quingoc_path
+
+        if compiler_name == 'xtext':
+            xtext_path = self.get_xtext_path()
+            if xtext_path is None:
+                quingo_err("Cannot find the Xtext-based Quingo compiler.")
+                quingo_info(
+                    "To resolve this issue, please download the quingo.jar from xxxx and configure "
+                    "its path using the following command inside python:\n"
+                    "     `quingo_interface.set_xtext_compiler_path(<path-to-xtext>)`")
+                return None
+            return 'java -jar "{}"'.format(xtext_path)
+
     def compile(self):
         """Compiles the quingo files and generate corresponding quantum assembly code.
             Both the compiler and backend are selected based on the configuration.
         """
-        path_compiler_to_use = self.compiler_path[self.compiler_name]
-        if not path_compiler_to_use.exists():
-            raise SystemError("Cannot find the compiler {} at {}.".format(
-                self.compiler_name, path_compiler_to_use))
+        if self.compiler_name is None:
+            quingo_info("No Quingo compiler has been set. "
+                        "Trying to use the default xtext-based Quingo compiler...")
+            self.set_compiler("xtext")
 
-        if self.compiler_name == 'mlir':
-            quingo_compiler = '"{}"'.format(str(path_compiler_to_use))
+        compiler_name = self.get_compiler()
+        compile_cmd_head = self.get_compiler_cmd(compiler_name)
+        if compile_cmd_head is None:  # Failure
+            return False
 
-            logger.debug(self.compose_mlir_cmd(quingo_compiler, print=True))
-            compile_cmd = self.compose_mlir_cmd(quingo_compiler, False)
+        if compiler_name == 'mlir':
+            logger.debug(self.compose_mlir_cmd(compile_cmd_head, print=True))
+            compile_cmd = self.compose_mlir_cmd(compile_cmd_head, False)
 
-        elif self.compiler_name == 'xtext':
-            quingo_compiler = 'java -jar "{}"'.format(
-                str(path_compiler_to_use))
-
+        elif compiler_name == 'xtext':
             # the Quingo files written by the programmer
             # qgrtsys recursively scans the root directory of the project to get all quingo files.
             # however, qgrtsys will only use the files which are imported by `qg_filename`
@@ -387,10 +437,8 @@ class Runtime_system_manager():
             compile_files.extend(user_files)
             compile_files.extend(default_files)
 
-            logger.debug(self.compose_xtext_cmd(
-                quingo_compiler, compile_files, print=True))
-            compile_cmd = self.compose_xtext_cmd(
-                quingo_compiler, compile_files, False)
+            logger.debug(self.compose_xtext_cmd(compile_cmd_head, compile_files, print=True))
+            compile_cmd = self.compose_xtext_cmd(compile_cmd_head, compile_files, False)
 
         else:
             raise ValueError("Found undefined compiler to use.")
@@ -533,7 +581,7 @@ class Runtime_system_manager():
             quingo_warning('Last execution fails and no result is read back.')
             return None
 
-        qisa_used = self.backend.get_qisa()
+        qisa_used = self.get_backend().get_qisa()
         if qisa_used == 'eqasm':
             data_trans = dt.Data_transfer()
             data_trans.set_data_block(self.result)

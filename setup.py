@@ -31,5 +31,5 @@ setup(name='qgrtsys',
       author='Xiang Fu',
       author_email='gtaifu@gmail.com',
       packages=['qgrtsys'],
-      install_requires=['numpy', 'quantumsim==0.2.0', 'colorama', 'termcolor']
+      install_requires=['numpy', 'colorama', 'termcolor']
       )
