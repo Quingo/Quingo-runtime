@@ -175,6 +175,7 @@ class Runtime_system_manager():
         """
 
         backend_name = backend_name.lower()
+        print("connecting {}...".format(backend_name))
 
         backend_hub = Backend_hub()
         if not backend_hub.support(backend_name):
@@ -185,8 +186,9 @@ class Runtime_system_manager():
 
         try:
             self.backend = backend_hub.get_instance(backend_name)
-        except:
-            quingo_err("Cannot connect the backend: {}".format(backend_name))
+        except Exception as e:
+            quingo_err("Cannot connect backend '{}' with the following error:".format(backend_name))
+            quingo_err("{}".format(e))
             quingo_info("To fix this problem, you could explicitly connect another "
                         "backend use the the following method: \n"
                         "        `if_quingo.connect_backend(<backend_name>)`\n"
@@ -367,7 +369,8 @@ class Runtime_system_manager():
             quingoc_path = distutils.spawn.find_executable('quingoc')
             if quingoc_path is None:
                 quingo_err("Cannot find the mlir-based quingoc compiler in the system path.")
-                quingo_info("To resolve this problem, you can download quingoc from xxxxx and save "
+                quingo_info("To resolve this problem, you can download quingoc from "
+                            "https://gitee.com/hpcl_quanta/quingo-compiler and save "
                             "it at a directory in the system path.")
                 return None
             else:

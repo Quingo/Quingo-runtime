@@ -2,12 +2,11 @@ import logging
 from quingo import if_quingo
 from pathlib import Path
 
-if_quingo.set_verbose(True)
-if_quingo.set_log_level(logging.DEBUG)
+# if_quingo.set_verbose(True)
+# if_quingo.set_log_level(logging.DEBUG)
 if_quingo.set_compiler('mlir')
 
 if if_quingo.connect_backend('pyqcisim_quantumsim') is False:
-    print("cannot connect to pyqcisim_quantumsim")
     exit(-1)
 
 cur_dir = Path(__file__).parent

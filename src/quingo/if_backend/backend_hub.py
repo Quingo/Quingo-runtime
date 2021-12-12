@@ -17,10 +17,9 @@ class Backend_info():
         full_module_path = prefix + self.module_path
         try:
             module = importlib.import_module(full_module_path)
-        except:
+        except Exception as e:
             print("Cannot import the backend from '{}'".format(full_module_path))
-            raise SystemError(
-                "Cannot import the backend from '{}'".format(full_module_path))
+            raise e
         return module
 
     def get_instance(self):
