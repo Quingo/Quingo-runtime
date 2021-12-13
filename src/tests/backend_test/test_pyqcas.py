@@ -1,11 +1,11 @@
-from quingo import If_Quingo
+from quingo import Quingo_interface
 from pathlib import Path
 
-if_quingo = If_Quingo(backend='PyQCAS_QuantumSim')
+quingo_interface = Quingo_interface(backend='PyQCAS_QuantumSim')
 kernel_file = Path(__file__).parent / "kernel.qu"
 
-if if_quingo.call_quingo(kernel_file, 'gen_ran'):
-    res = if_quingo.read_result()
+if quingo_interface.call_quingo(kernel_file, 'gen_ran'):
+    res = quingo_interface.read_result()
     print("res: ", res)
 else:
     print("failed to call the quantum kernel qrng@kernel.qu.")

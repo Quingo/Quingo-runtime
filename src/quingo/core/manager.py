@@ -151,6 +151,9 @@ class Runtime_system_manager():
         return self.backend
 
     def get_backend_name(self):
+        '''return the name of the backend that is being used.
+        An empty string will be returned if no backend has been set.
+        '''
         backend = self.get_backend()
         if backend is None:
             return ""
@@ -183,7 +186,7 @@ class Runtime_system_manager():
             quingo_err("{}".format(e))
             quingo_info("To fix this problem, you could explicitly connect another "
                         "backend use the the following method: \n"
-                        "        `if_quingo.connect_backend(<backend_name>)`\n"
+                        "        `quingo_interface.connect_backend(<backend_name>)`\n"
                         "    or, install the corresponding simulation backend using:\n"
                         "        `pip install pyqcas`\n"
                         "    or\n"
