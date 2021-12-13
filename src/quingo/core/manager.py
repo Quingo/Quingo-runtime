@@ -61,14 +61,6 @@ class Runtime_system_manager():
               - mlir
         """
         self.supported_compilers = ["xtext", "mlir"]
-        # self.compiler_path = {
-        #     "xtext": gc.xtext_compiler_path,
-        #     "mlir": gc.mlir_compiler_path
-        # }
-        # self.compiler_name = kwargs.pop('compiler', "xtext")
-        # if (self.compiler_name not in self.compiler_path):
-        #     raise ValueError(
-        #         "Found unsupported compiler: {}".format(self.compiler_name))
 
         # define verbose & log_level here which will be used by backends
         self.verbose = verbose
@@ -359,8 +351,15 @@ class Runtime_system_manager():
         return valid_file_list
 
     def get_xtext_path(self):
-        # TODO: add support of searching quingo.jar
-        pass
+        if not gc.xtext_compiler_config_path.exists():
+            quingo_err('cannot find the file specifying the path to the xtext compiler.')
+            return None
+
+        xtext_path = None
+        with gc.xtext_compiler_config_path.open('r') as f:
+            xtext_path = f.read()
+
+        return xtext_path
 
     def get_compiler_cmd(self, compiler_name):
         assert(compiler_name in self.supported_compilers)

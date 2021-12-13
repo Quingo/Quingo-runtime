@@ -3,7 +3,6 @@ from logging.handlers import TimedRotatingFileHandler
 import sys
 import colorama as cm
 import termcolor as tc
-from pathlib import Path, PurePath
 
 cm.init()
 
