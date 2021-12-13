@@ -1,5 +1,5 @@
 from pathlib import Path
-from utils import quingo_err
+from .utils import quingo_err
 import quingo.global_config as gc
 
 
@@ -12,16 +12,19 @@ def set_compiler_path(path_str, is_mlir=False):
         return False
 
     if is_mlir:
-        fn = 'mlir_compiler_path.txt'
-        path_file = Path(__file__).parent / fn
+        path_file = gc.mlir_compiler_config_path
     else:
         path_file = gc.xtext_compiler_config_path
 
     with path_file.open('w') as f:
-        f.write(path_str)
+        f.write(str(path))
 
     return True
 
 
 def set_xtext_compiler_path(xtext_path_str):
     set_compiler_path(xtext_path_str, False)
+
+
+def set_mlir_compiler_path(mlir_path_str):
+    set_compiler_path(mlir_path_str, True)
