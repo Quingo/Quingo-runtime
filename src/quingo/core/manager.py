@@ -7,8 +7,8 @@ import re
 import platform
 import subprocess
 import logging
-import distutils.spawn
 from pathlib import Path
+from .compiler_config import get_mlir_path, get_xtext_path
 from quingo.core.utils import quingo_err, quingo_msg, quingo_warning, get_logger, quingo_info
 logger = get_logger((__name__).split('.')[-1])
 
@@ -353,38 +353,11 @@ class Runtime_system_manager():
 
         return valid_file_list
 
-    def retrieve_compiler_path_from_file(self, config_file):
-        compiler_path = None
-        with config_file.open('r') as f:
-            compiler_path = f.read()
-            if not Path(compiler_path).exists():
-                quingo_err("The compiler path is incorrect: {}".format(compiler_path))
-                return None
-        return compiler_path
-
-    def get_mlir_path(self):
-        if gc.mlir_compiler_config_path.exists():
-            read_path = self.retrieve_compiler_path_from_file(gc.mlir_compiler_config_path)
-            if read_path is not None:
-                return read_path
-
-        # failed to read the path from the file, so find the compiler executable from the
-        # system directly
-        quingoc_path = distutils.spawn.find_executable('quingoc')
-        return quingoc_path
-
-    def get_xtext_path(self):
-        if not gc.xtext_compiler_config_path.exists():
-            quingo_err('cannot find the file specifying the xtext compiler path.')
-            return None
-
-        return self.retrieve_compiler_path_from_file(gc.xtext_compiler_config_path)
-
     def get_compiler_cmd(self, compiler_name):
         assert(compiler_name in self.supported_compilers)
 
         if compiler_name == 'mlir':
-            quingoc_path = self.get_mlir_path()
+            quingoc_path = get_mlir_path()
             if quingoc_path is None:
                 quingo_err("Cannot find the mlir-based quingoc compiler in the system path.")
                 quingo_info(
@@ -398,7 +371,7 @@ class Runtime_system_manager():
                 return quingoc_path
 
         if compiler_name == 'xtext':
-            xtext_path = self.get_xtext_path()
+            xtext_path = get_xtext_path()
             if xtext_path is None:
                 quingo_err("Cannot find the Xtext-based Quingo compiler.")
                 quingo_info(
