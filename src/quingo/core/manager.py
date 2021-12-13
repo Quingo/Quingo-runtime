@@ -384,9 +384,12 @@ class Runtime_system_manager():
             quingoc_path = self.get_mlir_path()
             if quingoc_path is None:
                 quingo_err("Cannot find the mlir-based quingoc compiler in the system path.")
-                quingo_info("To resolve this problem, you can download quingoc from "
-                            "https://gitee.com/hpcl_quanta/quingo-runtime/releases and save "
-                            "it at a directory in the system path.")
+                quingo_info(
+                    "To resolve this problem, you can download quingoc from "
+                    "https://gitee.com/hpcl_quanta/quingo-runtime/releases and save "
+                    "it at a directory in the system path \n"
+                    "or configure its path by calling this method inside python:\n"
+                    "     `quingo.quingo_interface.set_mlir_compiler_path(<path-to-quingoc>)`")
                 return None
             else:
                 return quingoc_path
@@ -397,9 +400,9 @@ class Runtime_system_manager():
                 quingo_err("Cannot find the Xtext-based Quingo compiler.")
                 quingo_info(
                     "To resolve this issue, please download the quingo.jar from "
-                    "https://gitee.com/hpcl_quanta/quingo-runtime/releases "
-                    "and configure its path using the following command inside python:\n"
-                    "     `quingo.quingo_interface.set_xtext_compiler_path(<path-to-xtext>)`")
+                    "https://github.com/Quingo/compiler_xtext/releases "
+                    "and configure its path by calling this method inside python:\n"
+                    "     `quingo.quingo_interface.set_xtext_compiler_path(<path-to-quingo.jar>)`")
                 return None
             return 'java -jar "{}"'.format(xtext_path)
 
