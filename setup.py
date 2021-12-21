@@ -7,8 +7,38 @@ from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
-def download_latest_quingoc():
+
+def set_path_environment(install_path):
+    """Set path environment to contain the milr quingo compiler.
+    """
+   
+    shell_cmd = "if [-f \"{}\"]\nthen\n \
+                    echo 'export PATH={}:$PATH' >> {}\n \
+                elif [-f \"{}\"]\nthen\n \
+                    echo 'export PATH={}:$PATH' >> {}\n \
+                else\n \
+                    echo 'export PATH={}:$PATH' >> {}\n \
+                fi\n"
+
+    mlir_compiler_execute_path = install_path / 'bin'
+
+    bash_profile = Path.home() / '.bash_profile'
+    bashrc = Path.home() / '.bashrc'
+
+    set_env_cmd = shell_cmd.format(bashrc,mlir_compiler_execute_path,bashrc,bash_profile,mlir_compiler_execute_path,bash_profile,mlir_compiler_execute_path,bashrc)
+
+    ret_value = subprocess.run(set_env_cmd,stdout = subprocess.PIPE,stderr = subprocess.PIPE,text = True, shell = True)
+
+    if(ret_value.returncode != 0):
+        raise RuntimeError("Failed add \"{}\" to path environment with the"
+                           "following error: {}".format(mlir_compiler_execute_path,ret_value.stderr))
     
+    print("Installed mlir quingo compiler at directory:{}".format(mlir_compiler_execute_path))
+
+def download_and_install_latest_quingoc():
+    """Download the latest mlir quingo compiler.
+    """
+
     latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
         owner = "hpcl_quanta", repo = "quingo-runtime")
 
@@ -37,17 +67,22 @@ def download_latest_quingoc():
         raise RuntimeError("Failed to parse information retrieved from gitee with the "
                            "following error: {}".format(e))
 
-    quingoc_install_prefix = ' --prefix=/usr/local'
-    quingoc_install_extra_option = ' --exclude-subdir'
-    quingoc_install_cmd = 'sudo '+ str(mlir_compiler_path) + quingoc_install_prefix + quingoc_install_extra_option
+    mlir_compiler_install_path = Path.home() / '.local' 
+    mlir_compiler_install_prefix = ' --prefix=' + str(mlir_compiler_install_path)
+    mlir_compiler_install_extra_option = ' --exclude-subdir'
+    mlir_compiler_install_cmd = str(mlir_compiler_path) + mlir_compiler_install_prefix + mlir_compiler_install_extra_option
 
-    ret_value = subprocess.run(quingoc_install_cmd,stdout = subprocess.PIPE,stderr = subprocess.PIPE,text = True, shell = True)
+    ret_value = subprocess.run(mlir_compiler_install_cmd,stdout = subprocess.PIPE,stderr = subprocess.PIPE,text = True, shell = True)
 
     if(ret_value.returncode != 0):
         raise RuntimeError("Failed to install lastest quingo compiler with the"
                            "following error: {}".format(ret_value.stderr))
     
     mlir_compiler_path.unlink()
+    
+    set_path_environment(mlir_compiler_install_path)
+
+    return
 
 def friendly(command_subclass):
     """A decorator for classes subclassing one of the setuptools commands.
@@ -58,9 +93,8 @@ def friendly(command_subclass):
 
     def modified_run(self):
         quingoc_path = distutils.spawn.find_executable('quingoc')
-        print("quingoc path: {}".format(quingoc_path))
         if quingoc_path is None:
-            download_latest_quingoc()
+            download_and_install_latest_quingoc()
 
         orig_run(self)
 
