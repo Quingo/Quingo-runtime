@@ -78,8 +78,12 @@ def get_mlir_path():
         if read_path is not None:
             return read_path
 
-    # failed to read the path from the file, so find the compiler executable from the
-    # system directly
+    # failed to read the path from the file, find the compiler executable from default path
+    quingoc_path = distutils.spawn.find_executable('quingoc', str(gc.default_mlir_compiler_path.parent))
+    if quingoc_path is not None:
+        return quingoc_path
+
+    #find the compiler executable from the system directly
     quingoc_path = distutils.spawn.find_executable('quingoc')
     return quingoc_path
 

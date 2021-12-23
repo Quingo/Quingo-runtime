@@ -2,14 +2,17 @@ import requests
 import json
 import distutils.spawn
 import subprocess
+import platform
+import zipfile
+import shutil
 from pathlib import Path
 from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
 
-def set_path_environment(install_path):
-    """Set path environment to contain the milr quingo compiler.
+def set_path_env_on_Linux(install_path):
+    """Set path environment to contain the milr quingo compiler on Linux.
     """
    
     shell_cmd = "if [-f \"{}\"]\nthen\n \
@@ -35,6 +38,56 @@ def set_path_environment(install_path):
     
     print("Installed mlir quingo compiler at directory:{}".format(mlir_compiler_execute_path))
 
+
+def install_on_Linux(mlir_compiler_path):
+    """Install quingo compiler on Linux.
+    """
+
+    mlir_compiler_path.chmod(0o744)
+
+    mlir_compiler_install_path = Path.home() / '.local' 
+    mlir_compiler_install_prefix = ' --prefix=' + str(mlir_compiler_install_path)
+    mlir_compiler_install_extra_option = ' --exclude-subdir'
+    mlir_compiler_install_cmd = str(mlir_compiler_path) + mlir_compiler_install_prefix + mlir_compiler_install_extra_option
+
+    ret_value = subprocess.run(mlir_compiler_install_cmd,stdout = subprocess.PIPE,stderr = subprocess.PIPE,text = True, shell = True)
+
+    if(ret_value.returncode != 0):
+        raise RuntimeError("Failed to install lastest quingo compiler with the"
+                           "following error: {}".format(ret_value.stderr))
+    
+    set_path_env_on_Linux(mlir_compiler_install_path)
+    return
+
+
+def set_path_on_Windows(install_path):
+    """Set path environment to contain the milr quingo compiler on Windows.
+    """
+    # Nothing to do, quingo-runtime will search the default install path
+    # Default path is Path.home() / '.quingo'
+
+    return
+
+
+def install_on_Windows(mlir_compiler_path):
+    """Install quingo compiler on Windows.
+    """
+
+    mlir_compiler_install_path = Path.home() / '.quingo' 
+
+    zip_file = zipfile.ZipFile(mlir_compiler_path)
+    zip_list = zip_file.namelist()
+    zip_file.extractall(mlir_compiler_install_path)
+    zip_file.close()
+
+    files = [file for file in mlir_compiler_install_path.glob("*/*") if file.is_file()]
+    for file in files:
+        file.replace(mlir_compiler_install_path / file.name)
+
+    set_path_on_Windows(mlir_compiler_install_path)
+    return
+
+
 def download_and_install_latest_quingoc():
     """Download the latest mlir quingo compiler.
     """
@@ -48,11 +101,12 @@ def download_and_install_latest_quingoc():
         assets = release_info['assets']
         quingoc_asset = None
         for asset in assets:
-            if 'name' in asset and asset['name'].startswith('quingo-c'):
+            if 'name' in asset and ((asset['name'].endswith('.sh') and platform.system() == 'Linux') 
+                                    or (asset['name'].endswith('.zip') and platform.system() == 'Windows')):
                 quingoc_asset = asset
                 break
         if quingoc_asset is None:
-            raise RuntimeError("ailed to download quingoc from giteeF. ")
+            raise RuntimeError("Failed to download quingo compiler from gitee. ")
 
         quingoc_url = quingoc_asset['browser_download_url'] + '/' + quingoc_asset['name']
         quingoc_response = requests.get(quingoc_url)
@@ -61,28 +115,20 @@ def download_and_install_latest_quingoc():
         with mlir_compiler_path.open('wb') as f:
             f.write(quingoc_response.content)
 
-        mlir_compiler_path.chmod(0o744)
-
     except Exception as e:
         raise RuntimeError("Failed to parse information retrieved from gitee with the "
                            "following error: {}".format(e))
 
-    mlir_compiler_install_path = Path.home() / '.local' 
-    mlir_compiler_install_prefix = ' --prefix=' + str(mlir_compiler_install_path)
-    mlir_compiler_install_extra_option = ' --exclude-subdir'
-    mlir_compiler_install_cmd = str(mlir_compiler_path) + mlir_compiler_install_prefix + mlir_compiler_install_extra_option
-
-    ret_value = subprocess.run(mlir_compiler_install_cmd,stdout = subprocess.PIPE,stderr = subprocess.PIPE,text = True, shell = True)
-
-    if(ret_value.returncode != 0):
-        raise RuntimeError("Failed to install lastest quingo compiler with the"
-                           "following error: {}".format(ret_value.stderr))
+    if(platform.system()=='Windows'):
+        install_on_Windows(mlir_compiler_path)
+    elif(platform.system()=='Linux'):
+        install_on_Linux(mlir_compiler_path)
+    else:
+        raise RuntimeError("Failed to install quingo compiler on {}. Currently supports Windows and Linux.".format(platform.system()))
     
     mlir_compiler_path.unlink()
-    
-    set_path_environment(mlir_compiler_install_path)
-
     return
+
 
 def friendly(command_subclass):
     """A decorator for classes subclassing one of the setuptools commands.
