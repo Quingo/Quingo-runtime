@@ -368,7 +368,7 @@ class Runtime_system_manager():
                     "     `quingo.quingo_interface.set_mlir_compiler_path(<path-to-quingoc>)`")
                 return None
             else:
-                return quingoc_path
+                return '"{}"'.format(quingoc_path)
 
         if compiler_name == 'xtext':
             xtext_path = get_xtext_path()
