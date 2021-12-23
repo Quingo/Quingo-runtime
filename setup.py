@@ -138,7 +138,11 @@ def friendly(command_subclass):
     orig_run = command_subclass.run
 
     def modified_run(self):
-        quingoc_path = distutils.spawn.find_executable('quingoc')
+        default_path = Path.home() / '.quingo'
+        quingoc_path = distutils.spawn.find_executable('quingoc', str(default_path))
+        if quingoc_path is None:
+            quingoc_path = distutils.spawn.find_executable('quingoc')
+
         if quingoc_path is None:
             download_and_install_latest_quingoc()
 
