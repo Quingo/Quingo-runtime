@@ -80,4 +80,4 @@ The `Quingo_interface` class expose the following methods:
    - For QCIS-based backend, the result format is defined by PyQCISim. Please refer to the docstring of `quingo.if_backend.non_arch_backend.pyqcisim_quantumsim.PyQCISim_quantumsim::execute()`
 
 ## Quingo programming tutorial
-To be added.
+Please refer to the [Quingo User Document](https://hpcl_quanta.gitee.io/quingo-language-documentation/).
