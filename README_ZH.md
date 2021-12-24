@@ -37,7 +37,7 @@ quingo.quingo_interface.set_xtext_compiler_path(<path-to-quingo.jar>)
 quingo.quingo_interface.set_mlir_compiler_path(<path-to-quingoc>)
 ```
 
-对于mlir青果编译器，也可以将其二进制文件放在一个指定的目录，以便您的终端可以找到它，例如`/usr/loca/bin/`。在这种情况下，便不再需要调用 `set_mlir_compiler_path` 来指定编译器的路径。
+对于mlir青果编译器，也可以将其二进制文件放在一个指定的目录，以便您的终端可以找到它，例如`/usr/local/bin/`。在这种情况下，便不再需要调用 `set_mlir_compiler_path` 来指定编译器的路径。
 
 ### Linux系统下的注意事项
 由于编译器的可执行文件（`quinoc`）依赖于Linux系统中的许多库，如果你仅下载编译器的可执行二进制文件，`quinoc` 可能无法正常工作。为了解决在Linux系统下运行青果程序的困难，我们准备了一个docker镜像（大小大约在400MB左右），该镜像将所需的环境一并打包，无需额外安装便可以运行青果程序。使用以下命令可以快速安装：
