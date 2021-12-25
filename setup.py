@@ -28,9 +28,9 @@ def set_path_env_on_Linux(install_path):
 
     bash_profile = Path.home() / '.bash_profile'
     bashrc = Path.home() / '.bashrc'
-    shell_cmd = "if [-f \"{bashrc_path}\"]\nthen\n \
+    shell_cmd = "if [ -f \"{bashrc_path}\" ]\nthen\n \
                     echo 'export PATH={quingoc_dir_path}:$PATH' >> {bashrc_path}\n \
-                elif [-f \"{bash_profile_path}\"]\nthen\n \
+                elif [ -f \"{bash_profile_path}\" ]\nthen\n \
                     echo 'export PATH={quingoc_dir_path}:$PATH' >> {bash_profile_path}\n \
                 fi\n"
     set_env_cmd = shell_cmd.format(
