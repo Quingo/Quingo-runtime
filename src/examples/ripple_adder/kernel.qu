@@ -1,0 +1,81 @@
+// quantum ripple-carry adder from Cuccaro et al, quant-ph/0410184
+opaque X(q: qubit) : unit;
+opaque Y2P(q: qubit) : unit;
+opaque Y2M(q: qubit) : unit;
+opaque H(q: qubit) : unit;
+opaque T(q: qubit) : unit;
+opaque TD(q: qubit) : unit;
+opaque S(q: qubit) : unit;
+
+opaque CZ(q1: qubit, q2: qubit) : unit;
+opaque measure(q: qubit): bool;
+
+operation CNOT(a: qubit, b: qubit) : unit {
+    Y2M(b);
+    CZ(a, b);
+    Y2P(b);
+}
+
+operation CCNOT(a: qubit, b: qubit, c: qubit) : unit {
+    H(c);
+    CNOT(b, c);
+    TD(c);
+    CNOT(a, c);
+    T(c);
+    CNOT(b, c);
+    TD(c);
+    CNOT(a, c);
+    T(b);
+    T(c);
+    H(c);
+    CNOT(a, b);
+    T(a);
+    TD(b);
+    CNOT(a, b);
+}
+
+operation majority(a: qubit, b: qubit, c: qubit): unit {
+    CNOT(c, b);
+    CNOT(c, a);
+    CCNOT(a, b, c);
+}
+
+operation unmaj(a: qubit, b: qubit, c: qubit): unit {
+    CCNOT(a, b, c);
+    CNOT(c, a);
+    CNOT(a, b);
+}
+
+
+operation ripple_adder(num_qubits: int, In_a: int[], In_b: int[]) : unit {
+    using(cin: qubit, a: qubit[num_qubits], b: qubit[num_qubits], cout: qubit){
+        for(int i = num_qubits-1; i >= 0; i -= 1){
+            if(In_a[i] == 1){
+                X(a[num_qubits-1-i]);
+            }
+            if(In_b[i] == 1){
+                X(b[num_qubits-1-i]);
+            }
+        }
+
+        majority(cin, b[0], a[0]);
+        for(int i = 0; i < num_qubits-1; i += 1){
+            majority(a[i], b[i+1], a[i+1]);
+        }
+
+        CNOT(a[num_qubits-1], cout);
+
+        for(int i = num_qubits-1; i > 0; i -= 1){
+            unmaj(a[i-1], b[i], a[i]);
+        }
+        unmaj(cin, b[0], a[0]);
+        
+        for(int j = 0; j < num_qubits; j += 1){
+            measure(b[j]);
+        }
+    
+        measure(cout);
+        
+    }
+}
+
