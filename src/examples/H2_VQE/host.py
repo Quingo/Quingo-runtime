@@ -4,10 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 # from scipy.optimize import minimize_scalar, minimize
 from scipy.optimize import minimize_scalar
-from sympy import *
-from sympy.physics.matrices import msigma
-from sympy import Piecewise as pw
-# from symqc import *
+from numpy import *
 import numpy as np
 
 # qi.set_verbose(True)
@@ -77,6 +74,18 @@ bond_h_decompose = [
     [2.85, -0.3135, 0.0984,  0.0679, 0.3329, 0.1475, 0.1475]]
 
 
+def gate(i):
+    if i == 1:
+        m = np.mat("0, 1; 1, 0")
+    elif i == 2:
+        m = np.mat("0, -1j; 1j, 0")
+    elif i == 3:
+        m = np.mat("1, 0; 0, -1")
+    else:
+        raise IndexError("Invalid Pauli index")
+    return m
+
+
 def expand_1q_gate(gate, target_qubit):
     '''Expand a single-qubit gate applied on the `target_qubit` to a 4 x 4 matrix.
     Qubits in the basis is organized as: |qubit_1, qubit_0>
@@ -88,9 +97,9 @@ def expand_1q_gate(gate, target_qubit):
     |11>  xx    xx    xx    xx
     '''
     if target_qubit == 1:
-        return kronecker_product(gate, eye(2))
+        return np.kron(gate, eye(2))
     elif target_qubit == 0:
-        return kronecker_product(eye(2), gate)
+        return np.kron(eye(2), gate)
     else:
         raise ValueError(
             "Given target_qubit ({}) is neither 0 or 1.".format(target_qubit))
@@ -100,9 +109,10 @@ def hamiltonian(g):
     '''Generate the hamiltonian for the H2 molecule, which is:
         H = g0*I + g1*Z0 + g2*Z1 + g3*Z0Z1 + g4*Y0Y1 + g5*X0X1
     '''
-    X = msigma(1)
-    Y = msigma(2)
-    Z = msigma(3)
+    X = gate(1)
+    Y = gate(2)
+    Z = gate(3)
+
     assert(len(g) == 6)
     sigmas = [eye(4),
               expand_1q_gate(Z, 0),
@@ -110,30 +120,30 @@ def hamiltonian(g):
               expand_1q_gate(Z, 0) * expand_1q_gate(Z, 1),
               expand_1q_gate(X, 0) * expand_1q_gate(X, 1),
               expand_1q_gate(Y, 0) * expand_1q_gate(Y, 1)]
-    h = zeros(4)
+    h = zeros((4, 4))
     for i in range(6):
-        h += sigmas[i] * g[i]
+        h = h + np.dot(g[i], sigmas[i])
 
-    # print("The result of Hamiltonian is: {}".format(h))
     return h
 
 
 def get_ansatz(circ_name, theta):
     if not qi.call_quingo(qu_file, circ_name, theta):
         print("Failed to call {}".format(circ_name))
-    # print("The result of {} is:".format(circ_name))
     res = qi.read_result()
     return res
 
 
 def get_real(c):
-    return c.as_real_imag()[0]
+    return np.real(c)
 
 
 def expectation(h, state):
     ''' Return the expectation value of the given state under the given hamiltonian.
     '''
-    return get_real(N(np.dot(state, h * state)))
+    state_matrix = np.mat(state).T
+    t_conj_state = state_matrix.T.conjugate()
+    return get_real(np.dot(t_conj_state, np.dot(h, state_matrix)))
 
 
 def energy_theta(theta: np.double, g):
@@ -148,18 +158,21 @@ def energy_theta(theta: np.double, g):
 def eval_all():
     bond_length = []
     lowest_energies = []
+    # theta = -np.pi/2
     for b in bond_h_decompose:
         bond_length.append(b[0])
         g = b[1:]
 
-    # --------------- brute-force scanning - --------------
-    angles = np.linspace(-np.pi/2, np.pi/2, 50)
-    tmp_lowest_energies = [energy_theta(theta, g) for theta in angles]
-    lowest_energies.append(min(tmp_lowest_energies))
+        # --------------- brute-force scanning - --------------
+        # angles = np.linspace(-np.pi/2, np.pi/2, 50)
+        # tmp_lowest_energies = [energy_theta(theta, g) for theta in angles]
+        # ele_tmp_lowest_energies = (min(tmp_lowest_energies)).A[0][0]
+        # lowest_energies.append(ele_tmp_lowest_energies)
 
-    # # --------------- optimization based on searching ---------------
-    # minimum = minimize_scalar(lambda theta: energy_theta(theta, g))
-    # lowest_energies.append(minimum.fun)
+        # # --------------- optimization based on searching ---------------
+        minimum = minimize_scalar(
+            lambda theta: (energy_theta(theta, g)).A[0][0])
+        lowest_energies.append(minimum.fun)
 
     plt.plot(bond_length, lowest_energies, "b.-")
     plt.xlabel("Bond Length")
