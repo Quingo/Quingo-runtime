@@ -64,12 +64,11 @@ def install_on_Linux(mlir_compiler_path, old_version_path=None):
 
     mlir_compiler_path.chmod(0o744)
 
-    if old_version_path is not True:
+    if old_version_path is not None:
         mlir_compiler_install_dir = old_version_path.parent
-        mlir_compiler_exec_path = mlir_compiler_install_dir
     else:
         mlir_compiler_install_dir = Path.home() / '.local'
-        mlir_compiler_exec_path = mlir_compiler_install_dir / 'bin'
+        
 
     mlir_compiler_install_cmd = '"{}" --prefix="{}" --exclude-subdir'.format(
         mlir_compiler_path, mlir_compiler_install_dir)
@@ -81,6 +80,12 @@ def install_on_Linux(mlir_compiler_path, old_version_path=None):
     if(ret_value.returncode != 0):
         raise RuntimeError("Failed to install lastest quingo compiler with the"
                            "following error: {}".format(ret_value.stderr))
+    
+    if old_version_path is not None:
+        mlir_compiler_exec_path = mlir_compiler_install_dir
+        shutil.copy(str(mlir_compiler_install_dir/ 'bin' / 'quingoc'), str(mlir_compiler_exec_path))
+    else:
+        mlir_compiler_exec_path = mlir_compiler_install_dir / 'bin'
 
     set_path_env_on_Linux(mlir_compiler_exec_path)
 
@@ -238,9 +243,8 @@ def download_and_install_latest_quingoc(old_version_path=None):
 
     shutil.rmtree(tmp_dir_path)
 
-
-def check_update(quingoc_path):
-    """Check local quingo compiler whether is latest version 
+def get_lastest_version():
+    """Get lastest quingo compiler version
     """
 
     latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
@@ -260,6 +264,13 @@ def check_update(quingoc_path):
         raise RuntimeError("Failed to parse information retrieved from gitee with the "
                            "following error: {}".format(e))
 
+    return lastest_version
+
+
+def get_current_version():
+    """Get current quingo compiler version
+    """
+
     get_current_version_cmd = "{} --version".format(quingoc_path)
 
     ret_value = subprocess.run(get_current_version_cmd, stdout=subprocess.PIPE,
@@ -275,7 +286,14 @@ def check_update(quingoc_path):
         raise RuntimeError(
             "Failed to get version of local quingo compiler from {}.".format(quingoc_path))
 
-    if current_version == lastest_version:
+    return current_version
+
+
+def check_update(quingoc_path):
+    """Check local quingo compiler whether is latest version 
+    """
+    return True
+    if get_current_version() == get_lastest_version():
         return False
     else:
         return True
