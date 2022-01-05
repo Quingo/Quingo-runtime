@@ -1,3 +1,4 @@
+import pathlib
 import re
 import requests
 import json
@@ -7,16 +8,29 @@ import platform
 import zipfile
 import shutil
 import tempfile
+import datetime
 from pathlib import Path
 from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
 
+def backup_compiler(quingoc_path):
+
+    backup_path = quingoc_path.parent / "quingoc_backup"
+
+    if not backup_path.exists():
+        backup_path.mkdir(exist_ok=True)
+
+    backup_file = quingoc_path.name + \
+        datetime.datetime.now().strftime('%F')
+
+    shutil.move(quingoc_path, backup_path/backup_file)
+
+
 def set_path_env_on_Linux(install_path):
     """Set path environment to contain the milr quingo compiler on Linux.
     """
-    quingoc_dir = install_path / 'bin'
 
     ret_value = subprocess.run("echo $PATH", stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, text=True, shell=True)
@@ -25,7 +39,7 @@ def set_path_env_on_Linux(install_path):
         raise RuntimeError(
             "Failed to retrieve system path using 'echo $PATH'.")
 
-    if str(quingoc_dir.absolute()) in ret_value.stdout:
+    if str(install_path.absolute()) in ret_value.stdout:
         return
 
     bash_profile = Path.home() / '.bash_profile'
@@ -36,26 +50,33 @@ def set_path_env_on_Linux(install_path):
                     echo 'export PATH={quingoc_dir_path}:$PATH' >> {bash_profile_path}\n \
                 fi\n"
     set_env_cmd = shell_cmd.format(
-        bashrc_path=bashrc, bash_profile_path=bash_profile, quingoc_dir_path=quingoc_dir)
+        bashrc_path=bashrc, bash_profile_path=bash_profile, quingoc_dir_path=install_path)
 
     ret_value = subprocess.run(set_env_cmd, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, text=True, shell=True)
 
     if(ret_value.returncode != 0):
         raise RuntimeError("Failed add \"{}\" to path environment with the"
-                           "following error: {}".format(quingoc_dir, ret_value.stderr))
+                           "following error: {}".format(install_path, ret_value.stderr))
 
-    print("Installed mlir quingo compiler at directory:{}".format(quingoc_dir))
+    print("Installed mlir quingo compiler at directory:{}".format(install_path))
 
 
-def install_on_Linux(mlir_compiler_path):
+def install_on_Linux(mlir_compiler_path, old_version_path=None):
     """Install quingo compiler on Linux.
     """
+
     mlir_compiler_path.chmod(0o744)
-    quingoc_install_dir = Path.home() / '.local'
+
+    if old_version_path is not True:
+        mlir_compiler_install_dir = old_version_path.parent
+        mlir_compiler_exec_path = mlir_compiler_install_dir
+    else:
+        mlir_compiler_install_dir = Path.home() / '.local'
+        mlir_compiler_exec_path = mlir_compiler_install_dir / 'bin'
 
     mlir_compiler_install_cmd = '"{}" --prefix="{}" --exclude-subdir'.format(
-        mlir_compiler_path, quingoc_install_dir)
+        mlir_compiler_path, mlir_compiler_install_dir)
 
     print("mlir_compiler_install_cmd: ", mlir_compiler_install_cmd)
 
@@ -65,7 +86,7 @@ def install_on_Linux(mlir_compiler_path):
         raise RuntimeError("Failed to install lastest quingo compiler with the"
                            "following error: {}".format(ret_value.stderr))
 
-    set_path_env_on_Linux(quingoc_install_dir)
+    set_path_env_on_Linux(mlir_compiler_exec_path)
 
 
 def set_path_on_Windows(install_path):
@@ -77,11 +98,14 @@ def set_path_on_Windows(install_path):
     return
 
 
-def install_on_Windows(mlir_compiler_path):
+def install_on_Windows(mlir_compiler_path, old_version_path=None):
     """Install quingo compiler on Windows.
     """
 
-    mlir_compiler_install_path = Path.home() / '.quingo'
+    if old_version_path is not None:
+        mlir_compiler_install_path = old_version_path.parent
+    else:
+        mlir_compiler_install_path = Path.home() / '.quingo'
 
     zip_file = zipfile.ZipFile(mlir_compiler_path)
     zip_list = zip_file.namelist()
@@ -96,14 +120,68 @@ def install_on_Windows(mlir_compiler_path):
     set_path_on_Windows(mlir_compiler_install_path)
 
 
+def set_path_env_on_Darwin(install_path):
+    """Set path environment to contain the milr quingo compiler on Darwin.
+    """
+
+    set_path_env_on_Linux(install_path)
+
+
+def install_on_Darwin(mlir_compiler_path, old_version_path=None):
+    """Install quingo compiler on Darwin.
+    """
+
+    if old_version_path is not None:
+        mlir_compiler_install_path = old_version_path.parent
+        mlir_compiler_exec_path = mlir_compiler_install_path
+    else:
+        mlir_compiler_install_path = Path.home() / '.local'
+        mlir_compiler_exec_path = mlir_compiler_install_path / 'bin'
+
+    if not mlir_compiler_exec_path.exists():
+        mlir_compiler_exec_path.mkdir(exist_ok=True)
+
+    # mount dmg file
+    mount_cmd = "hdiutil attach " + str(mlir_compiler_path)
+
+    ret_value = subprocess.run(mount_cmd, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, text=True, shell=True)
+    if(ret_value.returncode != 0):
+        raise RuntimeError("Failed to mount lastest quingo compiler dmg file with the"
+                           "following error: {}".format(ret_value.stderr))
+
+    mlir_compiler_exec_file = pathlib.path(
+        "/Volumes/" + mlir_compiler_path.name) / 'quingoc.app' / 'Contents' / 'Resources' / 'bin' / 'quingoc'
+
+    shutil.move(mlir_compiler_exec_file, mlir_compiler_exec_path)
+
+    # umount dmg file
+    umount_cmd = "hdiutil detach " + str("/Volumes/" + mlir_compiler_path.name)
+
+    ret_value = subprocess.run(umount_cmd, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, text=True, shell=True)
+    if(ret_value.returncode != 0):
+        raise RuntimeError("Failed to umount lastest quingo compiler dmg file with the"
+                           "following error: {}".format(ret_value.stderr))
+
+    set_path_env_on_Darwin(mlir_compiler_exec_path)
+
+
 def install_compiler(os_name, mlir_compiler_path, old_version_path=None):
     assert os_name in ['Linux', 'Windows', 'Darwin']
+
+    if old_version_path is not None:
+        backup_compiler(old_version_path)
+
     if(os_name == 'Windows'):
-        install_on_Windows(mlir_compiler_path, old_version_path)
+        install_on_Windows(mlir_compiler_path,
+                           old_version_path)
     if(os_name == 'Linux'):
-        install_on_Linux(mlir_compiler_path, old_version_path)
+        install_on_Linux(mlir_compiler_path,
+                         old_version_path)
     if(os_name == 'Linux'):
-        install_on_Linux(mlir_compiler_path, old_version_path)
+        install_on_Linux(mlir_compiler_path,
+                         old_version_path)
 
 
 def download_compiler(os_name, tmp_dir_name):
