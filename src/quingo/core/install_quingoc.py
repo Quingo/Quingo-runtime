@@ -250,8 +250,6 @@ def download_and_install_latest_quingoc(old_version_path=None):
     mlir_compiler_path = download_compiler(os_name, tmp_dir_path)
     install_compiler(os_name, mlir_compiler_path, old_version_path)
 
-    shutil.rmtree(tmp_dir_path)
-
 
 def get_lastest_version():
     """Get lastest quingo compiler version
