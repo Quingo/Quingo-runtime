@@ -113,6 +113,15 @@ def install_on_Windows(mlir_compiler_path, old_version_path=None):
     zip_file.extractall(mlir_compiler_install_path)
     zip_file.close()
 
+    mlir_compiler_extract_path = mlir_compiler_install_path / mlir_compiler_path.stem
+
+    files = [file for file in mlir_compiler_extract_path.glob(
+        "bin/*") if file.is_file()]
+    for file in files:
+        shutil.copy(file, mlir_compiler_install_path)
+
+    shutil.rmtree(mlir_compiler_extract_path)
+
     set_path_on_Windows(mlir_compiler_install_path)
 
 
@@ -243,6 +252,7 @@ def download_and_install_latest_quingoc(old_version_path=None):
 
     shutil.rmtree(tmp_dir_path)
 
+
 def get_lastest_version():
     """Get lastest quingo compiler version
     """
@@ -292,11 +302,12 @@ def get_current_version():
 def check_update(quingoc_path):
     """Check local quingo compiler whether is latest version 
     """
-    return True
-    if get_current_version() == get_lastest_version():
-        return False
-    else:
-        return True
+
+    #if get_current_version() == get_lastest_version():
+    #    return False
+    #else:
+    #    return True
+    return True # set true while quingoc can not get version at this time
 
 
 if __name__ == "__main__":
