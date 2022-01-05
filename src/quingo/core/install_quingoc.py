@@ -10,10 +10,6 @@ import shutil
 import tempfile
 import datetime
 from pathlib import Path
-from setuptools import setup
-from setuptools.command.develop import develop
-from setuptools.command.install import install
-
 
 def backup_compiler(quingoc_path):
 
@@ -111,11 +107,6 @@ def install_on_Windows(mlir_compiler_path, old_version_path=None):
     zip_list = zip_file.namelist()
     zip_file.extractall(mlir_compiler_install_path)
     zip_file.close()
-
-    files = [file for file in mlir_compiler_install_path.glob(
-        "*/*") if file.is_file()]
-    for file in files:
-        file.replace(mlir_compiler_install_path / file.name)
 
     set_path_on_Windows(mlir_compiler_install_path)
 
@@ -296,4 +287,4 @@ if __name__ == "__main__":
         download_and_install_latest_quingoc()
     else:
         if check_update(quingoc_path):
-            download_and_install_latest_quingoc(quingoc_path)
+            download_and_install_latest_quingoc(pathlib.Path(quingoc_path))
