@@ -132,28 +132,34 @@ def install_on_Darwin(mlir_compiler_path, old_version_path=None):
     if not mlir_compiler_exec_path.exists():
         mlir_compiler_exec_path.mkdir(exist_ok=True)
 
-    # mount dmg file
-    mount_cmd = "hdiutil attach " + str(mlir_compiler_path)
+    try:
+        # mount dmg file
+        mount_cmd = "hdiutil attach " + str(mlir_compiler_path)
 
-    ret_value = subprocess.run(mount_cmd, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, text=True, shell=True)
-    if(ret_value.returncode != 0):
-        raise RuntimeError("Failed to mount lastest quingo compiler dmg file with the"
-                           "following error: {}".format(ret_value.stderr))
+        ret_value = subprocess.run(mount_cmd, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, shell=True)
+        if(ret_value.returncode != 0):
+            raise RuntimeError("Failed to mount lastest quingo compiler dmg file with the"
+                               "following error: {}".format(ret_value.stderr))
 
-    mlir_compiler_exec_file = pathlib.path(
-        "/Volumes/" + mlir_compiler_path.name) / 'quingoc.app' / 'Contents' / 'Resources' / 'bin' / 'quingoc'
+        mlir_compiler_exec_file = pathlib.Path(
+            "/Volumes/" + mlir_compiler_path.stem) / 'quingoc.app' / 'Contents' / 'Resources' / 'bin' / 'quingoc'
 
-    shutil.move(mlir_compiler_exec_file, mlir_compiler_exec_path)
+        shutil.copy(str(mlir_compiler_exec_file), str(mlir_compiler_exec_path))
+    
+    except Exception as e:
+        raise RuntimeError("Failed to copy quingo compiler {} to '{}' with the "
+                           "following error: {}".format(mlir_compiler_exec_file, mlir_compiler_exec_path, e))
 
-    # umount dmg file
-    umount_cmd = "hdiutil detach " + str("/Volumes/" + mlir_compiler_path.name)
+    finally:
+        # umount dmg file
+        umount_cmd = "hdiutil detach " + str("/Volumes/" + mlir_compiler_path.stem)
 
-    ret_value = subprocess.run(umount_cmd, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, text=True, shell=True)
-    if(ret_value.returncode != 0):
-        raise RuntimeError("Failed to umount lastest quingo compiler dmg file with the"
-                           "following error: {}".format(ret_value.stderr))
+        ret_value = subprocess.run(umount_cmd, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, shell=True)
+        if(ret_value.returncode != 0):
+            raise RuntimeError("Failed to umount lastest quingo compiler dmg file with the"
+                               "following error: {}".format(ret_value.stderr))
 
     set_path_env_on_Darwin(mlir_compiler_exec_path)
 
@@ -170,8 +176,8 @@ def install_compiler(os_name, mlir_compiler_path, old_version_path=None):
     if(os_name == 'Linux'):
         install_on_Linux(mlir_compiler_path,
                          old_version_path)
-    if(os_name == 'Linux'):
-        install_on_Linux(mlir_compiler_path,
+    if(os_name == 'Darwin'):
+        install_on_Darwin(mlir_compiler_path,
                          old_version_path)
 
 
