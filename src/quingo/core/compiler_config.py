@@ -96,8 +96,7 @@ def get_xtext_path():
     if not gc.xtext_compiler_config_path.exists():
         quingo_err('cannot find the file specifying the xtext compiler path.')
         return None
-    read_path = retrieve_compiler_path_from_file(gc.xtext_compiler_config_path)
-    return read_path
+    return retrieve_compiler_path_from_file(gc.xtext_compiler_config_path)
 
 
 def set_xtext_compiler_path(xtext_path_str):
