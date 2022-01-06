@@ -11,6 +11,7 @@ import tempfile
 import datetime
 from pathlib import Path
 
+
 def backup_compiler(quingoc_path):
 
     backup_path = quingoc_path.parent / "quingoc_backup"
@@ -22,6 +23,9 @@ def backup_compiler(quingoc_path):
         datetime.datetime.now().strftime('%F')
 
     shutil.move(quingoc_path, backup_path/backup_file)
+
+    print("Local quingoc has been backup at \"{}\".".format(
+        backup_path))
 
 
 def set_path_env_on_Linux(install_path):
@@ -55,8 +59,6 @@ def set_path_env_on_Linux(install_path):
         raise RuntimeError("Failed add \"{}\" to path environment with the"
                            "following error: {}".format(install_path, ret_value.stderr))
 
-    print("Installed mlir quingo compiler at directory:{}".format(install_path))
-
 
 def install_on_Linux(mlir_compiler_path, old_version_path=None):
     """Install quingo compiler on Linux.
@@ -68,7 +70,6 @@ def install_on_Linux(mlir_compiler_path, old_version_path=None):
         mlir_compiler_install_dir = old_version_path.parent
     else:
         mlir_compiler_install_dir = Path.home() / '.local'
-        
 
     mlir_compiler_install_cmd = '"{}" --prefix="{}" --exclude-subdir'.format(
         mlir_compiler_path, mlir_compiler_install_dir)
@@ -80,14 +81,18 @@ def install_on_Linux(mlir_compiler_path, old_version_path=None):
     if(ret_value.returncode != 0):
         raise RuntimeError("Failed to install lastest quingo compiler with the"
                            "following error: {}".format(ret_value.stderr))
-    
+
     if old_version_path is not None:
         mlir_compiler_exec_path = mlir_compiler_install_dir
-        shutil.copy(str(mlir_compiler_install_dir/ 'bin' / 'quingoc'), str(mlir_compiler_exec_path))
+        shutil.copy(str(mlir_compiler_install_dir / 'bin' /
+                    'quingoc'), str(mlir_compiler_exec_path))
     else:
         mlir_compiler_exec_path = mlir_compiler_install_dir / 'bin'
 
     set_path_env_on_Linux(mlir_compiler_exec_path)
+
+    print("Lastest quingoc has been installed at \"{}\".".format(
+        mlir_compiler_exec_path))
 
 
 def set_path_on_Windows(install_path):
@@ -123,6 +128,9 @@ def install_on_Windows(mlir_compiler_path, old_version_path=None):
     shutil.rmtree(mlir_compiler_extract_path)
 
     set_path_on_Windows(mlir_compiler_install_path)
+
+    print("Lastest quingoc has been installed at \"{}\".".format(
+        mlir_compiler_install_path))
 
 
 def set_path_env_on_Darwin(install_path):
@@ -160,14 +168,15 @@ def install_on_Darwin(mlir_compiler_path, old_version_path=None):
             "/Volumes/" + mlir_compiler_path.stem) / 'quingoc.app' / 'Contents' / 'Resources' / 'bin' / 'quingoc'
 
         shutil.copy(str(mlir_compiler_exec_file), str(mlir_compiler_exec_path))
-    
+
     except Exception as e:
         raise RuntimeError("Failed to copy quingo compiler {} to '{}' with the "
                            "following error: {}".format(mlir_compiler_exec_file, mlir_compiler_exec_path, e))
 
     finally:
         # umount dmg file
-        umount_cmd = "hdiutil detach " + str("/Volumes/" + mlir_compiler_path.stem)
+        umount_cmd = "hdiutil detach " + \
+            str("/Volumes/" + mlir_compiler_path.stem)
 
         ret_value = subprocess.run(umount_cmd, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, text=True, shell=True)
@@ -176,6 +185,9 @@ def install_on_Darwin(mlir_compiler_path, old_version_path=None):
                                "following error: {}".format(ret_value.stderr))
 
     set_path_env_on_Darwin(mlir_compiler_exec_path)
+
+    print("Lastest quingoc has been installed at \"{}\".".format(
+        mlir_compiler_exec_path))
 
 
 def install_compiler(os_name, mlir_compiler_path, old_version_path=None):
@@ -192,7 +204,7 @@ def install_compiler(os_name, mlir_compiler_path, old_version_path=None):
                          old_version_path)
     if(os_name == 'Darwin'):
         install_on_Darwin(mlir_compiler_path,
-                         old_version_path)
+                          old_version_path)
 
 
 def download_compiler(os_name, tmp_dir_name):
@@ -275,7 +287,7 @@ def get_lastest_version():
     return lastest_version
 
 
-def get_current_version():
+def get_current_version(quingoc_path):
     """Get current quingo compiler version
     """
 
@@ -301,11 +313,15 @@ def check_update(quingoc_path):
     """Check local quingo compiler whether is latest version 
     """
 
-    #if get_current_version() == get_lastest_version():
+    lastest_version = get_lastest_version()
+    # current_version = get_current_version(quingoc_path)
+    # if current_version == lastest_version:
+    #    print("Local quingoc is already the lastest version.")
     #    return False
-    #else:
+    # else:
+    #    print("Local quingoc version ({}) is behind lastest version ({}). Update now.".format(current_version, lastest_version))
     #    return True
-    return True # set true while quingoc can not get version at this time
+    return True  # set true while quingoc can not get version at this time
 
 
 if __name__ == "__main__":
