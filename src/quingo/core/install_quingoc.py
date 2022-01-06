@@ -1,5 +1,6 @@
 import pathlib
 import re
+import math
 import requests
 import json
 import distutils.spawn
@@ -9,6 +10,7 @@ import zipfile
 import shutil
 import tempfile
 import datetime
+import tqdm
 from pathlib import Path
 
 
@@ -234,13 +236,17 @@ def download_compiler(os_name, tmp_dir_name):
 
         quingoc_url = quingoc_asset['browser_download_url'] + \
             '/' + quingoc_asset['name']
-        quingoc_response = requests.get(quingoc_url)
+        quingoc_response = requests.get(quingoc_url, stream=True)
+        data_size = math.ceil(int(quingoc_response.headers['Content-Length'])/1024/1024)
 
         mlir_compiler_path = tmp_dir_name / quingoc_asset['name']
         with mlir_compiler_path.open('wb') as tmp_dl_file:
-            num_bytes = tmp_dl_file.write(quingoc_response.content)
+            for data in tqdm.tqdm(iterable=quingoc_response.iter_content(1024*1024), total=data_size, desc='Download', unit='MB'):
+                tmp_dl_file.write(data)
+
             print("installation file has been downloaded to tmp file {} ({} bytes). ".format(
-                mlir_compiler_path, num_bytes))
+                mlir_compiler_path, quingoc_response.headers['Content-Length']))
+
         return mlir_compiler_path
 
     except Exception as e:
