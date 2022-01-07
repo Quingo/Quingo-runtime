@@ -245,7 +245,7 @@ def download_compiler(os_name, tmp_dir_name):
             for data in tqdm.tqdm(iterable=quingoc_response.iter_content(1024*1024), total=data_size, desc='Download', unit='MB'):
                 tmp_dl_file.write(data)
 
-            print("installation file has been downloaded to tmp file {} ({} bytes). ".format(
+            print("installation file has been downloaded to tmp file \"{}\" ({} bytes). ".format(
                 mlir_compiler_path, quingoc_response.headers['Content-Length']))
 
         return mlir_compiler_path
@@ -274,13 +274,32 @@ def get_lastest_version():
     """Get lastest quingo compiler version
     """
 
+    os_name = platform.system()
+    assert os_name in ['Linux', 'Windows', 'Darwin']
+    os_dl_suffix = {
+        'Linux': '.sh',
+        'Windows': '.zip',
+        'Darwin': '.dmg'
+    }
+    dl_file_suffix = os_dl_suffix[os_name]
+
     latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
         owner="quingo", repo="quingo-runtime")
 
     try:
         latest_release = requests.get(latest_release_url).text
         release_info = json.loads(latest_release)
-        find_version = re.search(r'\d+\.\d+\.\d+', release_info['tag_name'])
+        assets = release_info['assets']
+        quingoc_asset = None
+        for asset in assets:
+            if 'name' in asset and asset['name'].endswith(dl_file_suffix):
+                quingoc_asset = asset
+                break
+        if quingoc_asset is None:
+            raise RuntimeError(
+                "Failed to download quingo compiler from gitee.")
+
+        find_version = re.search(r'\d+\.\d+\.\d+', quingoc_asset['name'])
         if find_version is not None:
             lastest_version = find_version.group()
         else:
@@ -306,7 +325,7 @@ def get_current_version(quingoc_path):
         raise RuntimeError("Failed to get local quingo compiler version with the"
                            "following error: {}".format(ret_value.stderr))
 
-    find_version = re.search(r'\d+\.\d+\.\d+', ret_value.stdout.split()[0])
+    find_version = re.search(r'\d+\.\d+\.\d+', ret_value.stdout.split('\n')[0])
     if find_version is not None:
         current_version = find_version.group()
     else:
@@ -320,15 +339,15 @@ def check_update(quingoc_path):
     """Check local quingo compiler whether is latest version 
     """
 
+    current_version = get_current_version(quingoc_path)
     lastest_version = get_lastest_version()
-    # current_version = get_current_version(quingoc_path)
-    # if current_version == lastest_version:
-    #    print("Local quingoc is already the lastest version.")
-    #    return False
-    # else:
-    #    print("Local quingoc version ({}) is behind lastest version ({}). Update now.".format(current_version, lastest_version))
-    #    return True
-    return True  # set true while quingoc can not get version at this time
+
+    if current_version == lastest_version:
+       print("Local quingoc is already the lastest version.")
+       return False
+    else:
+       print("Local quingoc version ({}) is behind lastest version ({}). Update now.".format(current_version, lastest_version))
+       return True
 
 
 if __name__ == "__main__":
