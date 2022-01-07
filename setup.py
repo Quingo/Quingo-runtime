@@ -21,7 +21,8 @@ def set_path_env_on_Linux(install_path):
                                stderr=subprocess.PIPE, text=True, shell=True)
 
     if ret_value.returncode != 0:
-        raise RuntimeError("Failed to retrieve system path using 'echo $PATH'.")
+        raise RuntimeError(
+            "Failed to retrieve system path using 'echo $PATH'.")
 
     if str(quingoc_dir.absolute()) in ret_value.stdout:
         return
@@ -86,7 +87,8 @@ def install_on_Windows(mlir_compiler_path):
     zip_file.extractall(mlir_compiler_install_path)
     zip_file.close()
 
-    files = [file for file in mlir_compiler_install_path.glob("*/*") if file.is_file()]
+    files = [file for file in mlir_compiler_install_path.glob(
+        "*/*") if file.is_file()]
     for file in files:
         file.replace(mlir_compiler_install_path / file.name)
 
@@ -110,7 +112,7 @@ def download_compiler(os_name, tmp_dir_name):
     dl_file_suffix = os_dl_suffix[os_name]
 
     latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
-        owner="hpcl_quanta", repo="quingo-runtime")
+        owner="quingo", repo="quingo-runtime")
 
     try:
         latest_release = requests.get(latest_release_url).text
@@ -122,9 +124,11 @@ def download_compiler(os_name, tmp_dir_name):
                 quingoc_asset = asset
                 break
         if quingoc_asset is None:
-            raise RuntimeError("Failed to download quingo compiler from gitee.")
+            raise RuntimeError(
+                "Failed to download quingo compiler from gitee.")
 
-        quingoc_url = quingoc_asset['browser_download_url'] + '/' + quingoc_asset['name']
+        quingoc_url = quingoc_asset['browser_download_url'] + \
+            '/' + quingoc_asset['name']
         quingoc_response = requests.get(quingoc_url)
 
         mlir_compiler_path = tmp_dir_name / quingoc_asset['name']
@@ -144,7 +148,8 @@ def download_and_install_latest_quingoc():
     """
     os_name = platform.system()
     if os_name not in ['Linux', 'Windows']:
-        raise SystemError("Currently pip installation does not support {}".format(os_name))
+        raise SystemError(
+            "Currently pip installation does not support {}".format(os_name))
 
     tmp_dir = tempfile.TemporaryDirectory()
     tmp_dir_path = Path(tmp_dir.name)
@@ -164,7 +169,8 @@ def friendly(command_subclass):
 
     def modified_run(self):
         default_path = Path.home() / '.quingo'
-        quingoc_path = distutils.spawn.find_executable('quingoc', str(default_path))
+        quingoc_path = distutils.spawn.find_executable(
+            'quingoc', str(default_path))
 
         if quingoc_path is None:
             quingoc_path = distutils.spawn.find_executable('quingoc')

@@ -135,7 +135,8 @@ class Runtime_system_manager():
               - mlir
         """
         if (compiler_name not in self.supported_compilers):
-            raise ValueError("Found unsupported compiler: {}".format(compiler_name))
+            raise ValueError(
+                "Found unsupported compiler: {}".format(compiler_name))
 
         self.compiler_name = compiler_name
 
@@ -182,7 +183,8 @@ class Runtime_system_manager():
         try:
             self.backend = backend_hub.get_instance(backend_name)
         except Exception as e:
-            quingo_err("Cannot connect backend '{}' with the following error:".format(backend_name))
+            quingo_err(
+                "Cannot connect backend '{}' with the following error:".format(backend_name))
             quingo_err("{}".format(e))
             quingo_info("To fix this problem, you could explicitly connect another "
                         "backend use the the following method: \n"
@@ -318,13 +320,16 @@ class Runtime_system_manager():
                 "The backend {} is not available.".format(backend.name()))
 
         if self.mode == 'state_vector' and not backend.is_simulator():
-            raise ValueError("Cannot retrieve state vector from a non-simulator backend.")
+            raise ValueError(
+                "Cannot retrieve state vector from a non-simulator backend.")
 
         if self.verbose:
-            quingo_msg("Uploading the program to the backend {}...".format(backend.name()))
+            quingo_msg(
+                "Uploading the program to the backend {}...".format(backend.name()))
 
         if not backend.upload_program(self.qasm_file_path):
-            quingo_err("Failed to upload the program to the backend {}.".format(backend.name()))
+            quingo_err(
+                "Failed to upload the program to the backend {}.".format(backend.name()))
             quingo_info("  Suggestion: are you uploading QCIS program to an eQASM backend "
                         "or eQASM program to a QCIS backend?\n"
                         "    If so, please specify the compiler and backend accordingly.")
@@ -359,10 +364,11 @@ class Runtime_system_manager():
         if compiler_name == 'mlir':
             quingoc_path = get_mlir_path()
             if quingoc_path is None:
-                quingo_err("Cannot find the mlir-based quingoc compiler in the system path.")
+                quingo_err(
+                    "Cannot find the mlir-based quingoc compiler in the system path.")
                 quingo_info(
                     "To resolve this problem, you can download quingoc from "
-                    "https://gitee.com/hpcl_quanta/quingo-runtime/releases and save "
+                    "https://gitee.com/quingo/quingo-runtime/releases and save "
                     "it at a directory in the system path \n"
                     "or configure its path by calling this method inside python:\n"
                     "     `quingo.quingo_interface.set_mlir_compiler_path(<path-to-quingoc>)`")
@@ -432,8 +438,10 @@ class Runtime_system_manager():
             compile_files.extend(user_files)
             compile_files.extend(default_files)
 
-            logger.debug(self.compose_xtext_cmd(compile_cmd_head, compile_files, print=True))
-            compile_cmd = self.compose_xtext_cmd(compile_cmd_head, compile_files, False)
+            logger.debug(self.compose_xtext_cmd(
+                compile_cmd_head, compile_files, print=True))
+            compile_cmd = self.compose_xtext_cmd(
+                compile_cmd_head, compile_files, False)
 
         else:
             raise ValueError("Found undefined compiler to use.")

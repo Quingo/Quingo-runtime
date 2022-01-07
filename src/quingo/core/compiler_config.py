@@ -32,7 +32,7 @@ def set_compiler_path(path_str, is_mlir=False):
 
 def download_latest_quingoc():
     latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
-        owner="hpcl_quanta", repo="quingo-runtime")
+        owner="quingo", repo="quingo-runtime")
 
     try:
         latest_release = get_text(latest_release_url)

@@ -9,7 +9,7 @@ The Quingo installation comprises of two main steps:
 ### Install the Runtime system and simulator
 Install Quingo runtime system with required simulators using the following command:
 ```sh
-git clone https://gitee.com/hpcl_quanta/quingo-runtime.git
+git clone https://gitee.com/quingo/quingo-runtime.git
 cd /your/download/path/quingo-runtime/
 pip install -e .
 ```
@@ -72,4 +72,4 @@ The `Quingo_interface` class expose the following methods:
    - For QCIS-based backend, the result format is defined by PyQCISim. Please refer to the docstring of `quingo.if_backend.non_arch_backend.pyqcisim_quantumsim.PyQCISim_quantumsim::execute()`
 
 ## Quingo programming tutorial
-At present, Qingguo runtime system has included sample programs such as `Bell_state`, `GHZ`, `VQE`, etc. Details can be found [here](https://gitee.com/hpcl_quanta/quingo-runtime/tree/master/src/examples).
+At present, Qingguo runtime system has included sample programs such as `Bell_state`, `GHZ`, `VQE`, etc. Details can be found [here](https://gitee.com/quingo/quingo-runtime/tree/master/src/examples).
