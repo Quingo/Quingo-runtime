@@ -9,9 +9,7 @@ The Quingo installation comprises of two main steps:
 ### Install the Runtime system and simulator
 Install Quingo runtime system with required simulators using the following command:
 ```sh
-git clone https://gitee.com/quingo/quingo-runtime.git
-cd /your/download/path/quingo-runtime/
-pip install -e .
+pip install quingo
 ```
 
 Upon success, it will automatically install the Quingo runtime system (this package), the PyQCAS simulator and the PyQCISim simulator.
@@ -25,13 +23,16 @@ Two versions of Quingo compiler has been developed:
 
 #### Install the Mlir-based Compiler
 
-At present, as long as all the commands in the step of [Install the Runtime system and simulator](#install-the-runtime-system-and-simulator) are executed, the binary file of the mlir-based compiler will be automatically downloaded.
+Install the mlir-based Quingo compiler using the following command:
+```sh
+python -m quingo.install_quingoc
+```
 
 #### Install the Xtext-based Compiler
 
 At present, the java executable file of xtext-based compiler has not yet been automatically downloaded, so users need to download [java executable](https://github.com/Quingo/compiler_xtext/releases) separately to get the xtext-based compiler.
 
-After downloading the binary, you need to call specify the compiler path for once in python using the following command:
+After downloading the binary, you need to call specify the compiler path for once in python using the following commands:
 ```python
 import quingo
 # for xtext compiler
