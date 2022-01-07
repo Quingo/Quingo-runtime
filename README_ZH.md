@@ -13,6 +13,7 @@
 git clone https://gitee.com/quingo/quingo-runtime.git
 cd /your/download/path/quingo-runtime/
 pip install -e .
+python -m quingo.install_quingocquingo
 ```
 
 ### 安装青果编译器

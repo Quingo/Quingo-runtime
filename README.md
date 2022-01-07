@@ -12,6 +12,7 @@ Install Quingo runtime system with required simulators using the following comma
 git clone https://gitee.com/quingo/quingo-runtime.git
 cd /your/download/path/quingo-runtime/
 pip install -e .
+python -m quingo.install_quingoc
 ```
 
 Upon success, it will automatically install the Quingo runtime system (this package), the PyQCAS simulator and the PyQCISim simulator.
