@@ -7,6 +7,7 @@ import distutils.spawn
 import subprocess
 import platform
 import zipfile
+import sys
 import shutil
 import tempfile
 import datetime
@@ -249,16 +250,13 @@ def download_compiler(os_name, tmp_dir_name):
                            "following error: {}".format(quingoc_asset['name'], e))
 
     data_size = math.ceil(
-        int(quingoc_response.headers['Content-Length'])/1024/1024)
+        int(quingoc_response.headers['Content-Length'])/1024)
 
     mlir_compiler_path = tmp_dir_name / quingoc_asset['name']
     with mlir_compiler_path.open('wb') as tmp_dl_file:
-        print('Downloading quingoc from {}'.format(quingoc_url))
-        for data in tqdm.tqdm(iterable=quingoc_response.iter_content(1024*1024), total=data_size, desc='', unit='MB'):
+        print('Downloading quingoc from {} ({} KiB)'.format(quingoc_url, data_size))
+        for data in tqdm.tqdm(iterable=quingoc_response.iter_content(1024), total=data_size, desc='progress', unit='KB'):
                 tmp_dl_file.write(data)
-
-    print("installation file has been downloaded to tmp file \"{}\" ({} bytes). ".format(
-        mlir_compiler_path, quingoc_response.headers['Content-Length']))
 
     return mlir_compiler_path
 
@@ -284,7 +282,7 @@ def get_lastest_version():
 
     os_name = platform.system()
     assert os_name in os_name_list
-    
+
     dl_file_suffix = os_dl_suffix[os_name]
 
     try:
