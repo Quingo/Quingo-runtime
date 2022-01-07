@@ -10,7 +10,7 @@
 
 依次执行以下命令便可以安装青果运行时系统、PyQCAS模拟器以及PyQCISim模拟器。
 ```sh
-git clone https://gitee.com/hpcl_quanta/quingo-runtime.git
+git clone https://gitee.com/quingo/quingo-runtime.git
 cd /your/download/path/quingo-runtime/
 pip install -e .
 ```
@@ -71,4 +71,4 @@ The result of bell_state is:
    - 对于能够执行QCIS指令的后端，结果的格式由PyQCISim进行定义。详情请参考`quingo.if_backend.non_arch_backend.pyqcisim_quantumsim.PyQCISim_quantumsim::execute()`中的文档描述。
 
 ## 青果示例程序
-目前青果运行时系统中已经包含了`Bell_state`、`GHZ`、`VQE`等示例程序，详情可见[此处](https://gitee.com/hpcl_quanta/quingo-runtime/tree/master/src/examples)。
+目前青果运行时系统中已经包含了`Bell_state`、`GHZ`、`VQE`等示例程序，详情可见[此处](https://gitee.com/quingo/quingo-runtime/tree/master/src/examples)。
