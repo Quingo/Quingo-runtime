@@ -219,7 +219,7 @@ def download_compiler(os_name, tmp_dir_name):
     dl_file_suffix = os_dl_suffix[os_name]
 
     latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
-        owner="hpcl_quanta", repo="quingo-runtime")
+        owner="quingo", repo="quingo-runtime")
 
     try:
         latest_release = requests.get(latest_release_url).text
@@ -237,7 +237,8 @@ def download_compiler(os_name, tmp_dir_name):
         quingoc_url = quingoc_asset['browser_download_url'] + \
             '/' + quingoc_asset['name']
         quingoc_response = requests.get(quingoc_url, stream=True)
-        data_size = math.ceil(int(quingoc_response.headers['Content-Length'])/1024/1024)
+        data_size = math.ceil(
+            int(quingoc_response.headers['Content-Length'])/1024/1024)
 
         mlir_compiler_path = tmp_dir_name / quingoc_asset['name']
         with mlir_compiler_path.open('wb') as tmp_dl_file:
@@ -274,7 +275,7 @@ def get_lastest_version():
     """
 
     latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
-        owner="hpcl_quanta", repo="quingo-runtime")
+        owner="quingo", repo="quingo-runtime")
 
     try:
         latest_release = requests.get(latest_release_url).text
