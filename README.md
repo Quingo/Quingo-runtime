@@ -9,9 +9,7 @@ The Quingo installation comprises of two main steps:
 ### Install the Runtime system and simulator
 Install Quingo runtime system with required simulators using the following command:
 ```sh
-git clone https://gitee.com/quingo/quingo-runtime.git
-cd /your/download/path/quingo-runtime/
-pip install -e .
+pip install quingo
 python -m quingo.install_quingoc
 ```
 

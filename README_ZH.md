@@ -10,9 +10,7 @@
 
 依次执行以下命令便可以安装青果运行时系统、PyQCAS模拟器以及PyQCISim模拟器。
 ```sh
-git clone https://gitee.com/quingo/quingo-runtime.git
-cd /your/download/path/quingo-runtime/
-pip install -e .
+pip install quingo
 python -m quingo.install_quingocquingo
 ```
 
