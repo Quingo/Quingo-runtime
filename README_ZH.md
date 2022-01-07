@@ -1,6 +1,6 @@
 # 青果运行时系统
 
- 青果（Quingo）运行时系统能够与青果编译器协同工作，旨在为用户提供编程和模拟青果程序的能力。
+青果（Quingo）运行时系统能够与青果编译器协同工作，旨在为用户提供编程和模拟青果程序的能力。
 
 ## 环境安装
 
@@ -11,7 +11,6 @@
 依次执行以下命令便可以安装青果运行时系统、PyQCAS模拟器以及PyQCISim模拟器。
 ```sh
 pip install quingo
-python -m quingo.install_quingocquingo
 ```
 
 ### 安装青果编译器
@@ -21,11 +20,14 @@ python -m quingo.install_quingocquingo
 1. 基于`mlir`的青果编译器，该编译器可以生成能够被PyQCISim模拟器模拟的QCIS指令。
 2. 基于`xtext`的青果编译器，该编译器可以生成能够被PyQCAS模拟器模拟的eQASM指令。
 
-#### 基于`mlir`的青果编译器
+#### 安装基于`mlir`的青果编译器
 
-目前，只要执行了[安装运行时系统以及模拟器](#安装运行时系统以及模拟器)步骤中的所有命令，基于`mlir`的青果编译器的二进制文件便会自动下载，因此用户可以直接使用，无需单独下载。
+执行以下命令便可自动下载安装基于`mlir`的青果编译器：
+```sh
+python -m quingo.install_quingoc
+```
 
-#### 基于`xtext`的青果编译器
+#### 安装基于`xtext`的青果编译器
 
 目前，基于`xtext`的青果编译器还未实现自动下载，故用户需要单独下载[java二进制文件](https://github.com/Quingo/compiler_xtext/releases)来获取青果编译器。
 
