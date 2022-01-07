@@ -76,7 +76,7 @@ def install_on_Linux(mlir_compiler_path, old_version_path=None):
     mlir_compiler_install_cmd = '"{}" --prefix="{}" --exclude-subdir'.format(
         mlir_compiler_path, mlir_compiler_install_dir)
 
-    print("mlir_compiler_install_cmd: ", mlir_compiler_install_cmd)
+    print("installing...")
 
     ret_value = subprocess.run(mlir_compiler_install_cmd, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, text=True, shell=True)
@@ -93,7 +93,7 @@ def install_on_Linux(mlir_compiler_path, old_version_path=None):
 
     set_path_env_on_Linux(mlir_compiler_exec_path)
 
-    print("Lastest quingoc has been installed at \"{}\".".format(
+    print("Successfully installed the lastest quingoc at \"{}\".".format(
         mlir_compiler_exec_path))
 
 
@@ -242,7 +242,7 @@ def download_compiler(os_name, tmp_dir_name):
 
         mlir_compiler_path = tmp_dir_name / quingoc_asset['name']
         with mlir_compiler_path.open('wb') as tmp_dl_file:
-            for data in tqdm.tqdm(iterable=quingoc_response.iter_content(1024*1024), total=data_size, desc='Download', unit='MB'):
+            for data in tqdm.tqdm(iterable=quingoc_response.iter_content(1024*1024), total=data_size, desc='Downloading quingoc from {}'.format(quingoc_url), unit='MB'):
                 tmp_dl_file.write(data)
 
             print("installation file has been downloaded to tmp file \"{}\" ({} bytes). ".format(
@@ -336,7 +336,7 @@ def get_current_version(quingoc_path):
 
 
 def check_update(quingoc_path):
-    """Check local quingo compiler whether is latest version 
+    """Check local quingo compiler whether is latest version
     """
 
     current_version = get_current_version(quingoc_path)
