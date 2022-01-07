@@ -367,8 +367,9 @@ class Runtime_system_manager():
                 quingo_err(
                     "Cannot find the mlir-based quingoc compiler in the system path.")
                 quingo_info(
-                    "To resolve this problem, you can download quingoc from "
-                    "https://gitee.com/quingo/quingo-runtime/releases and save "
+                    "To resolve this problem, you can install quingoc with two ways:\n"
+                    "1. run the following command \"python -m quingo.install_quingoc\"\n"
+                    "2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/releases and save "
                     "it at a directory in the system path \n"
                     "or configure its path by calling this method inside python:\n"
                     "     `quingo.quingo_interface.set_mlir_compiler_path(<path-to-quingoc>)`")

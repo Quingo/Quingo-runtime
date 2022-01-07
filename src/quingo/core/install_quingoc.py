@@ -13,6 +13,17 @@ import datetime
 import tqdm
 from pathlib import Path
 
+quingoc_owner = "quingo"
+quingoc_release_repo = "quingoc-release"
+lastest_quingoc_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
+        owner=quingoc_owner, repo=quingoc_release_repo)
+
+os_name_list = ['Linux', 'Windows', 'Darwin']
+os_dl_suffix = {
+        'Linux': '.sh',
+        'Windows': '.zip',
+        'Darwin': '.dmg'
+    }
 
 def backup_compiler(quingoc_path):
 
@@ -76,8 +87,6 @@ def install_on_Linux(mlir_compiler_path, old_version_path=None):
     mlir_compiler_install_cmd = '"{}" --prefix="{}" --exclude-subdir'.format(
         mlir_compiler_path, mlir_compiler_install_dir)
 
-    print("installing...")
-
     ret_value = subprocess.run(mlir_compiler_install_cmd, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, text=True, shell=True)
     if(ret_value.returncode != 0):
@@ -93,7 +102,7 @@ def install_on_Linux(mlir_compiler_path, old_version_path=None):
 
     set_path_env_on_Linux(mlir_compiler_exec_path)
 
-    print("Successfully installed the lastest quingoc at \"{}\".".format(
+    print("Successfully installed the Lastest quingoc at \"{}\".".format(
         mlir_compiler_exec_path))
 
 
@@ -116,7 +125,6 @@ def install_on_Windows(mlir_compiler_path, old_version_path=None):
         mlir_compiler_install_path = Path.home() / '.quingo'
 
     zip_file = zipfile.ZipFile(mlir_compiler_path)
-    zip_list = zip_file.namelist()
     zip_file.extractall(mlir_compiler_install_path)
     zip_file.close()
 
@@ -131,7 +139,7 @@ def install_on_Windows(mlir_compiler_path, old_version_path=None):
 
     set_path_on_Windows(mlir_compiler_install_path)
 
-    print("Lastest quingoc has been installed at \"{}\".".format(
+    print("Successfully installed the Lastest quingoc at \"{}\".".format(
         mlir_compiler_install_path))
 
 
@@ -188,12 +196,11 @@ def install_on_Darwin(mlir_compiler_path, old_version_path=None):
 
     set_path_env_on_Darwin(mlir_compiler_exec_path)
 
-    print("Lastest quingoc has been installed at \"{}\".".format(
+    print("Successfully installed the Lastest quingoc at \"{}\".".format(
         mlir_compiler_exec_path))
 
 
 def install_compiler(os_name, mlir_compiler_path, old_version_path=None):
-    assert os_name in ['Linux', 'Windows', 'Darwin']
 
     if old_version_path is not None:
         backup_compiler(old_version_path)
@@ -210,49 +217,50 @@ def install_compiler(os_name, mlir_compiler_path, old_version_path=None):
 
 
 def download_compiler(os_name, tmp_dir_name):
-    assert os_name in ['Linux', 'Windows', 'Darwin']
-    os_dl_suffix = {
-        'Linux': '.sh',
-        'Windows': '.zip',
-        'Darwin': '.dmg'
-    }
+    assert os_name in os_name_list
+
     dl_file_suffix = os_dl_suffix[os_name]
 
-    latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
-        owner="quingo", repo="quingo-runtime")
-
     try:
-        latest_release = requests.get(latest_release_url).text
+        latest_release = requests.get(lastest_quingoc_release_url).text
         release_info = json.loads(latest_release)
-        assets = release_info['assets']
-        quingoc_asset = None
-        for asset in assets:
-            if 'name' in asset and asset['name'].endswith(dl_file_suffix):
-                quingoc_asset = asset
-                break
-        if quingoc_asset is None:
-            raise RuntimeError(
-                "Failed to download quingo compiler from gitee.")
-
-        quingoc_url = quingoc_asset['browser_download_url'] + \
-            '/' + quingoc_asset['name']
-        quingoc_response = requests.get(quingoc_url, stream=True)
-        data_size = math.ceil(
-            int(quingoc_response.headers['Content-Length'])/1024/1024)
-
-        mlir_compiler_path = tmp_dir_name / quingoc_asset['name']
-        with mlir_compiler_path.open('wb') as tmp_dl_file:
-            for data in tqdm.tqdm(iterable=quingoc_response.iter_content(1024*1024), total=data_size, desc='Downloading quingoc from {}'.format(quingoc_url), unit='MB'):
-                tmp_dl_file.write(data)
-
-            print("installation file has been downloaded to tmp file \"{}\" ({} bytes). ".format(
-                mlir_compiler_path, quingoc_response.headers['Content-Length']))
-
-        return mlir_compiler_path
 
     except Exception as e:
         raise RuntimeError("Failed to parse information retrieved from gitee with the "
                            "following error: {}".format(e))
+
+    assets = release_info['assets']
+    quingoc_asset = None
+    for asset in assets:
+        if 'name' in asset and asset['name'].endswith(dl_file_suffix):
+            quingoc_asset = asset
+            break
+    if quingoc_asset is None:
+        raise RuntimeError(
+            "Failed to get quingo compiler release package for {} platform.".format(os_name))
+
+    quingoc_url = quingoc_asset['browser_download_url'] + \
+        '/' + quingoc_asset['name']
+
+    try:
+        quingoc_response = requests.get(quingoc_url, stream=True)
+    except Exception as e:
+        raise RuntimeError("Failed to download package \"{}\" from gitee with the "
+                           "following error: {}".format(quingoc_asset['name'], e))
+
+    data_size = math.ceil(
+        int(quingoc_response.headers['Content-Length'])/1024/1024)
+
+    mlir_compiler_path = tmp_dir_name / quingoc_asset['name']
+    with mlir_compiler_path.open('wb') as tmp_dl_file:
+        print('Downloading quingoc from {}'.format(quingoc_url))
+        for data in tqdm.tqdm(iterable=quingoc_response.iter_content(1024*1024), total=data_size, desc='', unit='MB'):
+                tmp_dl_file.write(data)
+
+    print("installation file has been downloaded to tmp file \"{}\" ({} bytes). ".format(
+        mlir_compiler_path, quingoc_response.headers['Content-Length']))
+
+    return mlir_compiler_path
 
 
 def download_and_install_latest_quingoc(old_version_path=None):
@@ -275,40 +283,34 @@ def get_lastest_version():
     """
 
     os_name = platform.system()
-    assert os_name in ['Linux', 'Windows', 'Darwin']
-    os_dl_suffix = {
-        'Linux': '.sh',
-        'Windows': '.zip',
-        'Darwin': '.dmg'
-    }
+    assert os_name in os_name_list
+    
     dl_file_suffix = os_dl_suffix[os_name]
 
-    latest_release_url = "https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest".format(
-        owner="quingo", repo="quingo-runtime")
-
     try:
-        latest_release = requests.get(latest_release_url).text
+        latest_release = requests.get(lastest_quingoc_release_url).text
         release_info = json.loads(latest_release)
-        assets = release_info['assets']
-        quingoc_asset = None
-        for asset in assets:
-            if 'name' in asset and asset['name'].endswith(dl_file_suffix):
-                quingoc_asset = asset
-                break
-        if quingoc_asset is None:
-            raise RuntimeError(
-                "Failed to download quingo compiler from gitee.")
-
-        find_version = re.search(r'\d+\.\d+\.\d+', quingoc_asset['name'])
-        if find_version is not None:
-            lastest_version = find_version.group()
-        else:
-            raise RuntimeError(
-                "Failed to get lastest version of quingo compiler from gitee.")
 
     except Exception as e:
         raise RuntimeError("Failed to parse information retrieved from gitee with the "
                            "following error: {}".format(e))
+
+    assets = release_info['assets']
+    quingoc_asset = None
+    for asset in assets:
+        if 'name' in asset and asset['name'].endswith(dl_file_suffix):
+            quingoc_asset = asset
+            break
+    if quingoc_asset is None:
+        raise RuntimeError(
+            "Failed to get quingo compiler release package for {} platform.".format(os_name))
+
+    find_version = re.search(r'\d+\.\d+\.\d+', quingoc_asset['name'])
+    if find_version is not None:
+        lastest_version = find_version.group()
+    else:
+        raise RuntimeError(
+            "Failed to get lastest version of quingo compiler from package \"{}\".".format(quingoc_asset['name']))
 
     return lastest_version
 
