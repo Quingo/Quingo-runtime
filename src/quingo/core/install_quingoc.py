@@ -343,7 +343,7 @@ def check_update(quingoc_path):
     lastest_version = get_lastest_version()
 
     if current_version == lastest_version:
-       print("Local quingoc is already the lastest version.")
+       print("Local quingoc is already the lastest version {}.".format(lastest_version))
        return False
     else:
        print("Local quingoc version ({}) is behind lastest version ({}). Update now.".format(current_version, lastest_version))
