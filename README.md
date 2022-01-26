@@ -23,10 +23,20 @@ Two versions of Quingo compiler has been developed:
 
 #### Install the Mlir-based Compiler
 
-Install the mlir-based Quingo compiler using the following command:
-```sh
-python -m quingo.install_quingoc
-```
+We can install mlir-based quingo compiler in two ways:
+
++ Install the mlir-based Quingo compiler using the following command:
+  ```sh
+  python -m quingo.install_quingoc
+  ```
+
++ Download [mlir-based Quingo compiler](https://gitee.com/quingo/quingoc-release/releases)
+  + Windows: unzip .zip file, add directory which contains the quingoc executable file to system environment PATH.  
+  + Linux: as the following sample usage, Quingoc will be installed to user defined directory, then add directory which contains the quingoc executable file to system environment PATH.
+  ```sh
+   quingo-compiler-0.1.4.sh -prefix=/home/user/.local
+  ```
+  + Macos: uncompress .dmg file, copy quingoc executable file to user defined directory, then add directory which contains the quingoc executable file to system environment PATH.
 
 #### Install the Xtext-based Compiler
 

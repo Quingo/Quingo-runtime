@@ -22,10 +22,22 @@ pip install quingo
 
 #### 安装基于`mlir`的青果编译器
 
-执行以下命令便可自动下载安装基于`mlir`的青果编译器：
-```sh
-python -m quingo.install_quingoc
-```
+Quingo提供两种方式安装基于`mlir`的青果编译器
+
++ 执行以下命令便可自动下载安装基于`mlir`的青果编译器：
+   ```sh
+   python -m quingo.install_quingoc
+   ```
+
++ 从[Quingoc发布地址](https://gitee.com/quingo/quingoc-release/releases)下载基于`mlir`的青果编译器
+  + Windows:解压zip压缩包，并将Quingoc所在目录加入到系统环境变量PATH中
+  + Linux:执行如下示例命令，Quingoc安装到用户指定的目录，将该目录加入到系统环境变量PATH中
+  ```sh
+   quingo-compiler-0.1.4.sh -prefix=/home/user/.local
+  ```
+  + Macos:解压dmg压缩包，将Quingoc可执行文件拷贝到用户指定的目录下，并添加该目录加入到系统环境变量PATH中
+
+
 
 #### 安装基于`xtext`的青果编译器
 
