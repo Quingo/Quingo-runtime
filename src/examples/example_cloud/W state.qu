@@ -1,0 +1,33 @@
+opaque X(q: qubit) : unit;
+opaque RY(q: qubit, angle: double) : unit;
+opaque H(q: qubit) : unit;
+
+opaque CZ(q1: qubit, q2: qubit) : unit;
+opaque measure(q: qubit): bool;
+
+operation CNOT(q1: qubit, q2: qubit): unit{
+    H(q2);
+    CZ(q1, q2);
+    H(q2);
+}
+
+operation w_state_3(qs: qubit[3]): unit{
+    RY(qs[0], -1.9106332362490184);
+    for(int i = 0; i < 2; i += 1){
+        RY(qs[1], toDouble(2 * i * (-1) + 1) * 0.7853981633974483);
+        CNOT(qs[0], qs[1]);
+    }
+   for(int i = 2; i > 0; i -= 1){
+       CNOT(qs[i - 1], qs[i]);
+   }
+    X(qs[0]);
+}
+
+operation main(): unit{
+    using(qs: qubit[3]){
+        w_state_3(qs);
+        for(int i = 0; i < 3; i += 1){
+            measure(qs[i]);
+        }
+    }
+}

@@ -1,0 +1,24 @@
+opaque X(q: qubit) : unit;
+opaque H(q: qubit) : unit;
+opaque CZ(q1: qubit, q2: qubit) : unit;
+opaque measure(q: qubit): bool;
+
+operation CNOT(q1: qubit, q2: qubit): unit{
+    H(q2);
+    CZ(q1, q2);
+    H(q2);
+}
+
+operation bell_state(q1: qubit, q2: qubit) : unit{
+    H(q1);
+    X(q2);
+    CNOT(q1, q2);
+}
+
+operation main(): unit{
+    using(q1: qubit, q2: qubit){
+        bell_state(q1, q2);
+        measure(q1);
+        measure(q2);
+    }
+}
