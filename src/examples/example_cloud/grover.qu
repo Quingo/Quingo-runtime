@@ -1,7 +1,4 @@
-opaque X(q: qubit) : unit;
-opaque H(q: qubit) : unit;
-opaque CZ(q1: qubit, q2: qubit) : unit;
-opaque measure(q: qubit): bool;
+import std_qcis
 
 operation state_preparation(q1: qubit, q2: qubit): unit{
     H(q1);
