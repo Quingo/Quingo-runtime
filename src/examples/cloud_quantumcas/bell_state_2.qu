@@ -1,0 +1,21 @@
+import std_qcis
+
+operation CNOT(q1: qubit, q2: qubit): unit{
+    H(q2);
+    CZ(q1, q2);
+    H(q2);
+}
+
+operation bell_state(q1: qubit, q2: qubit): unit{
+    H(q1);
+    CNOT(q1, q2);
+    Z(q1);
+}
+
+operation main(): unit{
+    using(q1: qubit, q2: qubit){
+        bell_state(q1, q2);
+        measure(q1);
+        measure(q2);
+    }
+}

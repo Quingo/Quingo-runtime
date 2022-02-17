@@ -1,0 +1,14 @@
+import std_qcis
+
+operation equal_superposition(q1: qubit, q2: qubit): unit{
+    H(q1);
+    H(q2);
+}
+
+operation main(): unit{
+    using(q1: qubit, q2: qubit){
+        equal_superposition(q1, q2);
+        measure(q1);
+        measure(q2);
+    }
+}
