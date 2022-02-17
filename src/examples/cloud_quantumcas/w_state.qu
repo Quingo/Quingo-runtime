@@ -9,7 +9,7 @@ operation CNOT(q1: qubit, q2: qubit): unit{
 operation w_state_3(qs: qubit[3]): unit{
     RY(qs[0], -1.9106332362490184);
     for(int i = 0; i < 2; i += 1){
-        RY(qs[1], toDouble(2 * i * (-1) + 1) * pi / toDouble(4));
+        RY(qs[1], toDouble(-2 * i + 1) * pi / 4.0);
         CNOT(qs[0], qs[1]);
     }
    for(int i = 2; i > 0; i -= 1){
