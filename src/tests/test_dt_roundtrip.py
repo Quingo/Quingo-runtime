@@ -1,6 +1,6 @@
-from qgrtsys.tests.pydata2bin import Pydata_2_qg_bin
-import qgrtsys.core.data_transfer as dt
-from qgrtsys.core.utils import *
+from pydata2bin import Pydata_2_qg_bin
+import quingo.core.data_transfer as dt
+from quingo.core.utils import *
 import pytest
 import random
 
@@ -26,21 +26,23 @@ def check_equal(val1, val2):
     if type(val1) is not type(val2):
         return False
 
-    if (isinstance(val1, float) or isinstance(val2, float)):
+    if isinstance(val1, float) or isinstance(val2, float):
         return val1 == pytest.approx(val2, rel=1e-7)
 
-    elif(isinstance(val1, int) or isinstance(val1, bool)):
+    elif isinstance(val1, int) or isinstance(val1, bool):
         return val1 == val2
 
-    elif(isinstance(val1, list) or isinstance(val1, tuple)):
-        if (len(val1) != len(val2)):
+    elif isinstance(val1, list) or isinstance(val1, tuple):
+        if len(val1) != len(val2):
             return False
 
         return all(map(lambda x, y: check_equal(x, y), val1, val2))
 
     else:
-        raise ValueError("Found unsupported value type ({}). \n\tCurrently only int, bool, float, "
-                         "list, and tuple are supported.".format(type(val1)))
+        raise ValueError(
+            "Found unsupported value type ({}). \n\tCurrently only int, bool, float, "
+            "list, and tuple are supported.".format(type(val1))
+        )
 
 
 def roundtrip(type_str, value):
@@ -62,14 +64,20 @@ def roundtrip(type_str, value):
 
     logger.debug("The decoded data is:{}\n".format(res_py))
 
-    assert(check_equal(res_py, value))
+    assert check_equal(res_py, value)
 
 
 def test_roundtrip():
     n = 20
     while n > 0:
-        type_str = gen_type_str(weight_list=4, weight_tuple=4,
-                                weight_bool=2, weight_int_double=10, layer=0, max_num=5)
+        type_str = gen_type_str(
+            weight_list=4,
+            weight_tuple=4,
+            weight_bool=2,
+            weight_int_double=10,
+            layer=0,
+            max_num=5,
+        )
 
         if type_str == None:
             continue
@@ -79,7 +87,9 @@ def test_roundtrip():
         n -= 1
 
 
-def gen_type_str(weight_list, weight_tuple, weight_bool, weight_int_double, layer, max_num):
+def gen_type_str(
+    weight_list, weight_tuple, weight_bool, weight_int_double, layer, max_num
+):
     """This function generates a random string of type.
 
     Args:
@@ -92,7 +102,7 @@ def gen_type_str(weight_list, weight_tuple, weight_bool, weight_int_double, laye
         max_num (int) : the maximum number of the values in a tuple.
     """
 
-    if(layer >= 5):
+    if layer >= 5:
         return
 
     tmp_bool = weight_bool
@@ -105,52 +115,68 @@ def gen_type_str(weight_list, weight_tuple, weight_bool, weight_int_double, laye
     weight_total = weight_list + weight_tuple + weight_bool + weight_int_double
 
     # Select the type according to the weight
-    if(layer == 0):
+    if layer == 0:
         weight_bool = 1
         weight_int_double = 1
-    if(index < weight_list / weight_total):
-        chosed_type = 'list'
-    elif(index < (weight_list + weight_tuple) / weight_total):
-        chosed_type = 'tuple'
-    elif(index < (weight_list + weight_tuple + weight_bool) / weight_total):
-        chosed_type = 'bool'
-    elif(index < (weight_list + weight_tuple + weight_bool + 0.25*weight_int_double) / weight_total):
-        chosed_type = 'double'
+    if index < weight_list / weight_total:
+        chosed_type = "list"
+    elif index < (weight_list + weight_tuple) / weight_total:
+        chosed_type = "tuple"
+    elif index < (weight_list + weight_tuple + weight_bool) / weight_total:
+        chosed_type = "bool"
+    elif (
+        index
+        < (weight_list + weight_tuple + weight_bool + 0.25 * weight_int_double)
+        / weight_total
+    ):
+        chosed_type = "double"
     else:
-        chosed_type = 'int'
+        chosed_type = "int"
 
     weight_bool = tmp_bool
     weight_int_double = tmp_int_double
 
     # If the tuple is chosen, the function is called to add several elements to the tuple.
-    if(chosed_type == 'tuple'):
+    if chosed_type == "tuple":
         res = "("
         num = random.randint(2, max_num)
         cnt = 0
         for i in range(num):
-            tmp = gen_type_str(weight_list, weight_tuple-1,
-                               weight_bool, weight_int_double, layer+1, max_num)
-            if(tmp):
+            tmp = gen_type_str(
+                weight_list,
+                weight_tuple - 1,
+                weight_bool,
+                weight_int_double,
+                layer + 1,
+                max_num,
+            )
+            if tmp:
                 cnt += 1
-                res += tmp + ','
-        if(cnt < 2):
+                res += tmp + ","
+        if cnt < 2:
             return
-        return res[:-1]+')'
+        return res[:-1] + ")"
 
     # If the list is chosen, the function is called to genetate a type for the list.
-    elif(chosed_type == 'list'):
-        tmp = gen_type_str(weight_list-1, weight_tuple,
-                           weight_bool, weight_int_double, layer+1, max_num)
-        if(tmp):
-            return tmp + '[]'
+    elif chosed_type == "list":
+        tmp = gen_type_str(
+            weight_list - 1,
+            weight_tuple,
+            weight_bool,
+            weight_int_double,
+            layer + 1,
+            max_num,
+        )
+        if tmp:
+            return tmp + "[]"
         return
 
-    elif(chosed_type == 'bool'):
-        return 'bool'
-    elif(chosed_type == 'int'):
-        return 'int'
-    elif(chosed_type == 'double'):
-        return 'double'
+    elif chosed_type == "bool":
+        return "bool"
+    elif chosed_type == "int":
+        return "int"
+    elif chosed_type == "double":
+        return "double"
     else:
         print("Error: No such a type!")
         exit(0)
@@ -165,39 +191,39 @@ def gen_ran_value(type_str, max_num=5):
     """
 
     res = []
-    type_str = type_str.replace(' ', '')
-    if(type_str[-2:] == '[]'):
-        num = random.randint(1, max_num+1)
+    type_str = type_str.replace(" ", "")
+    if type_str[-2:] == "[]":
+        num = random.randint(1, max_num + 1)
         for i in range(num):
             res.append(gen_ran_value(type_str[:-2], max_num))
         return res
 
-    elif(type_str[0] == '(' and type_str[-1] == ')'):
+    elif type_str[0] == "(" and type_str[-1] == ")":
         sub = list(type_str[1:-1])
         left = 0
 
         for i in range(len(sub)):
-            if(sub[i] == '('):
+            if sub[i] == "(":
                 left += 1
-            elif(sub[i] == ')'):
+            elif sub[i] == ")":
                 left -= 1
-            elif(sub[i] == ','):
-                if(left == 0):
-                    sub[i] = '$'
-        sub = (''.join(sub)).split('$')
+            elif sub[i] == ",":
+                if left == 0:
+                    sub[i] = "$"
+        sub = ("".join(sub)).split("$")
 
         for i in sub:
             res.append(gen_ran_value(i, max_num))
         return tuple(res)
 
-    elif(type_str == 'int'):
+    elif type_str == "int":
         return random.randint(-10000, 10000)
 
-    elif(type_str == 'double'):
+    elif type_str == "double":
         return random.uniform(-10000, 10000)
 
-    elif(type_str == 'bool'):
-        if(random.uniform(0, 1) < 0.5):
+    elif type_str == "bool":
+        if random.uniform(0, 1) < 0.5:
             return True
         return False
     else:
@@ -205,5 +231,5 @@ def gen_ran_value(type_str, max_num=5):
         exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_roundtrip()
