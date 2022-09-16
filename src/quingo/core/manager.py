@@ -555,7 +555,7 @@ class Runtime_system_manager:
 
         # The project root directory is added to the compiler module search path.
         compile_cmd = (
-            '{header}{qgc_path} {main_fn}{sep} -I {root_dir} -o "{qasm_fn}"'.format(
+            '{header}"{qgc_path}" "{main_fn}"{sep} -I "{root_dir}" -o "{qasm_fn}"'.format(
                 header=header,
                 qgc_path=quingoc_path,
                 main_fn=str(self.main_file_fn),

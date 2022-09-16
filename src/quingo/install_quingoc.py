@@ -240,8 +240,7 @@ def download_compiler(os_name, tmp_dir_name):
         raise RuntimeError(
             "Failed to get quingo compiler release package for {} platform.".format(os_name))
 
-    quingoc_url = quingoc_asset['browser_download_url'] + \
-        '/' + quingoc_asset['name']
+    quingoc_url = quingoc_asset['browser_download_url'] + '/'
 
     try:
         quingoc_response = requests.get(quingoc_url, stream=True)
