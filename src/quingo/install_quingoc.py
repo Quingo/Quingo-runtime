@@ -360,5 +360,7 @@ if __name__ == "__main__":
     if quingoc_path is None:
         download_and_install_latest_quingoc()
     else:
+        if quingoc_path[0] != '"':
+            quingoc_path = '"{}"'.format(quingoc_path)
         if check_update(quingoc_path):
             download_and_install_latest_quingoc(pathlib.Path(quingoc_path))
