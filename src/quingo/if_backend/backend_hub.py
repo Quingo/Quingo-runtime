@@ -1,8 +1,8 @@
 import importlib
 
 
-class Backend_info():
-    def __init__(self, module_name, module_path,  with_timing, is_simulator):
+class Backend_info:
+    def __init__(self, module_name, module_path, with_timing, is_simulator):
         self.module_name = module_name
         self.module_path = module_path
         self.with_timing = with_timing
@@ -10,9 +10,9 @@ class Backend_info():
 
     def get_module(self):
         if self.with_timing:
-            prefix = 'quingo.if_backend.arch_backend.'
+            prefix = "quingo.if_backend.arch_backend."
         else:
-            prefix = 'quingo.if_backend.non_arch_backend.'
+            prefix = "quingo.if_backend.non_arch_backend."
 
         full_module_path = prefix + self.module_path
         try:
@@ -33,24 +33,35 @@ def singleton(cls):
         if cls not in _instance:
             _instance[cls] = cls()
         return _instance[cls]
+
     return inner
 
 
 @singleton
-class Backend_hub():
+class Backend_hub:
     def __init__(self):
         self.backends = {}
 
-        self.backends['pyqcas_quantumsim'] = Backend_info(
-            'PyQCAS_quantumsim', 'pyqcas_quantumsim', with_timing=False,
-            is_simulator=True)
+        self.backends["pyqcas_quantumsim"] = Backend_info(
+            "PyQCAS_quantumsim",
+            "pyqcas_quantumsim",
+            with_timing=False,
+            is_simulator=True,
+        )
 
-        self.backends['pyqcisim_quantumsim'] = Backend_info(
-            'PyQCISim_quantumsim', 'pyqcisim_quantumsim', with_timing=False,
-            is_simulator=True)
+        self.backends["pyqcisim_quantumsim"] = Backend_info(
+            "PyQCISim_quantumsim",
+            "pyqcisim_quantumsim",
+            with_timing=False,
+            is_simulator=True,
+        )
+
+        self.backends["symqc"] = Backend_info(
+            "SymQC", "symqc", with_timing=False, is_simulator=True
+        )
 
     def support(self, backend_name):
-        return (backend_name in self.backends)
+        return backend_name in self.backends
 
     def get_instance(self, backend_name):
         backend_info = self.backends[backend_name]
