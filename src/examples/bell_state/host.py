@@ -6,7 +6,8 @@ from pathlib import Path
 # qi.set_log_level(logging.DEBUG)
 qi.set_compiler('mlir')
 
-if qi.connect_backend('pyqcisim_quantumsim') is False:
+# if qi.connect_backend('pyqcisim_quantumsim') is False:
+if qi.connect_backend('symqc') is False:
     exit(-1)
 
 qu_file = Path(__file__).parent / "kernel.qu"

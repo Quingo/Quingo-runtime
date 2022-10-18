@@ -192,7 +192,9 @@ class Runtime_system_manager():
                         "    or, install the corresponding simulation backend using:\n"
                         "        `pip install pyqcas`\n"
                         "    or\n"
-                        "        `pip install pyqcisim`\n")
+                        "        `pip install pyqcisim`\n"
+                        "    or\n"
+                        "        `pip install symqc`\n")
             return False
 
         if self.backend is None:

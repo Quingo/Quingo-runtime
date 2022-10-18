@@ -57,7 +57,7 @@ class Backend_hub:
         )
 
         self.backends["symqc"] = Backend_info(
-            "SymQC", "symqc", with_timing=False, is_simulator=True
+            "IfSymQC", "symqc", with_timing=False, is_simulator=True
         )
 
     def support(self, backend_name):

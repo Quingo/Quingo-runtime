@@ -9,8 +9,8 @@ from symqc.simulator import SymQC
 logger = get_logger((__name__).split(".")[-1])
 
 
-class SymQC(If_backend):
-    """A functional QCIS simulation backend using PyQCISim and QuantumSim."""
+class IfSymQC(If_backend):
+    """A functional QCIS simulation backend based on symbolic computation."""
 
     def __init__(self, **kwargs):  # 关键字参数
 
@@ -73,12 +73,13 @@ class SymQC(If_backend):
           - num_shots (int): the number of iterations performed in `one_shot` mode.
         """
         try:
-            self.res = self.sim.simulate(mode, num_shots)
+            print("mode: ", mode, "num_shots: ", num_shots)
             if mode == "state_vector":  # mapping between the name of simulation modes
                 raw_res = self.sim.simulate("final_state")
                 self.res = raw_res["quantum"][1]
             else:
                 self.res = self.sim.simulate(mode, num_shots)
+            print("self.res after simulation: ", self.res)
             return True
         except Exception as e:
             quingo_err("Error in SymQC simulation: {}".format(e))
