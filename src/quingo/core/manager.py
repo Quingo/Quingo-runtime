@@ -9,13 +9,20 @@ import subprocess
 import logging
 from pathlib import Path
 from .compiler_config import get_mlir_path, get_xtext_path
-from quingo.core.utils import quingo_err, quingo_msg, quingo_warning, get_logger, quingo_info
-logger = get_logger((__name__).split('.')[-1])
+from quingo.core.utils import (
+    quingo_err,
+    quingo_msg,
+    quingo_warning,
+    get_logger,
+    quingo_info,
+)
+
+logger = get_logger((__name__).split(".")[-1])
 
 
 def remove_comment(qu_src):
-    search_annotation_string = r'\/\/.*\n'
-    return re.sub(search_annotation_string, '', qu_src)
+    search_annotation_string = r"\/\/.*\n"
+    return re.sub(search_annotation_string, "", qu_src)
 
 
 def get_ret_type(qg_filename: str, qg_func_name: str):
@@ -27,24 +34,25 @@ def get_ret_type(qg_filename: str, qg_func_name: str):
             quantum function called by the host program.
         qg_func_name (str) : the name of the Quingo function.
     """
-    with open(qg_filename, 'r', encoding='utf-8') as qu_src_file:
+    with open(qg_filename, "r", encoding="utf-8") as qu_src_file:
         qu_src = qu_src_file.read()
 
     qu_src = remove_comment(qu_src)
 
-    search_string = r'\boperation\b\s+' + \
-        qg_func_name + r'\s*\((.*)\)\s*:(.*)\s*\{'
+    search_string = r"\boperation\b\s+" + qg_func_name + r"\s*\((.*)\)\s*:(.*)\s*\{"
 
     op_def_components = re.search(search_string, qu_src)
     if op_def_components is None:
-        raise ValueError("Cannot find the operation ({}) in the given Quingo source "
-                         "file ({}).".format(qg_func_name, qg_filename))
+        raise ValueError(
+            "Cannot find the operation ({}) in the given Quingo source "
+            "file ({}).".format(qg_func_name, qg_filename)
+        )
 
-    ret_type = re.sub(r'\d', '', op_def_components.groups()[1].strip())
+    ret_type = re.sub(r"\d", "", op_def_components.groups()[1].strip())
     return ret_type
 
 
-class Runtime_system_manager():
+class Runtime_system_manager:
     def __init__(self, verbose=False, log_level=logging.WARNING, **kwargs):
         """The quingo runtime system manager.
 
@@ -66,7 +74,7 @@ class Runtime_system_manager():
         self.verbose = verbose
         self.log_level = log_level
 
-        self.config_execution('one_shot', 1)
+        self.config_execution("one_shot", 1)
 
         self.compiler_name = None  # to be set
         self.backend = None  # to be connected
@@ -90,11 +98,10 @@ class Runtime_system_manager():
         self.max_unroll = 100
 
         if self.verbose:
-            logger.debug("Python version: {}".format(
-                platform.python_version()))
+            logger.debug("Python version: {}".format(platform.python_version()))
 
     def set_call_kernel_success(self, success):
-        assert(isinstance(success, bool))
+        assert isinstance(success, bool)
         if not success:
             self.qasm_file_path = None
         self.success_on_last_execution = success
@@ -113,7 +120,7 @@ class Runtime_system_manager():
         Args:
             v (bool): True or False.
         """
-        assert(isinstance(v, bool))
+        assert isinstance(v, bool)
         self.verbose = v
         backend = self.get_backend()
         if backend is not None:
@@ -134,9 +141,8 @@ class Runtime_system_manager():
               - xtext
               - mlir
         """
-        if (compiler_name not in self.supported_compilers):
-            raise ValueError(
-                "Found unsupported compiler: {}".format(compiler_name))
+        if compiler_name not in self.supported_compilers:
+            raise ValueError("Found unsupported compiler: {}".format(compiler_name))
 
         self.compiler_name = compiler_name
 
@@ -145,16 +151,18 @@ class Runtime_system_manager():
 
     def get_backend_or_connect_default(self):
         if self.backend is None:
-            quingo_info("No backend has been connected. "
-                        "Trying to connect the default PyQCAS backend...")
-            if not self.connect_backend('pyqcas_quantumsim'):
+            quingo_info(
+                "No backend has been connected. "
+                "Trying to connect the default PyQCAS backend..."
+            )
+            if not self.connect_backend("pyqcas_quantumsim"):
                 raise SystemError("Cannot connect to the default backend.")
         return self.backend
 
     def get_backend_name(self):
-        '''return the name of the backend that is being used.
+        """return the name of the backend that is being used.
         An empty string will be returned if no backend has been set.
-        '''
+        """
         backend = self.get_backend()
         if backend is None:
             return ""
@@ -175,26 +183,33 @@ class Runtime_system_manager():
 
         backend_hub = Backend_hub()
         if not backend_hub.support(backend_name):
-            logger.error("The chosen backend ({}) is currently not "
-                         "supported by qgrtsys.".format(backend_name))
+            logger.error(
+                "The chosen backend ({}) is currently not "
+                "supported by qgrtsys.".format(backend_name)
+            )
 
-            raise ValueError('Undefined backend ({})'.format(backend_name))
+            raise ValueError("Undefined backend ({})".format(backend_name))
 
         try:
             self.backend = backend_hub.get_instance(backend_name)
         except Exception as e:
             quingo_err(
-                "Cannot connect backend '{}' with the following error:".format(backend_name))
+                "Cannot connect backend '{}' with the following error:".format(
+                    backend_name
+                )
+            )
             quingo_err("{}".format(e))
-            quingo_info("To fix this problem, you could explicitly connect another "
-                        "backend use the the following method: \n"
-                        "        `quingo_interface.connect_backend(<backend_name>)`\n"
-                        "    or, install the corresponding simulation backend using:\n"
-                        "        `pip install pyqcas`\n"
-                        "    or\n"
-                        "        `pip install pyqcisim`\n"
-                        "    or\n"
-                        "        `pip install symqc`\n")
+            quingo_info(
+                "To fix this problem, you could explicitly connect another "
+                "backend use the the following method: \n"
+                "        `quingo_interface.connect_backend(<backend_name>)`\n"
+                "    or, install the corresponding simulation backend using:\n"
+                "        `pip install pyqcas`\n"
+                "    or\n"
+                "        `pip install pyqcisim`\n"
+                "    or\n"
+                "        `pip install symqc`\n"
+            )
             return False
 
         if self.backend is None:
@@ -218,36 +233,39 @@ class Runtime_system_manager():
         return success
 
     def config_path(self, qg_filename: str, qg_func_name: str):
-        '''Configure the following paths of the following files or directories:
-            - The project root direcotry (`prj_root_dir`).
-            - The build directory (`build_dir`), which is used to buffer generarted files.
-                Create this directory if it does not exist.
-            - the main file (`main_file_fn`) generated by the runtime system, which contains
-                the `main` operation.
-            - the qasm file (`qasm_file_path`) generated by the compiler.
-        '''
+        """Configure the following paths of the following files or directories:
+        - The project root direcotry (`prj_root_dir`).
+        - The build directory (`build_dir`), which is used to buffer generarted files.
+            Create this directory if it does not exist.
+        - the main file (`main_file_fn`) generated by the runtime system, which contains
+            the `main` operation.
+        - the qasm file (`qasm_file_path`) generated by the compiler.
+        """
         self.resolved_qg_filename = Path(qg_filename).resolve()
 
         # ensure there is a build directory in the same directory as the source file.
         self.prj_root_dir = Path(self.resolved_qg_filename).parent
         self.build_dir = self.prj_root_dir / gc.build_dirname
 
-        if self.build_dir.exists():  # clear the existing build directory to remove old files.
+        # clear the existing build directory to remove old files.
+        if self.build_dir.exists():
             shutil.rmtree(str(self.build_dir))
-        self.build_dir.mkdir()       # create a new emtpy build dir.
+        # create a new emtpy build dir.
+        self.build_dir.mkdir()
 
         # the basename of qg_filename without extension
         self.qg_stem = self.resolved_qg_filename.stem
 
-        self.main_file_fn = (self.build_dir / ('main_' + self.qg_stem)).with_suffix(
-            gc.quingo_suffix)
+        self.main_file_fn = (self.build_dir / ("main_" + self.qg_stem)).with_suffix(
+            gc.quingo_suffix
+        )
 
         qasm_fn_no_ext = self.build_dir / qg_func_name
         backend = self.get_backend_or_connect_default()
         qisa_used = backend.get_qisa()
-        if qisa_used == 'eqasm':
+        if qisa_used == "eqasm":
             self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.eqasm_suffix)
-        elif qisa_used == 'qcis':
+        elif qisa_used == "qcis":
             self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.qcis_suffix)
         else:
             quingo_err("Found unsupported QISA to use: {}".format(qisa_used))
@@ -256,8 +274,8 @@ class Runtime_system_manager():
 
     def get_last_qasm(self):
         if self.qasm_file_path is None or not self.qasm_file_path.is_file():
-            return ''
-        with self.qasm_file_path.open('r') as f:
+            return ""
+        with self.qasm_file_path.open("r") as f:
             return f.read()
 
     def main_process(self, qg_filename: str, qg_func_name: str, *args):
@@ -278,7 +296,7 @@ class Runtime_system_manager():
             return False
 
         if self.verbose:
-            quingo_msg("Start compilation ... ", end='')
+            quingo_msg("Start compilation ... ", end="")
 
         # generate the quingo file which contains the main function.
         self.gen_main_func_file(qg_filename, qg_func_name, *args)
@@ -291,20 +309,24 @@ class Runtime_system_manager():
         logger.debug("The compiler exited successfully.")
 
         if not self.qasm_file_path.is_file():
-            quingo_err("Error: expected qasm file ({}) has not been generated. Aborts.".format(
-                self.qasm_file_path))
+            quingo_err(
+                "Error: expected qasm file ({}) has not been generated. Aborts.".format(
+                    self.qasm_file_path
+                )
+            )
             return False
 
         # compilation finished successfully
-        logger.debug("The qasm file has been generated at: {}".format(
-            self.qasm_file_path))
+        logger.debug(
+            "The qasm file has been generated at: {}".format(self.qasm_file_path)
+        )
 
         if not self.execute():  # execute the eQASM file
             quingo_err("Execution failed. Abort.")
             return False
 
         if self.verbose:
-            quingo_msg('Execution finished.')
+            quingo_msg("Execution finished.")
 
         # read back the results
         self.result = self.get_backend().read_result()
@@ -319,28 +341,34 @@ class Runtime_system_manager():
         backend = self.get_backend_or_connect_default()
         if backend.available is False:
             raise EnvironmentError(
-                "The backend {} is not available.".format(backend.name()))
+                "The backend {} is not available.".format(backend.name())
+            )
 
-        if self.mode == 'state_vector' and not backend.is_simulator():
+        if self.mode == "state_vector" and not backend.is_simulator():
             raise ValueError(
-                "Cannot retrieve state vector from a non-simulator backend.")
+                "Cannot retrieve state vector from a non-simulator backend."
+            )
 
         if self.verbose:
             quingo_msg(
-                "Uploading the program to the backend {}...".format(backend.name()))
+                "Uploading the program to the backend {}...".format(backend.name())
+            )
 
         if not backend.upload_program(self.qasm_file_path):
             quingo_err(
-                "Failed to upload the program to the backend {}.".format(backend.name()))
-            quingo_info("  Suggestion: are you uploading QCIS program to an eQASM backend "
-                        "or eQASM program to a QCIS backend?\n"
-                        "    If so, please specify the compiler and backend accordingly.")
+                "Failed to upload the program to the backend {}.".format(backend.name())
+            )
+            quingo_info(
+                "  Suggestion: are you uploading QCIS program to an eQASM backend "
+                "or eQASM program to a QCIS backend?\n"
+                "    If so, please specify the compiler and backend accordingly."
+            )
             return False
 
         if self.verbose:
             quingo_msg("Start execution with {}... ".format(backend.name()))
 
-        if backend.name() == "PyQCISim_QuantumSim":
+        if backend.name() == "PyQCISim_QuantumSim" or backend.name() == "SymQC":
             return backend.execute(self.mode, self.num_shots)
         else:
             return backend.execute()
@@ -352,34 +380,38 @@ class Runtime_system_manager():
         for r, d, f in os.walk(prj_dir):
             for file in f:
                 file_path = Path(r) / file
-                if file_path.suffix in ['.qu', '.qfg']:
+                if file_path.suffix in [".qu", ".qfg"]:
                     valid_file_list.append(file_path)
 
-        logger.debug("imported files:\n\t" +
-                     "\n\t".join(['"{}"'.format(str(f)) for f in valid_file_list]))
+        logger.debug(
+            "imported files:\n\t"
+            + "\n\t".join(['"{}"'.format(str(f)) for f in valid_file_list])
+        )
 
         return valid_file_list
 
     def get_compiler_cmd(self, compiler_name):
-        assert(compiler_name in self.supported_compilers)
+        assert compiler_name in self.supported_compilers
 
-        if compiler_name == 'mlir':
+        if compiler_name == "mlir":
             quingoc_path = get_mlir_path()
             if quingoc_path is None:
                 quingo_err(
-                    "Cannot find the mlir-based quingoc compiler in the system path.")
+                    "Cannot find the mlir-based quingoc compiler in the system path."
+                )
                 quingo_info(
                     "To resolve this problem, you can install quingoc with two ways:\n"
-                    "1. run the following command \"python -m quingo.install_quingoc\"\n"
+                    '1. run the following command "python -m quingo.install_quingoc"\n'
                     "2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/releases and save "
                     "it at a directory in the system path \n"
                     "or configure its path by calling this method inside python:\n"
-                    "     `quingo.quingo_interface.set_mlir_compiler_path(<path-to-quingoc>)`")
+                    "     `quingo.quingo_interface.set_mlir_compiler_path(<path-to-quingoc>)`"
+                )
                 return None
             else:
                 return '"{}"'.format(quingoc_path)
 
-        if compiler_name == 'xtext':
+        if compiler_name == "xtext":
             xtext_path = get_xtext_path()
             if xtext_path is None:
                 quingo_err("Cannot find the Xtext-based Quingo compiler.")
@@ -387,17 +419,20 @@ class Runtime_system_manager():
                     "To resolve this issue, please download the quingo.jar from "
                     "https://github.com/Quingo/compiler_xtext/releases "
                     "and configure its path by calling this method inside python:\n"
-                    "     `quingo.quingo_interface.set_xtext_compiler_path(<path-to-quingo.jar>)`")
+                    "     `quingo.quingo_interface.set_xtext_compiler_path(<path-to-quingo.jar>)`"
+                )
                 return None
             return 'java -jar "{}"'.format(xtext_path)
 
     def compile(self):
         """Compiles the quingo files and generate corresponding quantum assembly code.
-            Both the compiler and backend are selected based on the configuration.
+        Both the compiler and backend are selected based on the configuration.
         """
         if self.compiler_name is None:
-            quingo_info("No Quingo compiler has been set. "
-                        "Trying to use the default xtext-based Quingo compiler...")
+            quingo_info(
+                "No Quingo compiler has been set. "
+                "Trying to use the default xtext-based Quingo compiler..."
+            )
             self.set_compiler("xtext")
 
         compiler_name = self.get_compiler()
@@ -405,11 +440,11 @@ class Runtime_system_manager():
         if compile_cmd_head is None:  # Failure
             return False
 
-        if compiler_name == 'mlir':
+        if compiler_name == "mlir":
             logger.debug(self.compose_mlir_cmd(compile_cmd_head, print=True))
             compile_cmd = self.compose_mlir_cmd(compile_cmd_head, False)
 
-        elif compiler_name == 'xtext':
+        elif compiler_name == "xtext":
             # the Quingo files written by the programmer
             # qgrtsys recursively scans the root directory of the project to get all quingo files.
             # however, qgrtsys will only use the files which are imported by `qg_filename`
@@ -441,27 +476,29 @@ class Runtime_system_manager():
             compile_files.extend(user_files)
             compile_files.extend(default_files)
 
-            logger.debug(self.compose_xtext_cmd(
-                compile_cmd_head, compile_files, print=True))
-            compile_cmd = self.compose_xtext_cmd(
-                compile_cmd_head, compile_files, False)
+            logger.debug(
+                self.compose_xtext_cmd(compile_cmd_head, compile_files, print=True)
+            )
+            compile_cmd = self.compose_xtext_cmd(compile_cmd_head, compile_files, False)
 
         else:
             raise ValueError("Found undefined compiler to use.")
 
-        ret_value = subprocess.run(compile_cmd,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   text=True, shell=True)
-        if ret_value.stdout != '':
+        ret_value = subprocess.run(
+            compile_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            shell=True,
+        )
+        if ret_value.stdout != "":
             logger.info(ret_value.stdout.strip())
-        if ret_value.stderr != '':
-            msg = "Error message from the compiler:\n\t{}".format(
-                ret_value.stderr)
+        if ret_value.stderr != "":
+            msg = "Error message from the compiler:\n\t{}".format(ret_value.stderr)
             quingo_err(msg)
             logger.error(msg)
 
-        if (ret_value.returncode != 0):  # failure
+        if ret_value.returncode != 0:  # failure
             return False
         else:  # success
             return True
@@ -474,15 +511,28 @@ class Runtime_system_manager():
         else:
             head = ""
             separator = ""
-            str_files = " ".join(['"{}"'.format(str(f))
-                                  for f in compile_files])
+            str_files = " ".join(['"{}"'.format(str(f)) for f in compile_files])
 
-        compile_cmd = head + quingo_compiler + ' ' + str_files + \
-            separator + ' -o "{}"'.format(str(self.qasm_file_path)) + \
-            separator + " -s " + str(self.shared_addr) + \
-            separator + " -t " + str(self.static_addr) + \
-            separator + " -d " + str(self.dynamic_addr) + \
-            separator + " -u " + str(self.max_unroll)
+        compile_cmd = (
+            head
+            + quingo_compiler
+            + " "
+            + str_files
+            + separator
+            + ' -o "{}"'.format(str(self.qasm_file_path))
+            + separator
+            + " -s "
+            + str(self.shared_addr)
+            + separator
+            + " -t "
+            + str(self.static_addr)
+            + separator
+            + " -d "
+            + str(self.dynamic_addr)
+            + separator
+            + " -u "
+            + str(self.max_unroll)
+        )
 
         return compile_cmd
 
@@ -494,8 +544,14 @@ class Runtime_system_manager():
             head = ""
             separator = ""
 
-        compile_cmd = head + quingo_compiler + ' ' + str(self.main_file_fn) + \
-            separator + ' -o "{}"'.format(self.qasm_file_path)
+        compile_cmd = (
+            head
+            + quingo_compiler
+            + " "
+            + str(self.main_file_fn)
+            + separator
+            + ' -o "{}"'.format(self.qasm_file_path)
+        )
 
         return compile_cmd
 
@@ -511,12 +567,11 @@ class Runtime_system_manager():
             qg_func_name (str) : the name of the Quingo function.
             args (list): a variable length of parameters passed to the quantum function
         """
-        qg_file_content = self.resolved_qg_filename.open('r').read()
+        qg_file_content = self.resolved_qg_filename.open("r").read()
         main_func_str = self.main_func(qg_filename, qg_func_name, *args)
 
         try:
-            self.main_file_fn.write_text(
-                qg_file_content + '\n' + main_func_str)
+            self.main_file_fn.write_text(qg_file_content + "\n" + main_func_str)
         except:
             raise IOError("Cannot write the file: ", self.main_file_fn)
 
@@ -531,8 +586,9 @@ class Runtime_system_manager():
         var_name_list = []
         arg_str_list = []
 
-        logger.debug("calling function '{}' with parameters: {}".format(
-            qg_func_name, args))
+        logger.debug(
+            "calling function '{}' with parameters: {}".format(qg_func_name, args)
+        )
 
         if len(args) != 0:
             for (i, arg) in enumerate(args):
@@ -547,28 +603,32 @@ class Runtime_system_manager():
         if len(arg_strs) > 0:
             arg_strs = "\n    " + arg_strs
 
-        if self.ret_type == 'unit':
+        if self.ret_type == "unit":
             str_ret = ""
         else:
             str_ret = "return "
 
         func_call = "    {ret}{func_name}({parameters});".format(
-            ret=str_ret, func_name=qg_func_name, parameters=str_params)
+            ret=str_ret, func_name=qg_func_name, parameters=str_params
+        )
 
         func_str = "\noperation main() : {} {{{}\n{}\n}}".format(
-            self.ret_type, arg_strs, func_call)
+            self.ret_type, arg_strs, func_call
+        )
 
         return func_str
 
     def config_execution(self, mode: str, num_shots: int = 1):
-        '''Configure the execution mode to 'one_shot' or 'state_vector'.
+        """Configure the execution mode to 'one_shot' or 'state_vector'.
         When the execution mode is 'one_shot', the number of times to run the uploaded quantum
         circuit can be configured using the parameter `num_shots` at the same time.
-        '''
+        """
 
-        if mode not in ['one_shot', 'state_vector']:
-            raise ValueError("Found unrecognized execution mode: '{}'.".format(
-                mode) + "Allowed values are: 'one_shot' or 'state_vector'.")
+        if mode not in ["one_shot", "state_vector"]:
+            raise ValueError(
+                "Found unrecognized execution mode: '{}'.".format(mode)
+                + "Allowed values are: 'one_shot' or 'state_vector'."
+            )
 
         self.mode = mode
         self.num_shots = num_shots
@@ -580,25 +640,28 @@ class Runtime_system_manager():
         Args:
             num_shots (int): The number of times to run the quantum circuit.
         """
+        print("set_num_shots: ", num_shots)
         self.num_shots = num_shots
 
     def read_result(self, start_addr):
         if self.success_on_last_execution is False:
-            quingo_warning('Last execution fails and no result is read back.')
+            quingo_warning("Last execution fails and no result is read back.")
             return None
 
         qisa_used = self.get_backend().get_qisa()
-        if qisa_used == 'eqasm':
+        if qisa_used == "eqasm":
             data_trans = dt.Data_transfer()
             data_trans.set_data_block(self.result)
             pydata = data_trans.bin_to_pydata(self.ret_type, start_addr)
-            logger.debug(
-                "The data converted from the binary is: \n{}\n".format(pydata))
+            logger.debug("The data converted from the binary is: \n{}\n".format(pydata))
             return pydata
 
-        elif qisa_used == 'qcis':
+        elif qisa_used == "qcis":
             return self.result
 
         else:
             raise ValueError(
-                "Reading result from a program with unsupported QISA: {}".format(qisa_used))
+                "Reading result from a program with unsupported QISA: {}".format(
+                    qisa_used
+                )
+            )
