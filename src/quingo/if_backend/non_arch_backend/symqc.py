@@ -72,18 +72,13 @@ class IfSymQC(If_backend):
                   }
           - num_shots (int): the number of iterations performed in `one_shot` mode.
         """
-        try:
-            print("mode: ", mode, "num_shots: ", num_shots)
-            if mode == "state_vector":  # mapping between the name of simulation modes
-                raw_res = self.sim.simulate("final_state")
-                self.res = raw_res["quantum"][1]
-            else:
-                self.res = self.sim.simulate(mode, num_shots)
-            print("self.res after simulation: ", self.res)
-            return True
-        except Exception as e:
-            quingo_err("Error in SymQC simulation: {}".format(e))
-            return False
+        if mode == "state_vector":  # mapping between the name of simulation modes
+            raw_res = self.sim.simulate("final_state")
+            self.res = raw_res["quantum"][1]
+        else:
+            self.res = self.sim.simulate(mode, num_shots)
+        print("self.res after simulation: ", self.res)
+        return True
 
     def read_result(self):
         """This function tries to read the computation result of the quantum kernel."""
