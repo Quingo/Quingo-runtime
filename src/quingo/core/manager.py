@@ -175,6 +175,7 @@ class Runtime_system_manager:
          - 'cactus_light_quantumsim'
          - 'pyqcas_quantumsim'
          - 'pyqcisim_quantumsim': QCIS architecture simulator and QuantumSim qubit state simulator.
+         - 'pyqcisim_tequila': QCIS architecture simulator and Tequila tensor simulator.
          - 'zuchongzhi' : to be connected.
         """
 
@@ -222,6 +223,7 @@ class Runtime_system_manager:
 
         self.backend.set_log_level(self.log_level)
         self.backend.set_verbose(self.verbose)
+        print("connect success")
         return True
 
     def call_quingo(self, qg_filename: str, qg_func_name: str, *args):
@@ -368,7 +370,7 @@ class Runtime_system_manager:
         if self.verbose:
             quingo_msg("Start execution with {}... ".format(backend.name()))
 
-        if backend.name().lower() in ["pyqcisim_quantumsim", "symqc"]:
+        if backend.name().lower() in ["pyqcisim_quantumsim", "pyqcisim_tequila", "symqc"]:
             return backend.execute(self.mode, self.num_shots)
         else:
             return backend.execute()

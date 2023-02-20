@@ -56,6 +56,13 @@ class Backend_hub:
             is_simulator=True,
         )
 
+        self.backends["pyqcisim_tequila"] = Backend_info(
+            "PyQCISim_tequila",
+            "pyqcisim_tequila",
+            with_timing=False,
+            is_simulator=True,
+        )
+
         self.backends["symqc"] = Backend_info(
             "IfSymQC", "symqc", with_timing=False, is_simulator=True
         )
