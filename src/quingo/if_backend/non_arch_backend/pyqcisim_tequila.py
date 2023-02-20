@@ -13,6 +13,7 @@ class PyQCISim_tequila(If_backend):
     def __init__(self, **kwargs):
         super().__init__("PyQCISim_Tequila", is_simaultor=True)
         self.sim = PyQCISim()
+        self.sim.setBackend('tequila')
         self.verbose = kwargs.pop("verbose", False)
         self.loglevel = kwargs.pop("loglevel", logging.INFO)
         logger.setLevel(self.loglevel)
