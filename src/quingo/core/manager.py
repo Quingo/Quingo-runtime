@@ -7,6 +7,7 @@ import re
 import platform
 import subprocess
 import logging
+import tempfile
 from pathlib import Path
 from .compiler_config import get_mlir_path, get_xtext_path
 from quingo.core.utils import (
@@ -180,7 +181,7 @@ class Runtime_system_manager:
         """
 
         backend_name = backend_name.lower()
-        print("connecting {}...".format(backend_name))
+        # print("connecting {}...".format(backend_name))
 
         backend_hub = Backend_hub()
         if not backend_hub.support(backend_name):
@@ -219,11 +220,11 @@ class Runtime_system_manager:
             logger.error(msg)
         else:
             msg = "successfully connected the backend: " + backend_name
-            logger.info(msg)
+            # logger.info(msg)
 
         self.backend.set_log_level(self.log_level)
         self.backend.set_verbose(self.verbose)
-        print("connect success")
+        # print("connect success")
         return True
 
     def call_quingo(self, qg_filename: str, qg_func_name: str, *args):
@@ -245,20 +246,15 @@ class Runtime_system_manager:
         """
         self.resolved_qg_filename = Path(qg_filename).resolve()
 
+        self.build_dir = Path(tempfile.mkdtemp())
+
         # ensure there is a build directory in the same directory as the source file.
         self.prj_root_dir = Path(self.resolved_qg_filename).parent
-        self.build_dir = self.prj_root_dir / gc.build_dirname
-
-        # clear the existing build directory to remove old files.
-        if self.build_dir.exists():
-            shutil.rmtree(str(self.build_dir))
-        # create a new emtpy build dir.
-        self.build_dir.mkdir()
 
         # the basename of qg_filename without extension
-        self.qg_stem = self.resolved_qg_filename.stem
+        qg_stem = self.resolved_qg_filename.stem
 
-        self.main_file_fn = (self.build_dir / ("main_" + self.qg_stem)).with_suffix(
+        self.main_file_fn = (self.build_dir / ("main_" + qg_stem)).with_suffix(
             gc.quingo_suffix
         )
 
@@ -642,7 +638,7 @@ class Runtime_system_manager:
         Args:
             num_shots (int): The number of times to run the quantum circuit.
         """
-        print("set_num_shots: ", num_shots)
+        # print("set_num_shots: ", num_shots)
         self.num_shots = num_shots
 
     def read_result(self, start_addr):
