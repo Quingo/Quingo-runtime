@@ -4,12 +4,14 @@ import quingo.global_config as gc
 import quingo.core.data_transfer as dt
 import os
 import re
+import socket
 import platform
 import subprocess
 import logging
 import tempfile
 from pathlib import Path
-from .compiler_config import get_mlir_path, get_xtext_path
+from time import sleep
+from .compiler_config import get_mlir_path, get_mlir_server_path, get_xtext_path
 from quingo.core.utils import (
     quingo_err,
     quingo_msg,
@@ -146,6 +148,20 @@ class Runtime_system_manager:
             raise ValueError("Found unsupported compiler: {}".format(compiler_name))
 
         self.compiler_name = compiler_name
+
+        # open mlir compiler server
+        if(compiler_name == "mlir"):
+            # find available port
+            tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            tcp.bind(("localhost", 0))
+            _, self.port = tcp.getsockname()
+            tcp.close()
+            
+            # start quingo compile server
+            compile_path = get_mlir_server_path()
+            sleep(0.2)
+            p = os.popen('{} {}'.format(compile_path, self.port))
+            sleep(0.2)
 
     def get_backend(self):
         return self.backend
@@ -439,48 +455,65 @@ class Runtime_system_manager:
             return False
 
         if compiler_name == "mlir":
-            logger.debug(self.compose_mlir_cmd(compile_cmd_head, print=True))
-            compile_cmd = self.compose_mlir_cmd(compile_cmd_head, False)
+            return self.compile_mlir()
 
         elif compiler_name == "xtext":
-            # the Quingo files written by the programmer
-            # qgrtsys recursively scans the root directory of the project to get all quingo files.
-            # however, qgrtsys will only use the files which are imported by `qg_filename`
-            user_files = self.get_imported_qu_fns(self.prj_root_dir)
-
-            # default files that every compilation process should process, including:
-            #   - a `stand_operations.qu` file, which contains the declaration of opaque operations
-            #   - a `config-quingo.qu/.qfg` file, which contains the implementation of the above
-            #     operations.
-            #
-            # If the project directory contains either one of these two files, qgrtsys will the
-            # existing file(s). Otherwise, qgrtsys will use the default files as delivered with qgrtsys.
-            default_files = []
-
-            fn_list = [f.name for f in user_files]
-
-            # add the file `standard_operations.qu`
-            if not gc.std_op_fn in fn_list:
-                default_files.append(gc.std_op_full_path)
-
-            # search the file `config-quingo.qfg` in the project directory
-            # if not found, use the default one.
-            if not gc.std_qfg_fn in fn_list:
-                default_files.append(gc.std_qfg_full_path)
-
-            compile_files = [self.main_file_fn]
-
-            user_files.remove(self.main_file_fn)
-            compile_files.extend(user_files)
-            compile_files.extend(default_files)
-
-            logger.debug(
-                self.compose_xtext_cmd(compile_cmd_head, compile_files, print=True)
-            )
-            compile_cmd = self.compose_xtext_cmd(compile_cmd_head, compile_files, False)
-
+            return self.compile_xtext(compile_cmd_head)
+            
         else:
             raise ValueError("Found undefined compiler to use.")
+
+    def compile_mlir(self):
+        # connect compiler
+        x = socket.socket()
+        x.connect(("localhost", self.port))
+
+        # send compile message
+        compile_message = "compile " + str(self.main_file_fn) + " -o " + str(self.qasm_file_path)
+        print(f"compile_message: {compile_message}")
+        x.send(compile_message.encode())
+
+        # receive message
+        msg = x.recv(1024).decode()
+        print("returned message: {}".format(msg))
+        return True
+
+    def compile_xtext(self, compile_cmd_head):
+        # the Quingo files written by the programmer
+        # qgrtsys recursively scans the root directory of the project to get all quingo files.
+        # however, qgrtsys will only use the files which are imported by `qg_filename`
+        user_files = self.get_imported_qu_fns(self.prj_root_dir)
+
+        # default files that every compilation process should process, including:
+        #   - a `stand_operations.qu` file, which contains the declaration of opaque operations
+        #   - a `config-quingo.qu/.qfg` file, which contains the implementation of the above
+        #     operations.
+        #
+        # If the project directory contains either one of these two files, qgrtsys will the
+        # existing file(s). Otherwise, qgrtsys will use the default files as delivered with qgrtsys.
+        default_files = []
+
+        fn_list = [f.name for f in user_files]
+
+        # add the file `standard_operations.qu`
+        if not gc.std_op_fn in fn_list:
+            default_files.append(gc.std_op_full_path)
+
+        # search the file `config-quingo.qfg` in the project directory
+        # if not found, use the default one.
+        if not gc.std_qfg_fn in fn_list:
+            default_files.append(gc.std_qfg_full_path)
+
+        compile_files = [self.main_file_fn]
+
+        user_files.remove(self.main_file_fn)
+        compile_files.extend(user_files)
+        compile_files.extend(default_files)
+
+        logger.debug(
+            self.compose_xtext_cmd(compile_cmd_head, compile_files, print=True)
+        )
+        compile_cmd = self.compose_xtext_cmd(compile_cmd_head, compile_files, False)
 
         ret_value = subprocess.run(
             compile_cmd,

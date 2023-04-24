@@ -4,6 +4,7 @@ import quingo.global_config as gc
 import distutils.spawn
 import requests
 import json
+import os
 
 
 def get_text(link):
@@ -73,6 +74,10 @@ def retrieve_compiler_path_from_file(config_file):
             return None
     return compiler_path
 
+def get_mlir_server_path():
+    quingo_path = os.path.dirname(get_mlir_path())
+    quingo_server_path = os.path.join(quingo_path, "quingocServer")
+    return quingo_server_path
 
 def get_mlir_path():
     if gc.mlir_compiler_config_path.exists():
