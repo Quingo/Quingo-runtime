@@ -71,7 +71,7 @@ class Runtime_system_manager:
               - xtext
               - mlir
         """
-        self.supported_compilers = ["xtext", "mlir"]
+        self.supported_compilers = ["xtext", "mlir", "mlir_server"]
 
         # define verbose & log_level here which will be used by backends
         self.verbose = verbose
@@ -150,7 +150,7 @@ class Runtime_system_manager:
         self.compiler_name = compiler_name
 
         # open mlir compiler server
-        if(compiler_name == "mlir"):
+        if(compiler_name == "mlir_server"):
             # find available port
             tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             tcp.bind(("localhost", 0))
@@ -407,6 +407,24 @@ class Runtime_system_manager:
     def get_compiler_cmd(self, compiler_name):
         assert compiler_name in self.supported_compilers
 
+        if compiler_name == "mlir_server":
+            quingoc_path = get_mlir_server_path()
+            if quingoc_path is None:
+                quingo_err(
+                    "Cannot find the mlir-based quingoc compiler server in the system path."
+                )
+                quingo_info(
+                    "To resolve this problem, you can install quingoc with two ways:\n"
+                    '1. run the following command "python -m quingo.install_quingoc"\n'
+                    "2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/releases and save "
+                    "it at a directory in the system path \n"
+                    "or configure its path by calling this method inside python:\n"
+                    "     `quingo.quingo_interface.set_mlir_compiler_path(<path-to-quingoc>)`"
+                )
+                return None
+            else:
+                return quingoc_path
+
         if compiler_name == "mlir":
             quingoc_path = get_mlir_path()
             if quingoc_path is None:
@@ -454,66 +472,52 @@ class Runtime_system_manager:
         if compile_cmd_head is None:  # Failure
             return False
 
+        if compiler_name == "mlir_server":
+            return self.compile_mlir_server()
+        
         if compiler_name == "mlir":
-            return self.compile_mlir()
+            logger.debug(self.compose_mlir_cmd(compile_cmd_head, print=True))
+            compile_cmd = self.compose_mlir_cmd(compile_cmd_head, False)
 
         elif compiler_name == "xtext":
-            return self.compile_xtext(compile_cmd_head)
-            
+            # the Quingo files written by the programmer
+            # qgrtsys recursively scans the root directory of the project to get all quingo files.
+            # however, qgrtsys will only use the files which are imported by `qg_filename`
+            user_files = self.get_imported_qu_fns(self.prj_root_dir)
+
+            # default files that every compilation process should process, including:
+            #   - a `stand_operations.qu` file, which contains the declaration of opaque operations
+            #   - a `config-quingo.qu/.qfg` file, which contains the implementation of the above
+            #     operations.
+            #
+            # If the project directory contains either one of these two files, qgrtsys will the
+            # existing file(s). Otherwise, qgrtsys will use the default files as delivered with qgrtsys.
+            default_files = []
+
+            fn_list = [f.name for f in user_files]
+
+            # add the file `standard_operations.qu`
+            if not gc.std_op_fn in fn_list:
+                default_files.append(gc.std_op_full_path)
+
+            # search the file `config-quingo.qfg` in the project directory
+            # if not found, use the default one.
+            if not gc.std_qfg_fn in fn_list:
+                default_files.append(gc.std_qfg_full_path)
+
+            compile_files = [self.main_file_fn]
+
+            user_files.remove(self.main_file_fn)
+            compile_files.extend(user_files)
+            compile_files.extend(default_files)
+
+            logger.debug(
+                self.compose_xtext_cmd(compile_cmd_head, compile_files, print=True)
+            )
+            compile_cmd = self.compose_xtext_cmd(compile_cmd_head, compile_files, False)
+
         else:
             raise ValueError("Found undefined compiler to use.")
-
-    def compile_mlir(self):
-        # connect compiler
-        x = socket.socket()
-        x.connect(("localhost", self.port))
-
-        # send compile message
-        compile_message = "compile " + str(self.main_file_fn) + " -o " + str(self.qasm_file_path)
-        print(f"compile_message: {compile_message}")
-        x.send(compile_message.encode())
-
-        # receive message
-        msg = x.recv(1024).decode()
-        print("returned message: {}".format(msg))
-        return True
-
-    def compile_xtext(self, compile_cmd_head):
-        # the Quingo files written by the programmer
-        # qgrtsys recursively scans the root directory of the project to get all quingo files.
-        # however, qgrtsys will only use the files which are imported by `qg_filename`
-        user_files = self.get_imported_qu_fns(self.prj_root_dir)
-
-        # default files that every compilation process should process, including:
-        #   - a `stand_operations.qu` file, which contains the declaration of opaque operations
-        #   - a `config-quingo.qu/.qfg` file, which contains the implementation of the above
-        #     operations.
-        #
-        # If the project directory contains either one of these two files, qgrtsys will the
-        # existing file(s). Otherwise, qgrtsys will use the default files as delivered with qgrtsys.
-        default_files = []
-
-        fn_list = [f.name for f in user_files]
-
-        # add the file `standard_operations.qu`
-        if not gc.std_op_fn in fn_list:
-            default_files.append(gc.std_op_full_path)
-
-        # search the file `config-quingo.qfg` in the project directory
-        # if not found, use the default one.
-        if not gc.std_qfg_fn in fn_list:
-            default_files.append(gc.std_qfg_full_path)
-
-        compile_files = [self.main_file_fn]
-
-        user_files.remove(self.main_file_fn)
-        compile_files.extend(user_files)
-        compile_files.extend(default_files)
-
-        logger.debug(
-            self.compose_xtext_cmd(compile_cmd_head, compile_files, print=True)
-        )
-        compile_cmd = self.compose_xtext_cmd(compile_cmd_head, compile_files, False)
 
         ret_value = subprocess.run(
             compile_cmd,
@@ -533,6 +537,21 @@ class Runtime_system_manager:
             return False
         else:  # success
             return True
+
+    def compile_mlir_server(self):
+        # connect compiler
+        x = socket.socket()
+        x.connect(("localhost", self.port))
+
+        # send compile message
+        compile_message = "compile " + str(self.main_file_fn) + " -o " + str(self.qasm_file_path)
+        print(f"compile_message: {compile_message}")
+        x.send(compile_message.encode())
+
+        # receive message
+        msg = x.recv(1024).decode()
+        print("returned message: {}".format(msg))
+        return True
 
     def compose_xtext_cmd(self, quingo_compiler, compile_files, print: bool = False):
         if print:

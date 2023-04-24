@@ -4,7 +4,7 @@ from pathlib import Path
 
 qi.set_verbose(True)
 qi.set_log_level(logging.DEBUG)
-qi.set_compiler("mlir")
+qi.set_compiler("mlir_server")
 
 # if qi.connect_backend("pyqcisim_quantumsim") is False:
 if qi.connect_backend("symqc") is False:
