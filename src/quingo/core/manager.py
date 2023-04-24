@@ -159,9 +159,7 @@ class Runtime_system_manager:
             
             # start quingo compile server
             compile_path = get_mlir_server_path()
-            sleep(0.2)
             p = os.popen('{} {}'.format(compile_path, self.port))
-            sleep(0.2)
 
     def get_backend(self):
         return self.backend
