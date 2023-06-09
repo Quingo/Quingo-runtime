@@ -85,12 +85,12 @@ class Runtime_system_manager:
         self.config_execution("one_shot", 1)
 
         self.compiler_name = None  # to be set
-        if kwargs.has_key("compiler_name"):
+        if "compiler_name" in kwargs:
             self.set_compiler(kwargs["compiler_name"])
 
         self.backend = None  # to be connected
         self.backend_info = None
-        if kwargs.has_key("backend"):
+        if "backend" in kwargs:
             self.set_backend(kwargs["backend"])
 
         self.set_verbose(verbose)
@@ -189,7 +189,7 @@ class Runtime_system_manager:
                 raise SystemError("Cannot connect to the default backend.")
         return self.backend
 
-    def get_backend_info_or_set_default(self)->Backend_info:
+    def get_backend_info_or_set_default(self) -> Backend_info:
         if self.backend_info is None:
             quingo_info(
                 "No backend has been set. "
@@ -334,8 +334,8 @@ class Runtime_system_manager:
             self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.eqasm_suffix)
         elif qisa_used == "qcis":
             self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.qcis_suffix)
-        elif qisa_used == "schedule":
-            self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.schedule_suffix)
+        elif qisa_used == "quantify":
+            self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.quantify_suffix)
         else:
             quingo_err("Found unsupported QISA to use: {}".format(qisa_used))
             return False
@@ -601,16 +601,14 @@ class Runtime_system_manager:
 
         # The project root directory is added to the compiler module search path.
         code = self.get_backend_info().get_qisa()
-        compile_cmd = (
-            '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" --isa={qisa} -o "{qasm_fn}"'.format(
-                header=header,
-                qgc_path=quingoc_path,
-                main_fn=str(self.main_file_fn),
-                sep=separator,
-                root_dir=self.prj_root_dir,
-                qasm_fn=self.qasm_file_path,
-                qisa = code,
-            )
+        compile_cmd = '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" --isa={qisa} -o "{qasm_fn}"'.format(
+            header=header,
+            qgc_path=quingoc_path,
+            main_fn=str(self.main_file_fn),
+            sep=separator,
+            root_dir=self.prj_root_dir,
+            qasm_fn=self.qasm_file_path,
+            qisa=code,
         )
 
         return compile_cmd

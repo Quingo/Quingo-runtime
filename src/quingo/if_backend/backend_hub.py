@@ -28,7 +28,7 @@ class Backend_info:
         return getattr(self.get_module(), self.module_name)()
 
     def get_qisa(self):
-        self.qisa
+        return self.qisa
 
 
 def singleton(cls):
@@ -68,7 +68,7 @@ class Backend_hub:
             "to be added the hardware driver",
             with_timing=True,
             is_simulator=False,
-            qisa="schedule",
+            qisa="quantify",
         )
 
     def support(self, backend_name):

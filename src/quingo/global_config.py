@@ -17,7 +17,7 @@ std_qfg_full_path = qgrtsys_root_dir / "lib" / std_qfg_fn
 quingo_suffix = ".qu"
 eqasm_suffix = ".eqasm"
 qcis_suffix = ".qcis"
-schedule_suffix = ".json"
+quantify_suffix = ".json"
 res_bin_suffix = ".bin"
 build_dirname = "build"
 
