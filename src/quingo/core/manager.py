@@ -1,5 +1,5 @@
 import shutil
-from quingo.if_backend.backend_hub import Backend_hub
+from quingo.if_backend.backend_hub import Backend_hub, Backend_info
 import quingo.global_config as gc
 import quingo.core.data_transfer as dt
 import os
@@ -69,6 +69,14 @@ class Runtime_system_manager:
               - mlir
         """
         self.supported_compilers = ["xtext", "mlir"]
+        self.supported_backend = [
+            "pyqcas_quantumsim",
+            "cactus_quantumsim",
+            "cactus_light_quantumsim",
+            "pyqcisim_quantumsim",
+            "zuchongzhi",
+            "quantify",
+        ]
 
         # define verbose & log_level here which will be used by backends
         self.verbose = verbose
@@ -77,7 +85,13 @@ class Runtime_system_manager:
         self.config_execution("one_shot", 1)
 
         self.compiler_name = None  # to be set
+        if kwargs.has_key("compiler_name"):
+            self.set_compiler(kwargs["compiler_name"])
+
         self.backend = None  # to be connected
+        self.backend_info = None
+        if kwargs.has_key("backend"):
+            self.set_backend(kwargs["backend"])
 
         self.set_verbose(verbose)
         self.set_log_level(log_level)
@@ -149,38 +163,11 @@ class Runtime_system_manager:
     def get_backend(self):
         return self.backend
 
-    def get_backend_or_connect_default(self):
-        if self.backend is None:
-            quingo_info(
-                "No backend has been connected. "
-                "Trying to connect the default PyQCAS backend..."
-            )
-            if not self.connect_backend("pyqcas_quantumsim"):
-                raise SystemError("Cannot connect to the default backend.")
-        return self.backend
+    def get_backend_info(self) -> Backend_info:
+        return self.backend_info
 
-    def get_backend_name(self):
-        """return the name of the backend that is being used.
-        An empty string will be returned if no backend has been set.
-        """
-        backend = self.get_backend()
-        if backend is None:
-            return ""
-        return "{}".format(backend.name())
-
-    def connect_backend(self, backend_name: str):
-        """This function set the backend to execute the quantum application.
-        Allowed backend includes:
-         - 'cactus_quantumsim'
-         - 'cactus_light_quantumsim'
-         - 'pyqcas_quantumsim'
-         - 'pyqcisim_quantumsim': QCIS architecture simulator and QuantumSim qubit state simulator.
-         - 'zuchongzhi' : to be connected.
-        """
-
+    def set_backend(self, backend_name: str):
         backend_name = backend_name.lower()
-        print("connecting {}...".format(backend_name))
-
         backend_hub = Backend_hub()
         if not backend_hub.support(backend_name):
             logger.error(
@@ -189,9 +176,55 @@ class Runtime_system_manager:
             )
 
             raise ValueError("Undefined backend ({})".format(backend_name))
+        self.backend_info = backend_hub.backends[backend_name]
+
+    def get_backend_or_connect_default(self):
+        if self.backend is None:
+            quingo_info(
+                "No backend has been connected. "
+                "Trying to connect the default PyQCAS backend..."
+            )
+            self.set_backend("pyqcas_quantumsim")
+            if not self.connect_backend():
+                raise SystemError("Cannot connect to the default backend.")
+        return self.backend
+
+    def get_backend_info_or_set_default(self)->Backend_info:
+        if self.backend_info is None:
+            quingo_info(
+                "No backend has been set. "
+                "Trying to set the default PyQCAS backend..."
+            )
+            self.set_backend("pyqcas_quantumsim")
+        return self.backend_info
+
+    def get_backend_name(self):
+        """return the name of the backend that is being used.
+        An empty string will be returned if no backend has been set.
+        """
+        backend = self.get_backend_info()
+        if backend is None:
+            return ""
+        return "{}".format(backend.module_name)
+
+    def connect_backend(self):
+        """This function set the backend to execute the quantum application.
+        Allowed backend includes:
+         - 'cactus_quantumsim'
+         - 'cactus_light_quantumsim'
+         - 'pyqcas_quantumsim'
+         - 'pyqcisim_quantumsim': QCIS architecture simulator and QuantumSim qubit state simulator.
+         - 'zuchongzhi' : to be connected.
+        """
+        if self.backend_info is None:
+            quingo_err("No backend has been set.")
+            raise SystemError("No backend has been set.")
+
+        backend_name = self.backend_info.module_name
+        print("connecting {}...".format(backend_name))
 
         try:
-            self.backend = backend_hub.get_instance(backend_name)
+            self.backend = self.backend_info.get_instance()
         except Exception as e:
             quingo_err(
                 "Cannot connect backend '{}' with the following error:".format(
@@ -207,16 +240,13 @@ class Runtime_system_manager:
                 "        `pip install pyqcas`\n"
                 "    or\n"
                 "        `pip install pyqcisim`\n"
+                "    or\n"
+                "        if you are using quantify backend,  the backend has not been available yet."
             )
             return False
 
-        if self.backend is None:
-            msg = "Failed to connect the backend: " + backend_name
-            quingo_err(msg)
-            logger.error(msg)
-        else:
-            msg = "successfully connected the backend: " + backend_name
-            logger.info(msg)
+        msg = "successfully connected the backend: " + backend_name
+        logger.info(msg)
 
         self.backend.set_log_level(self.log_level)
         self.backend.set_verbose(self.verbose)
@@ -229,6 +259,44 @@ class Runtime_system_manager:
         self.set_call_kernel_success(success)
 
         return success
+
+    def call_quingo_compiler(self, qg_filename: str, qg_func_name: str, *args):
+        self.set_call_kernel_success(False)
+        success = self.compile_process(qg_filename, qg_func_name, *args)
+        self.set_call_kernel_success(success)
+
+        return success
+
+    def compile_process(self, qg_filename: str, qg_func_name: str, *args):
+        if not self.config_path(qg_filename, qg_func_name):
+            return False
+
+        if self.verbose:
+            quingo_msg("Start compilation ... ", end="")
+
+        # generate the quingo file which contains the main function.
+        self.gen_main_func_file(qg_filename, qg_func_name, *args)
+
+        # compile and execute
+        if not self.compile():  # compilation failed
+            quingo_err("Compilation failed. Abort.")
+            return False
+
+        logger.debug("The compiler exited successfully.")
+
+        if not self.qasm_file_path.is_file():
+            quingo_err(
+                "Error: expected qasm file ({}) has not been generated. Aborts.".format(
+                    self.qasm_file_path
+                )
+            )
+            return False
+
+        # compilation finished successfully
+        logger.debug(
+            "The qasm file has been generated at: {}".format(self.qasm_file_path)
+        )
+        return True
 
     def config_path(self, qg_filename: str, qg_func_name: str):
         """Configure the following paths of the following files or directories:
@@ -259,12 +327,15 @@ class Runtime_system_manager:
         )
 
         qasm_fn_no_ext = self.build_dir / qg_func_name
-        backend = self.get_backend_or_connect_default()
-        qisa_used = backend.get_qisa()
+        backend_info = self.get_backend_info_or_set_default()
+
+        qisa_used = backend_info.get_qisa()
         if qisa_used == "eqasm":
             self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.eqasm_suffix)
         elif qisa_used == "qcis":
             self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.qcis_suffix)
+        elif qisa_used == "schedule":
+            self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.schedule_suffix)
         else:
             quingo_err("Found unsupported QISA to use: {}".format(qisa_used))
             return False
@@ -290,34 +361,9 @@ class Runtime_system_manager:
             args: a variable length of parameters passed to the quantum function
         """
 
-        if not self.config_path(qg_filename, qg_func_name):
-            return False
-
-        if self.verbose:
-            quingo_msg("Start compilation ... ", end="")
-
-        # generate the quingo file which contains the main function.
-        self.gen_main_func_file(qg_filename, qg_func_name, *args)
-
-        # compile and execute
-        if not self.compile():  # compilation failed
+        if not self.compile_process(qg_filename, qg_func_name, *args):
             quingo_err("Compilation failed. Abort.")
             return False
-
-        logger.debug("The compiler exited successfully.")
-
-        if not self.qasm_file_path.is_file():
-            quingo_err(
-                "Error: expected qasm file ({}) has not been generated. Aborts.".format(
-                    self.qasm_file_path
-                )
-            )
-            return False
-
-        # compilation finished successfully
-        logger.debug(
-            "The qasm file has been generated at: {}".format(self.qasm_file_path)
-        )
 
         if not self.execute():  # execute the eQASM file
             quingo_err("Execution failed. Abort.")
@@ -429,9 +475,9 @@ class Runtime_system_manager:
         if self.compiler_name is None:
             quingo_info(
                 "No Quingo compiler has been set. "
-                "Trying to use the default xtext-based Quingo compiler..."
+                "Trying to use the default mlir-based Quingo compiler..."
             )
-            self.set_compiler("xtext")
+            self.set_compiler("mlir")
 
         compiler_name = self.get_compiler()
         cmd_invoke_compiler = self.get_compiler_cmd(compiler_name)
@@ -554,14 +600,16 @@ class Runtime_system_manager:
         # )
 
         # The project root directory is added to the compiler module search path.
+        code = self.get_backend_info().get_qisa()
         compile_cmd = (
-            '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" -o "{qasm_fn}"'.format(
+            '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" --isa={qisa} -o "{qasm_fn}"'.format(
                 header=header,
                 qgc_path=quingoc_path,
                 main_fn=str(self.main_file_fn),
                 sep=separator,
                 root_dir=self.prj_root_dir,
                 qasm_fn=self.qasm_file_path,
+                qisa = code,
             )
         )
 
@@ -603,7 +651,7 @@ class Runtime_system_manager:
         )
 
         if len(args) != 0:
-            for (i, arg) in enumerate(args):
+            for i, arg in enumerate(args):
                 var_name, var_def_str = dt.conv_arg_to_qg_str(i, arg)
                 var_name_list.append(var_name)
                 arg_str_list.append(var_def_str)
