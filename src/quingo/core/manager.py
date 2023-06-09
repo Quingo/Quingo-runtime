@@ -180,13 +180,17 @@ class Runtime_system_manager:
 
     def get_backend_or_connect_default(self):
         if self.backend is None:
-            quingo_info(
-                "No backend has been connected. "
-                "Trying to connect the default PyQCAS backend..."
-            )
-            self.set_backend("pyqcas_quantumsim")
-            if not self.connect_backend():
-                raise SystemError("Cannot connect to the default backend.")
+            if self.backend_info is None:
+                quingo_info(
+                    "No backend has been connected. "
+                    "Trying to connect the default PyQCAS backend..."
+                )
+                self.set_backend("pyqcas_quantumsim")
+                if not self.connect_backend():
+                    raise SystemError("Cannot connect to the default backend.")
+            else:
+                if not self.connect_backend():
+                    raise SystemError("Cannot connect to the backend.")
         return self.backend
 
     def get_backend_info_or_set_default(self) -> Backend_info:

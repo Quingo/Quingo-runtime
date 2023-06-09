@@ -1,6 +1,4 @@
-import config.json.*
-import operations.*
-
+opaque H(q: qubit) : unit;
 operation gen_ran(): (bool, bool)  {
 
     bool res1;
@@ -17,9 +15,7 @@ operation qrng(): bool {
     bool a;
     a = false;
     using(q: qubit) {
-        init(q);
         H(q);
-        a = measure(q);
     }
     return a;
 }
