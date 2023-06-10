@@ -1,15 +1,4 @@
 opaque H(q: qubit) : unit;
-operation gen_ran(): (bool, bool)  {
-
-    bool res1;
-    bool res2;
-
-    res1 = qrng();
-    res2 = qrng();
-
-
-    return  (res1, res2);
-}
 
 operation qrng(): bool {
     bool a;
