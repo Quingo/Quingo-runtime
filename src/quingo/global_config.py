@@ -29,7 +29,7 @@ QU_INT_SIZE = 4
 QU_PTR_SIZE = 4
 QU_DOUBLE_SIZE = 4
 
-allowed_primitive_types = ["int", "bool", "double"]
+allowed_primitive_types = ["int", "bool", "double", "time"]
 allowed_python_types = [
     "int",
     "bool",
@@ -39,6 +39,7 @@ allowed_python_types = [
     "list",
     "tuple",
     "ndarray",
+    "Time",
 ]
 
 endian = "little"

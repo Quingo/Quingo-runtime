@@ -350,6 +350,11 @@ class Runtime_system_manager:
             return ""
         with self.qasm_file_path.open("r") as f:
             return f.read()
+        
+    def get_last_qasm_file(self):
+        if self.qasm_file_path is None or not self.qasm_file_path.is_file():
+            return None
+        return self.qasm_file_path
 
     def main_process(self, qg_filename: str, qg_func_name: str, *args):
         """This function is the main function of the manager, which describes the main process:

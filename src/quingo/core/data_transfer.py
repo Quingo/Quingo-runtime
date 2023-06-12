@@ -3,6 +3,7 @@ import struct
 import numpy
 
 import quingo.global_config as gc
+from quingo.core.data import Time
 from quingo.core.utils import *
 from typing import Tuple
 
@@ -24,6 +25,9 @@ def check_if_param_type(arg) -> str:
 
     if isinstance(arg, numpy.ndarray):
         arg_type = "list"
+
+    if isinstance(arg, Time):
+        arg_type = "time"
 
     return arg_type
 
