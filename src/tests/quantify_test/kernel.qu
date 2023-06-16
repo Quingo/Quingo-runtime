@@ -9,7 +9,7 @@ opaque reset(q: qubit[]) : unit;
 operation t1(num: int) : bool[] {
 timer tmr;
 bool[num] results;
-using(q: qubit[1] = {1}){
+using(q: qubit[1] = {5}){
     time intervl = 20000 ns;
     time step = 5000 ns;
     sequential(int i = 0; i < num; i += 1) {

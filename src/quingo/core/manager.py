@@ -100,6 +100,8 @@ class Runtime_system_manager:
 
         self.qasm_file_path = None  # pathlib.Path
 
+        self.qubits_info_path = None  # pathlib.Path
+
         self.data_block = ""
 
         # Set to False upon `call_quingo`.
@@ -302,6 +304,14 @@ class Runtime_system_manager:
         )
         return True
 
+    def set_qubits_info_path(self, qubits_info_path: Path):
+        self.qubits_info_path = qubits_info_path.resolve()
+        print(self.qubits_info_path)
+        if not self.qubits_info_path.exists():
+            raise FileNotFoundError(
+                "Cannot find the qubits info file: {}".format(self.qubits_info_path)
+            )
+
     def config_path(self, qg_filename: str, qg_func_name: str):
         """Configure the following paths of the following files or directories:
         - The project root direcotry (`prj_root_dir`).
@@ -350,7 +360,7 @@ class Runtime_system_manager:
             return ""
         with self.qasm_file_path.open("r") as f:
             return f.read()
-        
+
     def get_last_qasm_file(self):
         if self.qasm_file_path is None or not self.qasm_file_path.is_file():
             return None
@@ -608,9 +618,14 @@ class Runtime_system_manager:
         #     + ' -o "{}"'.format(self.qasm_file_path)
         # )
 
+        # get the qubits info path if the backend is the quantify backend.
+        qubits_info = ""
+        if self.get_backend_name() == "quantify":
+            qubits_info = "--qubits=" + str(self.qubits_info_path)
+
         # The project root directory is added to the compiler module search path.
         code = self.get_backend_info().get_qisa()
-        compile_cmd = '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" --isa={qisa} -o "{qasm_fn}"'.format(
+        compile_cmd = '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" --isa={qisa} {qubits} -o "{qasm_fn}"'.format(
             header=header,
             qgc_path=quingoc_path,
             main_fn=str(self.main_file_fn),
@@ -618,6 +633,7 @@ class Runtime_system_manager:
             root_dir=self.prj_root_dir,
             qasm_fn=self.qasm_file_path,
             qisa=code,
+            qubits=qubits_info,
         )
 
         return compile_cmd
