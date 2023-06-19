@@ -89,6 +89,7 @@ def get_mlir_path():
 
     # find the compiler executable from the system directly
     quingoc_path = distutils.spawn.find_executable('quingoc')
+    print(str(quingoc_path))
     return quingoc_path
 
 

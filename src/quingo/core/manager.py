@@ -506,7 +506,6 @@ class Runtime_system_manager:
         if compiler_name == "mlir":
             logger.debug(self.compose_mlir_cmd(cmd_invoke_compiler, print=True))
             compile_cmd = self.compose_mlir_cmd(cmd_invoke_compiler, print=False)
-
         elif compiler_name == "xtext":
             # the Quingo files written by the programmer
             # qgrtsys recursively scans the root directory of the project to get all quingo files.
@@ -621,11 +620,11 @@ class Runtime_system_manager:
         # get the qubits info path if the backend is the quantify backend.
         qubits_info = ""
         if self.get_backend_name() == "quantify":
-            qubits_info = "--qubits=" + str(self.qubits_info_path)
+            qubits_info = "--qubits=" + "\"" + str(self.qubits_info_path) + "\""
 
         # The project root directory is added to the compiler module search path.
         code = self.get_backend_info().get_qisa()
-        compile_cmd = '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" --isa={qisa} {qubits} -o "{qasm_fn}"'.format(
+        compile_cmd = '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" --isa="{qisa}" {qubits} -o "{qasm_fn}"'.format(
             header=header,
             qgc_path=quingoc_path,
             main_fn=str(self.main_file_fn),
@@ -637,7 +636,6 @@ class Runtime_system_manager:
         )
 
         return compile_cmd
-
     def gen_main_func_file(self, qg_filename: str, qg_func_name: str, *args):
         """This function generates the main function required to perform
         compilation. A new file named 'main_<qg_filename>' under the
