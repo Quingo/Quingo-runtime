@@ -7,12 +7,13 @@ from pyqcisim.simulator import PyQCISim
 logger = get_logger((__name__).split(".")[-1])
 
 
-class PyQCISim_quantumsim(If_backend):
-    """A functional QCIS simulation backend using PyQCISim and QuantumSim."""
+class PyQCISim_tequila(If_backend):
+    """A functional QCIS simulation backend using PyQCISim and Tequila."""
 
     def __init__(self, **kwargs):
-        super().__init__("PyQCISim_QuantumSim", is_simaultor=True)
+        super().__init__("PyQCISim_Tequila", is_simaultor=True)
         self.sim = PyQCISim()
+        self.sim.setBackend('tequila')
         self.verbose = kwargs.pop("verbose", False)
         self.loglevel = kwargs.pop("loglevel", logging.INFO)
         logger.setLevel(self.loglevel)
@@ -68,11 +69,7 @@ class PyQCISim_quantumsim(If_backend):
           - num_shots (int): the number of iterations performed in `one_shot` mode.
         """
         try:
-            if mode == "state_vector":  # mapping between the name of simulation modes
-                raw_res = self.sim.simulate("final_state")
-                self.res = raw_res["quantum"][1]
-            else:
-                self.res = self.sim.simulate(mode, num_shots)
+            self.res = self.sim.simulate(mode, num_shots)
             return True
         except Exception as e:
             quingo_err("Error in PyQCISim Simulation: {}".format(e))

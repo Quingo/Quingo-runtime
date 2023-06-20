@@ -7,6 +7,7 @@ import re
 import platform
 import subprocess
 import logging
+import tempfile
 from pathlib import Path
 from .compiler_config import get_mlir_path, get_xtext_path
 from quingo.core.utils import (
@@ -220,6 +221,7 @@ class Runtime_system_manager:
          - 'cactus_light_quantumsim'
          - 'pyqcas_quantumsim'
          - 'pyqcisim_quantumsim': QCIS architecture simulator and QuantumSim qubit state simulator.
+         - 'pyqcisim_tequila': QCIS architecture simulator and Tequila tensor simulator.
          - 'zuchongzhi' : to be connected.
         """
         if self.backend_info is None:
@@ -247,15 +249,21 @@ class Runtime_system_manager:
                 "    or\n"
                 "        `pip install pyqcisim`\n"
                 "    or\n"
-                "        if you are using quantify backend,  the backend has not been available yet."
+                "        `pip install symqc`\n"
             )
             return False
 
-        msg = "successfully connected the backend: " + backend_name
-        logger.info(msg)
+        if self.backend is None:
+            msg = "Failed to connect the backend: " + backend_name
+            quingo_err(msg)
+            logger.error(msg)
+        else:
+            msg = "successfully connected the backend: " + backend_name
+            # logger.info(msg)
 
         self.backend.set_log_level(self.log_level)
         self.backend.set_verbose(self.verbose)
+        # print("connect success")
         return True
 
     def call_quingo(self, qg_filename: str, qg_func_name: str, *args):
@@ -323,6 +331,8 @@ class Runtime_system_manager:
         """
         self.resolved_qg_filename = Path(qg_filename).resolve()
 
+        self.build_dir = Path(tempfile.mkdtemp())
+
         # ensure there is a build directory in the same directory as the source file.
         self.prj_root_dir = Path(self.resolved_qg_filename).parent
         self.build_dir = self.prj_root_dir / gc.build_dirname
@@ -334,9 +344,9 @@ class Runtime_system_manager:
         self.build_dir.mkdir()  # create a new emtpy build dir.
 
         # the basename of qg_filename without extension
-        self.qg_stem = self.resolved_qg_filename.stem
+        qg_stem = self.resolved_qg_filename.stem
 
-        self.main_file_fn = (self.build_dir / ("main_" + self.qg_stem)).with_suffix(
+        self.main_file_fn = (self.build_dir / ("main_" + qg_stem)).with_suffix(
             gc.quingo_suffix
         )
 
@@ -431,7 +441,7 @@ class Runtime_system_manager:
         if self.verbose:
             quingo_msg("Start execution with {}... ".format(backend.name()))
 
-        if backend.name() == "PyQCISim_QuantumSim":
+        if backend.name().lower() in ["pyqcisim_quantumsim", "pyqcisim_tequila", "symqc"]:
             return backend.execute(self.mode, self.num_shots)
         else:
             return backend.execute()
@@ -721,6 +731,7 @@ class Runtime_system_manager:
         Args:
             num_shots (int): The number of times to run the quantum circuit.
         """
+        # print("set_num_shots: ", num_shots)
         self.num_shots = num_shots
 
     def read_result(self, start_addr):

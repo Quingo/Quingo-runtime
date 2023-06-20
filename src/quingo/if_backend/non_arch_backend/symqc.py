@@ -1,18 +1,21 @@
 from pathlib import Path
+from statistics import mode
 from quingo.if_backend.if_backend import If_backend
 import quingo.global_config as gc
 from quingo.core.utils import *
-from pyqcisim.simulator import PyQCISim
+from symqc.simulator import SymQC
+
 
 logger = get_logger((__name__).split(".")[-1])
 
 
-class PyQCISim_quantumsim(If_backend):
-    """A functional QCIS simulation backend using PyQCISim and QuantumSim."""
+class IfSymQC(If_backend):
+    """A functional QCIS simulation backend based on symbolic computation."""
 
-    def __init__(self, **kwargs):
-        super().__init__("PyQCISim_QuantumSim", is_simaultor=True)
-        self.sim = PyQCISim()
+    def __init__(self, **kwargs):  # 关键字参数
+
+        super().__init__("SymQC", is_simaultor=True)
+        self.sim = SymQC()
         self.verbose = kwargs.pop("verbose", False)
         self.loglevel = kwargs.pop("loglevel", logging.INFO)
         logger.setLevel(self.loglevel)
@@ -36,22 +39,24 @@ class PyQCISim_quantumsim(If_backend):
         Upload assembly or binary program to the simulator.
 
         Args:
-            prog_fn: the name of the assembly or binary file.
+            prog_fn: the name of the assembly file.
             is_binary: True when the uploaded program is in binary format.
+                       It should be False.
         """
         assert not is_binary
 
         if not isinstance(prog_fn, Path):
             prog_fn = Path(prog_fn)
 
-        f = prog_fn.open("r").read()
+        if not prog_fn.exists():
+            quingo_err("Cannot find the assembly file: {}".format(prog_fn))
+            return False
+
         try:
-            self.sim.compile(f)
+            self.sim.compile_file(prog_fn)
             return True
         except Exception as e:
-            quingo_err(
-                "Error in the QCIS program compiling process of PyQCISim: {}".format(e)
-            )
+            quingo_err("Error in compiling the QCIS program using SymQC: {}".format(e))
             return False
 
     def execute(self, mode="one_shot", num_shots=1):
@@ -67,16 +72,13 @@ class PyQCISim_quantumsim(If_backend):
                   }
           - num_shots (int): the number of iterations performed in `one_shot` mode.
         """
-        try:
-            if mode == "state_vector":  # mapping between the name of simulation modes
-                raw_res = self.sim.simulate("final_state")
-                self.res = raw_res["quantum"][1]
-            else:
-                self.res = self.sim.simulate(mode, num_shots)
-            return True
-        except Exception as e:
-            quingo_err("Error in PyQCISim Simulation: {}".format(e))
-            return False
+        if mode == "state_vector":  # mapping between the name of simulation modes
+            raw_res = self.sim.simulate("final_state")
+            self.res = raw_res["quantum"][1]
+        else:
+            self.res = self.sim.simulate(mode, num_shots)
+        # print("self.res after simulation: ", self.res)  
+        return True
 
     def read_result(self):
         """This function tries to read the computation result of the quantum kernel."""

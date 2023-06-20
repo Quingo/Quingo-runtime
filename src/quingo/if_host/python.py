@@ -30,6 +30,7 @@ class Quingo_interface:
          - 'cactus_light_quantumsim'
          - 'pyqcas_quantumsim'
          - 'pyqcisim_quantumsim': QCIS architecture simulator and QuantumSim qubit state simulator.
+         - 'pyqcisim_tequila': QCIS architecture simulator and Tequila tensor simulator.
          - 'zuchongzhi' : to be connected.
         """
         return self.rsm.connect_backend(backend)

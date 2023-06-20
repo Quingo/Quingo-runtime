@@ -71,6 +71,22 @@ class Backend_hub:
             qisa="quantify",
         )
 
+        self.backends["pyqcisim_tequila"] = Backend_info(
+            "PyQCISim_tequila",
+            "pyqcisim_tequila",
+            with_timing=False,
+            is_simulator=True,
+            qisa="qcis",
+        )
+
+        self.backends["symqc"] = Backend_info(
+            "IfSymQC",
+            "symqc",
+            with_timing=False,
+            is_simulator=True,
+            qisa="qcis",
+        )
+
     def support(self, backend_name):
         return backend_name in self.backends
 
