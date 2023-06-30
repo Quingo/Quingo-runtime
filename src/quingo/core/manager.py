@@ -366,7 +366,7 @@ class Runtime_system_manager:
         if self.verbose:
             quingo_msg("Start execution with {}... ".format(backend.name()))
 
-        if backend.name().lower() in ["pyqcisim_quantumsim", "pyqcisim_tequila", "symqc"]:
+        if backend.name().lower() in ["pyqcisim_quantumsim", "pyqcisim_tequila", "symqc", "zuchongzhi"]:
             return backend.execute(self.mode, self.num_shots)
         else:
             return backend.execute()
