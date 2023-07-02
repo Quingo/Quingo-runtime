@@ -4,6 +4,7 @@ import quingo.global_config as gc
 from quingo.core.utils import *
 import time
 import uuid
+import os
 import ezQpy
 
 logger = get_logger((__name__).split(".")[-1])
@@ -49,7 +50,9 @@ class Zuchongzhi(If_backend):
             prog_fn = Path(prog_fn)
 
         qcis_circuit = prog_fn.open("r").read()
+        logger.info("circuit before mapping{}{}".format(os.linesep, qcis_circuit))
         qcis_circuit = map_qubit(qcis_circuit)
+        logger.info("circuit after mapping{}{}".format(os.linesep, qcis_circuit))
         '''
         qcis_circuit = self.account.assign_parameters(
             circuit=qcis_circuit,
@@ -111,7 +114,6 @@ class Zuchongzhi(If_backend):
             self.lab_id = lab_id
 
 def map_qubit(qcis):
-    qcis_list = qcis.split()
     qubit_map = {
         "Q1": "Q3",
         "Q2": "Q10",
@@ -126,10 +128,8 @@ def map_qubit(qcis):
         "Q11": "Q33",
         "Q12": "Q38"
     }
-    for i, s in enumerate(qcis_list):
-        if s in qubit_map.keys():
-            qcis_list[i] = qubit_map[s]
-        else:
-            qcis_list[i] = "\n" + s
-    qcis_mapped = " ".join(qcis_list)
-    return qcis_mapped
+    def map_line(line):
+        substrs = line.split()
+        substrs[1] = qubit_map.get(substrs[1], substrs[1])
+        return ' '.join(substrs)
+    return os.linesep.join(map_line(line) for line in qcis.strip().split(os.linesep))
