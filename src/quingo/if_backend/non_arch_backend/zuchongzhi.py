@@ -116,7 +116,7 @@ class Zuchongzhi(If_backend):
 def map_qubit(qcis):
     qubit_map = {
         "Q1": "Q3",
-        "Q2": "Q10",
+        "Q2": "Q9",
         "Q3": "Q46",
         "Q4": "Q52",
         "Q5": "Q34",
@@ -128,8 +128,5 @@ def map_qubit(qcis):
         "Q11": "Q33",
         "Q12": "Q38"
     }
-    def map_line(line):
-        substrs = line.split()
-        substrs[1] = qubit_map.get(substrs[1], substrs[1])
-        return ' '.join(substrs)
+    map_line = lambda line: ' '.join(qubit_map.get(s, s) for s in line.split())
     return os.linesep.join(map_line(line) for line in qcis.strip().split(os.linesep))
