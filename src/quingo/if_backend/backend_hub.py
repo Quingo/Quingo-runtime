@@ -87,6 +87,14 @@ class Backend_hub:
             qisa="qcis",
         )
 
+        self.backends["dqcsim-tequila"] = Backend_info(
+            "IfDQCsim",
+            "dqcsim_tequila",
+            with_timing=False,
+            is_simulator=True,
+            qisa="quiet-s",
+        )
+
     def support(self, backend_name):
         return backend_name in self.backends
 
