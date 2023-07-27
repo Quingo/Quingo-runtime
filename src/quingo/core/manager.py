@@ -441,34 +441,29 @@ class Runtime_system_manager:
 
         return valid_file_list
 
-    def get_compiler_cmd(self):
-        quingoc_path = get_mlir_path()
-        if quingoc_path is None:
-            quingo_err(
-                "Cannot find the mlir-based quingoc compiler in the system path."
-            )
-            quingo_info(
-                "To resolve this problem, you can install quingoc with two ways:\n"
-                '1. run the following command "python -m quingo.install_quingoc"\n'
-                "2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/releases and save "
-                "it at a directory in the system path \n"
-                "or configure its path by calling this method inside python:\n"
-                "     `quingo.set_mlir_compiler_path(<path-to-quingoc>)`"
-            )
-            return None
-        else:
-            return '"{}"'.format(quingoc_path)
-
     def compile(self):
         """Compiles the quingo files and generate corresponding quantum assembly code.
         Both the compiler and backend are selected based on the configuration.
         """
-        cmd_invoke_compiler = self.get_compiler_cmd()
-        if cmd_invoke_compiler is None:  # Failure
-            return False
+        quingoc_path = get_mlir_path()
+        if quingoc_path is None:
+            quingo_info(
+                "Cannot find the compiler.\n"
+                "  To resolve this problem, you can install quingoc with two ways:\n"
+                '  1. run the following command "python -m quingo.install_quingoc"\n'
+                "  2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/"
+                "releases and save it at a directory in the system path \n"
+                "or configure its path by calling this method inside python:\n"
+                "     `quingo.set_mlir_compiler_path(<path-to-quingoc>)`"
+            )
+            raise RuntimeError(
+                "Cannot find the mlir-based quingoc compiler in the system path."
+            )
 
-        logger.debug(self.compose_mlir_cmd(cmd_invoke_compiler, print=True))
-        compile_cmd = self.compose_mlir_cmd(cmd_invoke_compiler, print=False)
+        quingoc_path = '"{}"'.format(quingoc_path)
+
+        logger.debug(self.compose_mlir_cmd(quingoc_path, print=True))
+        compile_cmd = self.compose_mlir_cmd(quingoc_path, print=False)
 
         ret_value = subprocess.run(
             compile_cmd,
