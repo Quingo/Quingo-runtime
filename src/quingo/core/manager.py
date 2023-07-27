@@ -188,11 +188,11 @@ class Runtime_system_manager:
                     "No backend has been connected. "
                     "Trying to connect the default PyQCAS backend..."
                 )
-                self.set_backend("pyqcas_quantumsim")
-                if not self.connect_backend():
+                # connect to the defacult backend pyqcas_quantumsim
+                if not self.connect_backend("pyqcas_quantumsim"):
                     raise SystemError("Cannot connect to the default backend.")
             else:
-                if not self.connect_backend():
+                if not self.connect_backend(self.get_backend_name()):
                     raise SystemError("Cannot connect to the backend.")
         return self.backend
 
@@ -214,7 +214,7 @@ class Runtime_system_manager:
             return ""
         return "{}".format(backend.module_name)
 
-    def connect_backend(self):
+    def connect_backend(self, backend_name: str):
         """This function set the backend to execute the quantum application.
         Allowed backend includes:
          - 'cactus_quantumsim'
@@ -224,6 +224,7 @@ class Runtime_system_manager:
          - 'pyqcisim_tequila': QCIS architecture simulator and Tequila tensor simulator.
          - 'zuchongzhi' : to be connected.
         """
+        self.set_backend(backend_name)
         if self.backend_info is None:
             quingo_err("No backend has been set.")
             raise SystemError("No backend has been set.")
@@ -441,7 +442,11 @@ class Runtime_system_manager:
         if self.verbose:
             quingo_msg("Start execution with {}... ".format(backend.name()))
 
-        if backend.name().lower() in ["pyqcisim_quantumsim", "pyqcisim_tequila", "symqc"]:
+        if backend.name().lower() in [
+            "pyqcisim_quantumsim",
+            "pyqcisim_tequila",
+            "symqc",
+        ]:
             return backend.execute(self.mode, self.num_shots)
         else:
             return backend.execute()
@@ -630,7 +635,7 @@ class Runtime_system_manager:
         # get the qubits info path if the backend is the quantify backend.
         qubits_info = ""
         if self.get_backend_name() == "quantify":
-            qubits_info = "--qubits=" + "\"" + str(self.qubits_info_path) + "\""
+            qubits_info = "--qubits=" + '"' + str(self.qubits_info_path) + '"'
 
         # The project root directory is added to the compiler module search path.
         code = self.get_backend_info().get_qisa()
@@ -646,6 +651,7 @@ class Runtime_system_manager:
         )
 
         return compile_cmd
+
     def gen_main_func_file(self, qg_filename: str, qg_func_name: str, *args):
         """This function generates the main function required to perform
         compilation. A new file named 'main_<qg_filename>' under the
