@@ -1,36 +1,21 @@
 // quantum ripple-carry adder from Cuccaro et al, quant-ph/0410184
-opaque X(q: qubit) : unit;
-opaque Y2P(q: qubit) : unit;
-opaque Y2M(q: qubit) : unit;
-opaque H(q: qubit) : unit;
-opaque T(q: qubit) : unit;
-opaque TD(q: qubit) : unit;
-opaque S(q: qubit) : unit;
-
-opaque CZ(q1: qubit, q2: qubit) : unit;
-opaque measure(q: qubit): bool;
-
-operation CNOT(a: qubit, b: qubit) : unit {
-    Y2M(b);
-    CZ(a, b);
-    Y2P(b);
-}
+import std_ops
 
 operation CCNOT(a: qubit, b: qubit, c: qubit) : unit {
     H(c);
     CNOT(b, c);
-    TD(c);
+    Tdag(c);
     CNOT(a, c);
     T(c);
     CNOT(b, c);
-    TD(c);
+    Tdag(c);
     CNOT(a, c);
     T(b);
     T(c);
     H(c);
     CNOT(a, b);
     T(a);
-    TD(b);
+    Tdag(b);
     CNOT(a, b);
 }
 
@@ -69,13 +54,13 @@ operation ripple_adder(num_qubits: int, In_a: int[], In_b: int[]) : unit {
             unmaj(a[i-1], b[i], a[i]);
         }
         unmaj(cin, b[0], a[0]);
-        
+
         for(int j = 0; j < num_qubits; j += 1){
             measure(b[j]);
         }
-    
+
         measure(cout);
-        
+
     }
 }
 

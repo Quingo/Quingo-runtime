@@ -1,15 +1,4 @@
-opaque Y2P(q: qubit) : unit;
-opaque Y2M(q: qubit) : unit;
-opaque H(q: qubit) : unit;
-
-opaque CZ(q1: qubit, q2: qubit) : unit;
-opaque measure(q: qubit): bool;
-
-operation CNOT(q1: qubit, q2: qubit) : unit {
-    Y2M(q2);
-    CZ(q1, q2);
-    Y2P(q2);
-}
+import std_ops
 
 
 operation ghz(num_qubits: int) : unit {

@@ -33,7 +33,10 @@ class Quingo_interface:
          - 'pyqcisim_tequila': QCIS architecture simulator and Tequila tensor simulator.
          - 'zuchongzhi' : to be connected.
         """
-        return self.rsm.connect_backend(backend)
+        try:
+            self.rsm.connect_backend(backend)
+        except:
+            raise RuntimeError("Failed to connect to backend {}".format(backend))
 
     def get_backend_name(self):
         """return the name of the backend that is being used.
@@ -84,7 +87,14 @@ class Quingo_interface:
             qg_func_name (str) : the name of the quantum function
             args (dict): a variable length of parameters passed to the quantum function
         """
-        return self.rsm.call_quingo(qg_filename, qg_func_name, *args)
+        try:
+            self.rsm.call_quingo(qg_filename, qg_func_name, *args)
+        except:
+            raise RuntimeError(
+                "Failed to call quantum kernel {} in {}".format(
+                    qg_func_name, qg_filename
+                )
+            )
 
     def call_quingo_compiler(self, qg_filename, qg_func_name, *args):
         """This function provides a method in Python to call quantum kernels

@@ -1,4 +1,4 @@
-import std_qcis
+import std_ops
 
 operation state_preparation(q1: qubit, q2: qubit): unit{
     H(q1);

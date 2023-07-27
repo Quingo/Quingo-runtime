@@ -1,10 +1,4 @@
-import std_qcis
-
-operation CNOT(q1: qubit, q2: qubit): unit{
-    H(q2);
-    CZ(q1, q2);
-    H(q2);
-}
+import std_ops
 
 operation bell_state(q1: qubit, q2: qubit): unit{
     H(q1);

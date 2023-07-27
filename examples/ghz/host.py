@@ -16,4 +16,4 @@ def routine(circ_name, num_shots=1, num_qubits=1):
     print(qi.read_result())
 
 
-routine("ghz", 5, 2)
+routine("ghz", 5, 4)
