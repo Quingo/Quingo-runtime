@@ -73,9 +73,9 @@ class IfDQCsim(If_backend):
                   }
           - num_shots (int): the number of iterations performed in `one_shot` mode.
         """
-        self.sim.start()
-        self.res = self.sim.recv()
-        self.sim.wait()
+        with self.sim as simulation:
+            simulation.run()
+            self.res = self.sim.recv()
         return True
 
     def read_result(self):
