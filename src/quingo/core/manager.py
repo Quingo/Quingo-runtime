@@ -9,7 +9,7 @@ import subprocess
 import logging
 import tempfile
 from pathlib import Path
-from .compiler_config import get_mlir_path, get_xtext_path
+from .compiler_config import get_mlir_path
 from quingo.core.utils import (
     quingo_err,
     quingo_msg,
@@ -65,11 +65,7 @@ class Runtime_system_manager:
               - logging.INFO
               - logging.WARNING
               - logging.ERROR
-            compiler (string, optional): which compiler to use. Default to xtext. Allowed values:
-              - xtext
-              - mlir
         """
-        self.supported_compilers = ["xtext", "mlir"]
         self.supported_backend = [
             "pyqcas_quantumsim",
             "cactus_quantumsim",
@@ -84,10 +80,6 @@ class Runtime_system_manager:
         self.log_level = log_level
 
         self.config_execution("one_shot", 1)
-
-        self.compiler_name = None  # to be set
-        if "compiler_name" in kwargs:
-            self.set_compiler(kwargs["compiler_name"])
 
         self.backend = None  # to be connected
         self.backend_info = None
@@ -142,26 +134,6 @@ class Runtime_system_manager:
         backend = self.get_backend()
         if backend is not None:
             backend.set_verbose(v)
-
-    def get_compiler(self):
-        """Get the name of the compiler that has been set.
-        If not compiler has been set, return None.
-        """
-        return self.compiler_name
-
-    def set_compiler(self, compiler_name):
-        """Set the compiler used to compiler the quingo program.
-
-        Args:
-            compiler_name (string): the name of the compiler to use. Default to 'xtext'.
-            Allowed values:
-              - xtext
-              - mlir
-        """
-        if compiler_name not in self.supported_compilers:
-            raise ValueError("Found unsupported compiler: {}".format(compiler_name))
-
-        self.compiler_name = compiler_name
 
     def get_backend(self):
         return self.backend
@@ -446,7 +418,7 @@ class Runtime_system_manager:
             "pyqcisim_quantumsim",
             "pyqcisim_tequila",
             "symqc",
-            "zuchongzhi"
+            "zuchongzhi",
         ]:
             return backend.execute(self.mode, self.num_shots)
         else:
@@ -469,100 +441,34 @@ class Runtime_system_manager:
 
         return valid_file_list
 
-    def get_compiler_cmd(self, compiler_name):
-        assert compiler_name in self.supported_compilers
-
-        if compiler_name == "mlir":
-            quingoc_path = get_mlir_path()
-            if quingoc_path is None:
-                quingo_err(
-                    "Cannot find the mlir-based quingoc compiler in the system path."
-                )
-                quingo_info(
-                    "To resolve this problem, you can install quingoc with two ways:\n"
-                    '1. run the following command "python -m quingo.install_quingoc"\n'
-                    "2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/releases and save "
-                    "it at a directory in the system path \n"
-                    "or configure its path by calling this method inside python:\n"
-                    "     `quingo.set_mlir_compiler_path(<path-to-quingoc>)`"
-                )
-                return None
-            else:
-                return '"{}"'.format(quingoc_path)
-
-        if compiler_name == "xtext":
-            xtext_path = get_xtext_path()
-            if xtext_path is None:
-                quingo_err("Cannot find the Xtext-based Quingo compiler.")
-                quingo_info(
-                    "To resolve this issue, please download the quingo.jar from "
-                    "https://github.com/Quingo/compiler_xtext/releases "
-                    "and configure its path by calling this method inside python:\n"
-                    "     `quingo.set_xtext_compiler_path(<path-to-quingo.jar>)`"
-                )
-                return None
-            return 'java -jar "{}"'.format(xtext_path)
+    def get_compiler_cmd(self):
+        quingoc_path = get_mlir_path()
+        if quingoc_path is None:
+            quingo_err(
+                "Cannot find the mlir-based quingoc compiler in the system path."
+            )
+            quingo_info(
+                "To resolve this problem, you can install quingoc with two ways:\n"
+                '1. run the following command "python -m quingo.install_quingoc"\n'
+                "2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/releases and save "
+                "it at a directory in the system path \n"
+                "or configure its path by calling this method inside python:\n"
+                "     `quingo.set_mlir_compiler_path(<path-to-quingoc>)`"
+            )
+            return None
+        else:
+            return '"{}"'.format(quingoc_path)
 
     def compile(self):
         """Compiles the quingo files and generate corresponding quantum assembly code.
         Both the compiler and backend are selected based on the configuration.
         """
-        if self.compiler_name is None:
-            quingo_info(
-                "No Quingo compiler has been set. "
-                "Trying to use the default mlir-based Quingo compiler..."
-            )
-            self.set_compiler("mlir")
-
-        compiler_name = self.get_compiler()
-        cmd_invoke_compiler = self.get_compiler_cmd(compiler_name)
+        cmd_invoke_compiler = self.get_compiler_cmd()
         if cmd_invoke_compiler is None:  # Failure
             return False
 
-        if compiler_name == "mlir":
-            logger.debug(self.compose_mlir_cmd(cmd_invoke_compiler, print=True))
-            compile_cmd = self.compose_mlir_cmd(cmd_invoke_compiler, print=False)
-        elif compiler_name == "xtext":
-            # the Quingo files written by the programmer
-            # qgrtsys recursively scans the root directory of the project to get all quingo files.
-            # however, qgrtsys will only use the files which are imported by `qg_filename`
-            user_files = self.get_imported_qu_fns(self.prj_root_dir)
-
-            # default files that every compilation process should process, including:
-            #   - a `stand_operations.qu` file, which contains the declaration of opaque operations
-            #   - a `config-quingo.qu/.qfg` file, which contains the implementation of the above
-            #     operations.
-            #
-            # If the project directory contains either one of these two files, qgrtsys will the
-            # existing file(s). Otherwise, qgrtsys will use the default files as delivered with qgrtsys.
-            default_files = []
-
-            fn_list = [f.name for f in user_files]
-
-            # add the file `standard_operations.qu`
-            if not gc.std_op_fn in fn_list:
-                default_files.append(gc.std_op_full_path)
-
-            # search the file `config-quingo.qfg` in the project directory
-            # if not found, use the default one.
-            if not gc.std_qfg_fn in fn_list:
-                default_files.append(gc.std_qfg_full_path)
-
-            compile_files = [self.main_file_fn]
-
-            user_files.remove(self.main_file_fn)
-            compile_files.extend(user_files)
-            compile_files.extend(default_files)
-
-            logger.debug(
-                self.compose_xtext_cmd(cmd_invoke_compiler, compile_files, print=True)
-            )
-            compile_cmd = self.compose_xtext_cmd(
-                cmd_invoke_compiler, compile_files, False
-            )
-
-        else:
-            raise ValueError("Found undefined compiler to use.")
+        logger.debug(self.compose_mlir_cmd(cmd_invoke_compiler, print=True))
+        compile_cmd = self.compose_mlir_cmd(cmd_invoke_compiler, print=False)
 
         ret_value = subprocess.run(
             compile_cmd,
@@ -582,39 +488,6 @@ class Runtime_system_manager:
             return False
         else:  # success
             return True
-
-    def compose_xtext_cmd(self, quingo_compiler, compile_files, print: bool = False):
-        if print:
-            head = "\n"
-            separator = "\n\t "
-            str_files = "<imported files>"
-        else:
-            head = ""
-            separator = ""
-            str_files = " ".join(['"{}"'.format(str(f)) for f in compile_files])
-
-        compile_cmd = (
-            head
-            + quingo_compiler
-            + " "
-            + str_files
-            + separator
-            + ' -o "{}"'.format(str(self.qasm_file_path))
-            + separator
-            + " -s "
-            + str(self.shared_addr)
-            + separator
-            + " -t "
-            + str(self.static_addr)
-            + separator
-            + " -d "
-            + str(self.dynamic_addr)
-            + separator
-            + " -u "
-            + str(self.max_unroll)
-        )
-
-        return compile_cmd
 
     def compose_mlir_cmd(self, quingoc_path, print: bool = False):
         if print:

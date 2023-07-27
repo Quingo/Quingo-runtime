@@ -41,17 +41,6 @@ class Quingo_interface:
         """
         return self.rsm.get_backend_name()
 
-    def set_compiler(self, compiler_name):
-        """Set the compiler used to compiler the quingo program.
-
-        Args:
-            compiler_name (string): the name of the compiler to use. Default to 'xtext'.
-            Allowed values:
-              - xtext
-              - mlir
-        """
-        self.rsm.set_compiler(compiler_name)
-
     def config_qubits_info(self, qubits_info: Path):
         """Configure the qubits information for the backend.
 

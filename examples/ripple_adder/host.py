@@ -2,9 +2,6 @@ import logging
 from quingo import quingo_interface as qi
 from pathlib import Path
 
-# qi.set_verbose(True)
-# qi.set_log_level(logging.DEBUG)
-qi.set_compiler('mlir')
 
 if qi.connect_backend('pyqcisim_quantumsim') is False:
     exit(-1)

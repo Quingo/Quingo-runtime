@@ -7,9 +7,6 @@ from scipy.optimize import minimize_scalar
 from numpy import *
 import numpy as np
 
-# qi.set_verbose(True)
-# qi.set_log_level(logging.DEBUG)
-qi.set_compiler('mlir')
 qi.config_execution("state_vector")
 
 if qi.connect_backend('pyqcisim_quantumsim') is False:

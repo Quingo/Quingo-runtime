@@ -15,13 +15,6 @@ pip install quingo
 
 ### 安装青果编译器
 
-目前的青果编译器有两个版本：
-
-1. 基于`mlir`的青果编译器，该编译器可以生成能够被PyQCISim模拟器模拟的QCIS指令。
-2. 基于`xtext`的青果编译器，该编译器可以生成能够被PyQCAS模拟器模拟的eQASM指令。
-
-#### 安装基于`mlir`的青果编译器
-
 Quingo提供两种方式安装基于`mlir`的青果编译器
 
 + 执行以下命令便可自动下载安装基于`mlir`的青果编译器：
@@ -37,18 +30,6 @@ Quingo提供两种方式安装基于`mlir`的青果编译器
   ```
   + Macos:解压dmg压缩包，将Quingoc可执行文件拷贝到用户指定的目录下，并添加该目录加入到系统环境变量PATH中
 
-
-
-#### 安装基于`xtext`的青果编译器
-
-目前，基于`xtext`的青果编译器还未实现自动下载，故用户需要单独下载[java二进制文件](https://github.com/Quingo/compiler_xtext/releases)来获取青果编译器。
-
-下载二进制文件后，需使用以下命令来指定编译器的路径：
-```python
-import quingo
-# xtext编译器
-quingo.set_xtext_compiler_path(<path-to-quingo.jar>)
-```
 
 ## 使用
 一个简单的例子可以在目录`src/examples`中找到。您可以通过执行以下命令简单地运行`Bell_state`示例：
@@ -69,7 +50,6 @@ The result of bell_state is:
  - `set_log_level(<log_level>)`: 该方法中`<log_level>`的值可以是`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`中的任意一个。
  - `connect_backend(<backend>)`: 该方法中`<backend>`的值目前可以是`'pyqcas_quantumsim'`或者`'pyqcisim_quantumsim'`。
 - `get_backend_name()`方法返回正在使用的后端名称。如果没有设置后端，将返回一个空字符串。
-- `set_compiler(<compiler_name>)`: `<compiler_name>`中的值可以是`'mlir'` 或者`'xtext'`。
 - `get_last_qasm()`用来获取上次执行生成的qasm指令代码。
 - `config_execution(<mode>, <num_shots>)`:
   -  `config_execution`能够将执行模式配置为`'one_shot'`或`'state_vector'`.
