@@ -446,6 +446,7 @@ class Runtime_system_manager:
             "pyqcisim_quantumsim",
             "pyqcisim_tequila",
             "symqc",
+            "zuchongzhi"
         ]:
             return backend.execute(self.mode, self.num_shots)
         else:

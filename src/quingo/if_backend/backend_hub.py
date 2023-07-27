@@ -87,6 +87,12 @@ class Backend_hub:
             qisa="qcis",
         )
 
+        self.backends["zuchongzhi"] = Backend_info(
+            "Zuchongzhi", "zuchongzhi",
+            with_timing=False,
+            is_simulator=False
+        )
+
     def support(self, backend_name):
         return backend_name in self.backends
 
