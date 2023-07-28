@@ -15,7 +15,7 @@ class IfDQCsim(If_backend):
 
     def __init__(self, **kwargs):  # 关键字参数
         super().__init__("DQCsim_Tequila", is_simaultor=True)
-        self.sim = Simulator().with_backend("tequila")
+        self.sim = Simulator(stderr_verbosity=Loglevel.INFO).with_backend("tequila")
         self.verbose = kwargs.pop("verbose", False)
         self.loglevel = kwargs.pop("loglevel", logging.INFO)
         logger.setLevel(self.loglevel)
