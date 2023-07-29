@@ -67,7 +67,7 @@ class Backend_hub:
         The module is imported here because the backend module may not be installed.
         We only import the module when it is needed.
         """
-        prefix = "quingo.if_backend.non_arch_backend."
+        prefix = "quingo.backend."
         full_module_path = prefix + module_path
         module = importlib.import_module(full_module_path)
         return module
