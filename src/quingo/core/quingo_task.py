@@ -2,8 +2,9 @@ from pathlib import Path
 import shutil
 import quingo.global_config as gc
 import tempfile
-from quingo.if_backend.backend_hub import QuBackends
-from quingo.if_backend.qisa import Qisa
+from quingo.backend.backend_hub import BackendType
+from quingo.backend.qisa import Qisa
+from quingo.core.utils import ensure_path
 
 DEBUG_MODE = False
 
@@ -15,7 +16,7 @@ def create_empty_dir(dir_path: Path):
 
 
 class Quingo_task:
-    def __init__(self, called_qu_fn: [Path | str], called_func: str, **kwargs) -> None:
+    def __init__(self, called_qu_fn: Path, called_func: str, **kwargs) -> None:
         """
         Define a quingo task by specifying the quingo file and the entry function.
 
@@ -39,8 +40,7 @@ class Quingo_task:
         risk of inconsistency when using this object.
         """
         # file name and function name
-        if isinstance(called_qu_fn, str):
-            called_qu_fn = Path(called_qu_fn)
+        called_qu_fn = ensure_path(called_qu_fn)
         self._called_qu_fn = called_qu_fn
         self._called_func = called_func
         self._build_dir = None
@@ -49,10 +49,10 @@ class Quingo_task:
         self.debug_mode = kwargs.get("debug_mode", False)
         # qisa and backend
         self._qisa = kwargs.get("qisa", None)
-        self._backend = kwargs.get("backend", QuBackends.QUANTUM_SIM)
+        self._backend = kwargs.get("backend", BackendType.QUANTUM_SIM)
 
     @property
-    def qubits_info(self) -> Path | None:
+    def qubits_info(self):
         """The path of the qubits information file."""
         return self._qubits_info
 
@@ -103,14 +103,14 @@ class Quingo_task:
             return self._qisa
 
         if self._backend in [
-            QuBackends.QUANTUM_SIM,
-            QuBackends.SYMQC,
-            QuBackends.ZUCHONGZHI,
-            QuBackends.TEUQILA,
+            BackendType.QUANTUM_SIM,
+            BackendType.SYMQC,
+            BackendType.ZUCHONGZHI,
+            BackendType.TEUQILA,
         ]:
             return Qisa.QCIS
 
-        if self._backend in [QuBackends.QUANTIFY]:
+        if self._backend in [BackendType.QUANTIFY]:
             return Qisa.Quantify
 
         raise ValueError(f"Found unknown backend {self._backend}")

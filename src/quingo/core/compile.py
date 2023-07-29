@@ -1,18 +1,10 @@
-import subprocess
-from quingo.core.quingo_task import Quingo_task
+import subprocess, logging
 from pathlib import Path
 from .compiler_config import get_mlir_path
-from quingo.core.utils import quingo_err, get_logger
-import logging
-from quingo.if_backend.qisa import *
+from quingo.core.quingo_task import Quingo_task
 from quingo.core.preparation import gen_main_file
-
-
-def ensure_path(fn) -> Path:
-    assert isinstance(fn, (str, Path))
-    if isinstance(fn, str):
-        fn = Path(fn).resolve()
-    return fn
+from quingo.core.utils import quingo_err, get_logger, ensure_path
+from quingo.backend.qisa import *
 
 
 logger = get_logger((__name__).split(".")[-1])

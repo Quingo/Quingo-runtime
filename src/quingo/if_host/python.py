@@ -38,12 +38,6 @@ class Quingo_interface:
         except:
             raise RuntimeError("Failed to connect to backend {}".format(backend))
 
-    def get_backend_name(self):
-        """return the name of the backend that is being used.
-        An empty string will be returned if no backend has been set.
-        """
-        return self.rsm.get_backend_name()
-
     def config_qubits_info(self, qubits_info: Path):
         """Configure the qubits information for the backend.
 
@@ -109,4 +103,4 @@ class Quingo_interface:
         return self.rsm.read_result(start_addr)
 
 
-quingo_interface = Quingo_interface()
+# quingo_interface = Quingo_interface()

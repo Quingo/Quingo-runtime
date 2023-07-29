@@ -1,10 +1,10 @@
 from pathlib import Path
-from quingo.if_backend.if_backend import If_backend
+from quingo.backend.if_backend import If_backend
 import quingo.global_config as gc
 from quingo.core.utils import *
 from pyqcas.quantum_coprocessor import Quantum_coprocessor
 
-logger = get_logger((__name__).split('.')[-1])
+logger = get_logger((__name__).split(".")[-1])
 
 
 class PyQCAS_quantumsim(If_backend):
@@ -14,22 +14,9 @@ class PyQCAS_quantumsim(If_backend):
         super().__init__("PyQCAS_QuantumSim", is_simaultor=True)
         self.sim = Quantum_coprocessor()
         self.pyqcas_dir = gc.qgrtsys_root_dir / "if_backend" / "pyqcas"
-        self.verbose = kwargs.pop('verbose', False)
-        self.loglevel = kwargs.pop('loglevel', logging.INFO)
+        self.verbose = kwargs.pop("verbose", False)
+        self.loglevel = kwargs.pop("loglevel", logging.INFO)
         logger.setLevel(self.loglevel)
-
-    def available(self):
-        return True
-
-    def get_qisa(self):
-        return "eqasm"
-
-    def set_log_level(self, log_level):
-        self.log_level = log_level
-        logger.setLevel(self.log_level)
-
-    def set_verbose(self, v):
-        self.verbose = v
 
     def set_max_exec_cycle(self, num_cycle: int):
         self.sim.set_max_exec_cycle(num_cycle)
@@ -65,6 +52,5 @@ class PyQCAS_quantumsim(If_backend):
         return False
 
     def read_result(self):
-        """This function tries to read the computation result of the quantum kernel.
-        """
+        """This function tries to read the computation result of the quantum kernel."""
         return self.sim.read_result()

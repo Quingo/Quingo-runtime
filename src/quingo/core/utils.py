@@ -3,6 +3,7 @@ from logging.handlers import TimedRotatingFileHandler
 import sys
 import colorama as cm
 import termcolor as tc
+from pathlib import Path
 
 cm.init()
 
@@ -16,19 +17,20 @@ def quingo_info(arg, **kwargs):
 
 
 def quingo_msg(arg, **kwargs):
-    print(tc.colored(arg, 'green'), **kwargs)
+    print(tc.colored(arg, "green"), **kwargs)
 
 
 def quingo_warning(arg, **kwargs):
-    print(tc.colored(arg, 'yellow'), **kwargs)
+    print(tc.colored(arg, "yellow"), **kwargs)
 
 
 def quingo_err(arg, **kwargs):
-    print(tc.colored(arg, 'red'), **kwargs)
+    print(tc.colored(arg, "red"), **kwargs)
 
 
 FORMATTER = logging.Formatter(
-    "%(asctime)s %(name)s %(lineno)d(%(levelname)s): %(message)s", datefmt='%H:%M:%S')
+    "%(asctime)s %(name)s %(lineno)d(%(levelname)s): %(message)s", datefmt="%H:%M:%S"
+)
 # LOG_FILE = "my_app.log"
 
 
@@ -53,3 +55,10 @@ def get_logger(logger_name):
     # with this pattern, it's rarely necessary to propagate the error up to parent
     logger.propagate = False
     return logger
+
+
+def ensure_path(fn) -> Path:
+    assert isinstance(fn, (str, Path))
+    if isinstance(fn, str):
+        fn = Path(fn).resolve()
+    return fn

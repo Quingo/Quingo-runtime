@@ -1,7 +1,7 @@
 import pytest
 from quingo.core.quingo_task import *
-from quingo.if_backend.backend_hub import QuBackends
-from quingo.if_backend.qisa import Qisa
+from quingo.backend.backend_hub import BackendType
+from quingo.backend.qisa import Qisa
 from pathlib import Path
 import platform
 
@@ -42,11 +42,11 @@ class TestQuingoTask:
             task = Quingo_task("mock.qu", "foo", backend=backend)
             assert task.qisa_type == qisa
 
-        single_test(QuBackends.SYMQC, Qisa.QCIS)
-        single_test(QuBackends.TEUQILA, Qisa.QCIS)
-        single_test(QuBackends.ZUCHONGZHI, Qisa.QCIS)
-        single_test(QuBackends.QUANTUM_SIM, Qisa.QCIS)
-        single_test(QuBackends.QUANTIFY, Qisa.Quantify)
+        single_test(BackendType.SYMQC, Qisa.QCIS)
+        single_test(BackendType.TEUQILA, Qisa.QCIS)
+        single_test(BackendType.ZUCHONGZHI, Qisa.QCIS)
+        single_test(BackendType.QUANTUM_SIM, Qisa.QCIS)
+        single_test(BackendType.QUANTIFY, Qisa.Quantify)
 
 
 if __name__ == "__main__":
