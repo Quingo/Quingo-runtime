@@ -3,8 +3,16 @@ from quingo.core.quingo_task import Quingo_task
 from pathlib import Path
 from .compiler_config import get_mlir_path
 from quingo.core.utils import quingo_err, get_logger
+import logging
 from quingo.if_backend.qisa import *
 from quingo.core.preparation import gen_main_file
+
+
+def ensure_path(fn) -> Path:
+    assert isinstance(fn, (str, Path))
+    if isinstance(fn, str):
+        fn = Path(fn).resolve()
+    return fn
 
 
 logger = get_logger((__name__).split(".")[-1])
@@ -14,11 +22,14 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None):
     """Compile the quingo file with given parameters and return the path of
     the generated qasm file.
     """
+    logger.setLevel(logging.WARNING)
     gen_main_file(task.called_qu_fn, task.called_func, task.cl_entry_fn, params)
 
     if qasm_fn is None:
         suffix = get_suffix(task.qisa_type)
         qasm_fn = task.cl_entry_fn.with_suffix(suffix)
+    else:
+        qasm_fn = ensure_path(qasm_fn)
 
     quingoc_path = Path(get_mlir_path())
 
@@ -47,6 +58,9 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None):
 
 
 def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path):
+    qasm_fn = ensure_path(qasm_fn)
+    quingoc_path = ensure_path(quingoc_path)
+
     cl_path = '"{}"'.format(str(quingoc_path.resolve()))
     cl_entry_fn = '"{}"'.format(str(task.cl_entry_fn))
 
@@ -58,9 +72,7 @@ def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path):
         qubits_info = '--qubits="{}"'.format(str(task.qubits_info.resolve()))
     opt_qubit_map = qubits_info
 
-    if isinstance(qasm_fn, str):
-        qasm_fn = Path(qasm_fn).resolve()
-    opt_out_fn = '-o "{}"'.format(str(qasm_fn.resolve()))
+    opt_out_fn = '-o "{}"'.format(str(qasm_fn))
 
     cmd_eles = [cl_path, cl_entry_fn, opt_inc_dirs, opt_isa, opt_qubit_map, opt_out_fn]
 

@@ -5,6 +5,7 @@
 import re
 from pathlib import Path
 from quingo.core.utils import get_logger
+import logging
 import quingo.core.data_transfer as dt
 
 logger = get_logger((__name__).split(".")[-1])
@@ -59,6 +60,7 @@ def gen_main_file(
         args (list):
             a variable length of parameters passed to the quantum function
     """
+    logger.setLevel(logging.WARNING)
     import_stmt = "import {}".format(called_qg_fn.stem)
 
     with called_qg_fn.open("r", encoding="utf-8") as qu_src_file:
@@ -66,12 +68,7 @@ def gen_main_file(
 
     main_func_str = gen_main_func(qu_src, called_qg_func, qg_params)
     try:
-        # print("write first: ", import_stmt)
-        # cl_entry_fn.write(import_stmt + "\n")
-        # print("write second")
-        # cl_entry_fn.write_text(main_func_str)
         content = import_stmt + "\n" + main_func_str
-        print("write content: ", content)
         cl_entry_fn.write_text(content)
     except:
         raise IOError("Cannot write the file: ", cl_entry_fn)
