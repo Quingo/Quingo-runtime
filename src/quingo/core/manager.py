@@ -1,7 +1,6 @@
 import platform
-import subprocess
 import logging
-from quingo.core.quingo_task import Quingo_task
+from quingo.if_backend.backend_hub import QuBackends
 from quingo.if_backend.backend_hub import Backend_hub, Backend_info
 import quingo.core.data_transfer as dt
 from pathlib import Path
@@ -52,7 +51,6 @@ class Runtime_system_manager:
         if "backend" in kwargs:
             self.set_backend(kwargs["backend"])
 
-        self.set_verbose(verbose)
         self.set_log_level(log_level)
 
         self.qg_main_fn = None  # pathlib.Path
@@ -89,18 +87,6 @@ class Runtime_system_manager:
         if backend is not None:
             backend.set_log_level(log_level)
 
-    def set_verbose(self, v: bool = False):
-        """Set the message level to verbose or not.
-
-        Args:
-            v (bool): True or False.
-        """
-        assert isinstance(v, bool)
-        self.verbose = v
-        backend = self.get_backend()
-        if backend is not None:
-            backend.set_verbose(v)
-
     def call_quingo(self, qg_filename: str, qg_func_name: str, *args):
         """This function triggers the main process."""
         self.set_call_kernel_success(False)
@@ -108,25 +94,6 @@ class Runtime_system_manager:
         self.set_call_kernel_success(success)
 
         return success
-
-    def set_qubits_info_path(self, qubits_info_path: Path):
-        self.qubits_info_path = qubits_info_path.absolute()
-        print(self.qubits_info_path)
-        if not self.qubits_info_path.exists():
-            raise FileNotFoundError(
-                "Cannot find the qubits info file: {}".format(self.qubits_info_path)
-            )
-
-    def get_last_qasm(self):
-        if self.qasm_file_path is None or not self.qasm_file_path.is_file():
-            return ""
-        with self.qasm_file_path.open("r") as f:
-            return f.read()
-
-    def get_last_qasm_file(self):
-        if self.qasm_file_path is None or not self.qasm_file_path.is_file():
-            return None
-        return self.qasm_file_path
 
     def main_process(self, qg_filename: str, qg_func_name: str, *args):
         """This function is the main function of the manager, which describes the main process:
@@ -286,74 +253,90 @@ class Runtime_system_manager:
             # logger.info(msg)
 
         self.backend.set_log_level(self.log_level)
-        self.backend.set_verbose(self.verbose)
         # print("connect success")
         return True
 
-    def execute(self):
-        """This function upload the compiled quantum program, i.e., instruction-format program
-        to the backend, and executes it.
-        After the execution, the result can be fetched via `read_result()`.
-        """
-        backend = self.get_backend_or_connect_default()
-        if backend.available is False:
-            raise EnvironmentError(
-                "The backend {} is not available.".format(backend.name())
-            )
 
-        if self.mode == "state_vector" and not backend.is_simulator():
-            raise ValueError(
-                "Cannot retrieve state vector from a non-simulator backend."
-            )
+class ExeMode(enum.Enum):
+    SimFinalResult = enum.auto()
+    SimStateVector = enum.auto()
+    SimMatrix = enum.auto()
+    RealMachine = enum.auto()
 
-        if self.verbose:
-            quingo_msg(
-                "Uploading the program to the backend {}...".format(backend.name())
-            )
 
-        if not backend.upload_program(self.qasm_file_path):
-            quingo_err(
-                "Failed to upload the program to the backend {}.".format(backend.name())
-            )
-            quingo_info(
-                "  Suggestion: are you uploading QCIS program to an eQASM backend "
-                "or eQASM program to a QCIS backend?\n"
-                "    If so, please specify the compiler and backend accordingly."
-            )
-            return False
+def is_simulation(exe_mode):
+    return exe_mode in [
+        ExeMode.SimFinalResult,
+        ExeMode.SimStateVector,
+        ExeMode.SimMatrix,
+    ]
 
-        if self.verbose:
-            quingo_msg("Start execution with {}... ".format(backend.name()))
 
-        if backend.name().lower() in [
-            "pyqcisim_quantumsim",
-            "pyqcisim_tequila",
-            "symqc",
-            "zuchongzhi",
-        ]:
-            return backend.execute(self.mode, self.num_shots)
-        else:
-            return backend.execute()
+class ExeConfig:
+    def __init__(self, mode: ExeMode = ExeMode.SimFinalResult, num_shots: int = 1):
+        self.mode = mode
+        self.num_shots = num_shots
 
-    def read_result(self, start_addr):
-        if self.success_on_last_execution is False:
-            quingo_warning("Last execution fails and no result is read back.")
-            return None
+    def __str__(self) -> str:
+        return str(self.mode)
 
-        qisa_used = self.get_backend().get_qisa()
-        if qisa_used == "eqasm":
-            data_trans = dt.Data_transfer()
-            data_trans.set_data_block(self.result)
-            pydata = data_trans.bin_to_pydata(self.ret_type, start_addr)
-            logger.debug("The data converted from the binary is: \n{}\n".format(pydata))
-            return pydata
 
-        elif qisa_used == "qcis":
-            return self.result
+def verify_backend_config(backend: QuBackends, exe_config: ExeConfig) -> bool:
+    if backend == QuBackends.ZUCHONGZHI and is_simulation(exe_config.mode):
+        return False
 
-        else:
-            raise ValueError(
-                "Reading result from a program with unsupported QISA: {}".format(
-                    qisa_used
-                )
-            )
+    if backend == QuBackends.QUANTIFY:
+        return False
+    return True
+
+
+def execute(qasm_fn: Path, backend: QuBackends, exe_config: ExeConfig = None):
+    """Execute the quingo task on the specified backend and return the result."""
+
+    if verify_backend_config(backend, exe_config) is False:
+        raise ValueError(
+            "Error configuration {} on the backend {}".format(str(exe_config), backend)
+        )
+
+    backend = get_backend_or_connect_default()
+    if backend.available is False:
+        raise EnvironmentError(
+            "The backend {} is not available.".format(backend.name())
+        )
+
+    if self.mode == "state_vector" and not backend.is_simulator():
+        raise ValueError("Cannot retrieve state vector from a non-simulator backend.")
+
+    backend.upload_program(qasm_fn)
+
+    if backend.name().lower() in [
+        "pyqcisim_quantumsim",
+        "pyqcisim_tequila",
+        "symqc",
+        "zuchongzhi",
+    ]:
+        return backend.execute(mode, num_shots)
+    else:
+        return backend.execute()
+
+
+def read_result(self, start_addr):
+    if self.success_on_last_execution is False:
+        quingo_warning("Last execution fails and no result is read back.")
+        return None
+
+    qisa_used = self.get_backend().get_qisa()
+    if qisa_used == "eqasm":
+        data_trans = dt.Data_transfer()
+        data_trans.set_data_block(self.result)
+        pydata = data_trans.bin_to_pydata(self.ret_type, start_addr)
+        logger.debug("The data converted from the binary is: \n{}\n".format(pydata))
+        return pydata
+
+    elif qisa_used == "qcis":
+        return self.result
+
+    else:
+        raise ValueError(
+            "Reading result from a program with unsupported QISA: {}".format(qisa_used)
+        )

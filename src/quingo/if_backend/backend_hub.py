@@ -10,6 +10,19 @@ class QuBackends(enum.Enum):
     ZUCHONGZHI = enum.auto()
 
 
+def get_backend_name(be_type: QuBackends):
+    if be_type == QuBackends.QUANTUM_SIM:
+        return "pyqcisim_quantumsim"
+    if be_type == QuBackends.TEUQILA:
+        return "pyqcisim_tequila"
+    if be_type == QuBackends.SYMQC:
+        return "symqc"
+    if be_type == QuBackends.QUANTIFY:
+        return "quantify"
+    if be_type == QuBackends.ZUCHONGZHI:
+        return "zuchongzhi"
+
+
 class Backend_info:
     def __init__(self, module_name, module_path, with_timing, is_simulator, qisa):
         self.module_name = module_name
@@ -107,6 +120,7 @@ class Backend_hub:
     def support(self, backend_name):
         return backend_name in self.backends
 
-    def get_instance(self, backend_name):
+    def get_instance(self, backend_type):
+        backend_name = get
         backend_info = self.backends[backend_name]
         return backend_info.get_instance()
