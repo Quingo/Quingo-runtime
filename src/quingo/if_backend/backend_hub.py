@@ -1,4 +1,13 @@
 import importlib
+import enum
+
+
+class QuBackends(enum.Enum):
+    QUANTUM_SIM = enum.auto()
+    TEUQILA = enum.auto()
+    SYMQC = enum.auto()
+    QUANTIFY = enum.auto()
+    ZUCHONGZHI = enum.auto()
 
 
 class Backend_info:
@@ -92,7 +101,7 @@ class Backend_hub:
             "zuchongzhi",
             with_timing=False,
             is_simulator=False,
-            qisa="qcis"
+            qisa="qcis",
         )
 
     def support(self, backend_name):

@@ -1,5 +1,5 @@
 from pathlib import Path
-from .utils import quingo_err
+from .utils import quingo_err, quingo_info
 import quingo.global_config as gc
 import distutils.spawn
 import requests
@@ -91,7 +91,21 @@ def get_mlir_path():
 
     # find the compiler executable from the system directly
     quingoc_path = distutils.spawn.find_executable("quingoc")
-    print(str(quingoc_path))
+
+    if quingoc_path is None:
+        quingo_info(
+            "Cannot find the compiler.\n"
+            "  To resolve this problem, you can install quingoc with two ways:\n"
+            '  1. run the following command "python -m quingo.install_quingoc"\n'
+            "  2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/"
+            "releases and save it at a directory in the system path \n"
+            "or configure its path by calling this method inside python:\n"
+            "     `quingo.set_mlir_compiler_path(<path-to-quingoc>)`"
+        )
+        raise RuntimeError(
+            "Cannot find the mlir-based quingoc compiler in the system path."
+        )
+
     return quingoc_path
 
 

@@ -1,13 +1,9 @@
-import shutil
-from quingo.if_backend.backend_hub import Backend_hub, Backend_info
-import quingo.global_config as gc
-import quingo.core.data_transfer as dt
-import os
-import re
 import platform
 import subprocess
 import logging
-import tempfile
+from quingo.core.quingo_task import Quingo_task
+from quingo.if_backend.backend_hub import Backend_hub, Backend_info
+import quingo.core.data_transfer as dt
 from pathlib import Path
 from .compiler_config import get_mlir_path
 from quingo.core.utils import (
@@ -17,40 +13,10 @@ from quingo.core.utils import (
     get_logger,
     quingo_info,
 )
+from quingo.if_backend.qisa import *
+from quingo.core.preparation import gen_main_file
 
 logger = get_logger((__name__).split(".")[-1])
-
-
-def remove_comment(qu_src):
-    search_annotation_string = r"\/\/.*\n"
-    return re.sub(search_annotation_string, "", qu_src)
-
-
-def get_ret_type(qg_filename: str, qg_func_name: str):
-    """This function read the Quingo source file to retrieve the return
-    type of called Quingo operation.
-
-    Args:
-        qg_filename (path) :  the name of the Quingo file which contains the
-            quantum function called by the host program.
-        qg_func_name (str) : the name of the Quingo function.
-    """
-    with open(qg_filename, "r", encoding="utf-8") as qu_src_file:
-        qu_src = qu_src_file.read()
-
-    qu_src = remove_comment(qu_src)
-
-    search_string = r"\boperation\b\s+" + qg_func_name + r"\s*\((.*)\)\s*:(.*)\s*\{"
-
-    op_def_components = re.search(search_string, qu_src)
-    if op_def_components is None:
-        raise ValueError(
-            "Cannot find the operation ({}) in the given Quingo source "
-            "file ({}).".format(qg_func_name, qg_filename)
-        )
-
-    ret_type = re.sub(r"\d", "", op_def_components.groups()[1].strip())
-    return ret_type
 
 
 class Runtime_system_manager:
@@ -89,7 +55,7 @@ class Runtime_system_manager:
         self.set_verbose(verbose)
         self.set_log_level(log_level)
 
-        self.main_file_fn = None  # pathlib.Path
+        self.qg_main_fn = None  # pathlib.Path
 
         self.qasm_file_path = None  # pathlib.Path
 
@@ -135,6 +101,91 @@ class Runtime_system_manager:
         if backend is not None:
             backend.set_verbose(v)
 
+    def call_quingo(self, qg_filename: str, qg_func_name: str, *args):
+        """This function triggers the main process."""
+        self.set_call_kernel_success(False)
+        success = self.main_process(qg_filename, qg_func_name, *args)
+        self.set_call_kernel_success(success)
+
+        return success
+
+    def set_qubits_info_path(self, qubits_info_path: Path):
+        self.qubits_info_path = qubits_info_path.absolute()
+        print(self.qubits_info_path)
+        if not self.qubits_info_path.exists():
+            raise FileNotFoundError(
+                "Cannot find the qubits info file: {}".format(self.qubits_info_path)
+            )
+
+    def get_last_qasm(self):
+        if self.qasm_file_path is None or not self.qasm_file_path.is_file():
+            return ""
+        with self.qasm_file_path.open("r") as f:
+            return f.read()
+
+    def get_last_qasm_file(self):
+        if self.qasm_file_path is None or not self.qasm_file_path.is_file():
+            return None
+        return self.qasm_file_path
+
+    def main_process(self, qg_filename: str, qg_func_name: str, *args):
+        """This function is the main function of the manager, which describes the main process:
+          1. prepare the hyper() function
+          2. compile the Quingo program including the hyper() function
+            - different low-level formats can be generated according to the compilation settings
+          3. Upload the assembly code or binary code to the backend for execution
+
+        Args:
+            qg_filename (str) :  the name of the Quingo file which contains the
+                quantum function called by the host program.
+            qg_func_name (str) : the name of the quantum function
+            args: a variable length of parameters passed to the quantum function
+        """
+
+        if not self.compile_process(qg_filename, qg_func_name, *args):
+            quingo_err("Compilation failed. Abort.")
+            return False
+
+        if not self.execute():  # execute the eQASM file
+            quingo_err("Execution failed. Abort.")
+            return False
+
+        if self.verbose:
+            quingo_msg("Execution finished.")
+
+        # read back the results
+        self.result = self.get_backend().read_result()
+
+        return True
+
+    def config_execution(self, mode: str, num_shots: int = 1):
+        """Configure the execution mode to 'one_shot' or 'state_vector'.
+        When the execution mode is 'one_shot', the number of times to run the uploaded quantum
+        circuit can be configured using the parameter `num_shots` at the same time.
+        """
+
+        if mode not in ["one_shot", "state_vector"]:
+            raise ValueError(
+                "Found unrecognized execution mode: '{}'.".format(mode)
+                + "Allowed values are: 'one_shot' or 'state_vector'."
+            )
+
+        self.mode = mode
+        self.num_shots = num_shots
+
+    def set_num_shots(self, num_shots: int):
+        """[Deprecated method]. Set the number of times to run the uploaded quantum circuit in
+        simulation. In other words, `num_shots` groups of measurement result will be generated.
+
+        Args:
+            num_shots (int): The number of times to run the quantum circuit.
+        """
+        # print("set_num_shots: ", num_shots)
+        self.num_shots = num_shots
+
+    #####################################################################
+    # Backend related methods
+    #####################################################################
     def get_backend(self):
         return self.backend
 
@@ -239,146 +290,6 @@ class Runtime_system_manager:
         # print("connect success")
         return True
 
-    def call_quingo(self, qg_filename: str, qg_func_name: str, *args):
-        """This function triggers the main process."""
-        self.set_call_kernel_success(False)
-        success = self.main_process(qg_filename, qg_func_name, *args)
-        self.set_call_kernel_success(success)
-
-        return success
-
-    def call_quingo_compiler(self, qg_filename: str, qg_func_name: str, *args):
-        self.set_call_kernel_success(False)
-        success = self.compile_process(qg_filename, qg_func_name, *args)
-        self.set_call_kernel_success(success)
-
-        return success
-
-    def compile_process(self, qg_filename: str, qg_func_name: str, *args):
-        if not self.config_path(qg_filename, qg_func_name):
-            return False
-
-        if self.verbose:
-            quingo_msg("Start compilation ... ", end="")
-
-        # generate the quingo file which contains the main function.
-        self.gen_main_func_file(qg_filename, qg_func_name, *args)
-
-        # compile and execute
-        if not self.compile():  # compilation failed
-            quingo_err("Compilation failed. Abort.")
-            return False
-
-        logger.debug("The compiler exited successfully.")
-
-        if not self.qasm_file_path.is_file():
-            quingo_err(
-                "Error: expected qasm file ({}) has not been generated. Aborts.".format(
-                    self.qasm_file_path
-                )
-            )
-            return False
-
-        # compilation finished successfully
-        logger.debug(
-            "The qasm file has been generated at: {}".format(self.qasm_file_path)
-        )
-        return True
-
-    def set_qubits_info_path(self, qubits_info_path: Path):
-        self.qubits_info_path = qubits_info_path.resolve()
-        print(self.qubits_info_path)
-        if not self.qubits_info_path.exists():
-            raise FileNotFoundError(
-                "Cannot find the qubits info file: {}".format(self.qubits_info_path)
-            )
-
-    def config_path(self, qg_filename: str, qg_func_name: str):
-        """Configure the following paths of the following files or directories:
-        - The project root direcotry (`prj_root_dir`).
-        - The build directory (`build_dir`), which is used to buffer generarted files.
-            Create this directory if it does not exist.
-        - the main file (`main_file_fn`) generated by the runtime system, which contains
-            the `main` operation.
-        - the qasm file (`qasm_file_path`) generated by the compiler.
-        """
-        self.resolved_qg_filename = Path(qg_filename).resolve()
-
-        self.build_dir = Path(tempfile.mkdtemp())
-
-        # ensure there is a build directory in the same directory as the source file.
-        self.prj_root_dir = Path(self.resolved_qg_filename).parent
-        self.build_dir = self.prj_root_dir / gc.build_dirname
-
-        if (
-            self.build_dir.exists()
-        ):  # clear the existing build directory to remove old files.
-            shutil.rmtree(str(self.build_dir))
-        self.build_dir.mkdir()  # create a new emtpy build dir.
-
-        # the basename of qg_filename without extension
-        qg_stem = self.resolved_qg_filename.stem
-
-        self.main_file_fn = (self.build_dir / ("main_" + qg_stem)).with_suffix(
-            gc.quingo_suffix
-        )
-
-        qasm_fn_no_ext = self.build_dir / qg_func_name
-        backend_info = self.get_backend_info_or_set_default()
-
-        qisa_used = backend_info.get_qisa()
-        if qisa_used == "eqasm":
-            self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.eqasm_suffix)
-        elif qisa_used == "qcis":
-            self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.qcis_suffix)
-        elif qisa_used == "quantify":
-            self.qasm_file_path = qasm_fn_no_ext.with_suffix(gc.quantify_suffix)
-        else:
-            quingo_err("Found unsupported QISA to use: {}".format(qisa_used))
-            return False
-        return True
-
-    def get_last_qasm(self):
-        if self.qasm_file_path is None or not self.qasm_file_path.is_file():
-            return ""
-        with self.qasm_file_path.open("r") as f:
-            return f.read()
-
-    def get_last_qasm_file(self):
-        if self.qasm_file_path is None or not self.qasm_file_path.is_file():
-            return None
-        return self.qasm_file_path
-
-    def main_process(self, qg_filename: str, qg_func_name: str, *args):
-        """This function is the main function of the manager, which describes the main process:
-          1. prepare the hyper() function
-          2. compile the Quingo program including the hyper() function
-            - different low-level formats can be generated according to the compilation settings
-          3. Upload the assembly code or binary code to the backend for execution
-
-        Args:
-            qg_filename (str) :  the name of the Quingo file which contains the
-                quantum function called by the host program.
-            qg_func_name (str) : the name of the quantum function
-            args: a variable length of parameters passed to the quantum function
-        """
-
-        if not self.compile_process(qg_filename, qg_func_name, *args):
-            quingo_err("Compilation failed. Abort.")
-            return False
-
-        if not self.execute():  # execute the eQASM file
-            quingo_err("Execution failed. Abort.")
-            return False
-
-        if self.verbose:
-            quingo_msg("Execution finished.")
-
-        # read back the results
-        self.result = self.get_backend().read_result()
-
-        return True
-
     def execute(self):
         """This function upload the compiled quantum program, i.e., instruction-format program
         to the backend, and executes it.
@@ -423,191 +334,6 @@ class Runtime_system_manager:
             return backend.execute(self.mode, self.num_shots)
         else:
             return backend.execute()
-
-    def get_imported_qu_fns(self, prj_dir):
-        """This function recursively scans the project root directory, and
-        return all Quingo files (with extention `.qu` or `.qfg`) as a list."""
-        valid_file_list = []
-        for r, d, f in os.walk(prj_dir):
-            for file in f:
-                file_path = Path(r) / file
-                if file_path.suffix in [".qu", ".qfg"]:
-                    valid_file_list.append(file_path)
-
-        logger.debug(
-            "imported files:\n\t"
-            + "\n\t".join(['"{}"'.format(str(f)) for f in valid_file_list])
-        )
-
-        return valid_file_list
-
-    def compile(self):
-        """Compiles the quingo files and generate corresponding quantum assembly code.
-        Both the compiler and backend are selected based on the configuration.
-        """
-        quingoc_path = get_mlir_path()
-        if quingoc_path is None:
-            quingo_info(
-                "Cannot find the compiler.\n"
-                "  To resolve this problem, you can install quingoc with two ways:\n"
-                '  1. run the following command "python -m quingo.install_quingoc"\n'
-                "  2. Dowload quingoc from https://gitee.com/quingo/quingoc-release/"
-                "releases and save it at a directory in the system path \n"
-                "or configure its path by calling this method inside python:\n"
-                "     `quingo.set_mlir_compiler_path(<path-to-quingoc>)`"
-            )
-            raise RuntimeError(
-                "Cannot find the mlir-based quingoc compiler in the system path."
-            )
-
-        quingoc_path = '"{}"'.format(quingoc_path)
-
-        logger.debug(self.compose_mlir_cmd(quingoc_path, print=True))
-        compile_cmd = self.compose_mlir_cmd(quingoc_path, print=False)
-
-        ret_value = subprocess.run(
-            compile_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            shell=True,
-        )
-        if ret_value.stdout != "":
-            logger.info(ret_value.stdout.strip())
-        if ret_value.stderr != "":
-            msg = "Error message from the compiler:\n\t{}".format(ret_value.stderr)
-            quingo_err(msg)
-            logger.error(msg)
-
-        if ret_value.returncode != 0:  # failure
-            return False
-        else:  # success
-            return True
-
-    def compose_mlir_cmd(self, quingoc_path, print: bool = False):
-        if print:
-            header = "\n"
-            separator = "\n\t "
-        else:
-            header = ""
-            separator = ""
-
-        # compile_cmd = (
-        #     head
-        #     + quingoc_path
-        #     + " "
-        #     + str(self.main_file_fn)
-        #     + separator
-        #     + ' -o "{}"'.format(self.qasm_file_path)
-        # )
-
-        # get the qubits info path if the backend is the quantify backend.
-        qubits_info = ""
-        if self.get_backend_name() == "quantify":
-            qubits_info = "--qubits=" + '"' + str(self.qubits_info_path) + '"'
-
-        # The project root directory is added to the compiler module search path.
-        code = self.get_backend_info().get_qisa()
-        compile_cmd = '{header}{qgc_path} "{main_fn}"{sep} -I "{root_dir}" --isa="{qisa}" {qubits} -o "{qasm_fn}"'.format(
-            header=header,
-            qgc_path=quingoc_path,
-            main_fn=str(self.main_file_fn),
-            sep=separator,
-            root_dir=self.prj_root_dir,
-            qasm_fn=self.qasm_file_path,
-            qisa=code,
-            qubits=qubits_info,
-        )
-
-        return compile_cmd
-
-    def gen_main_func_file(self, qg_filename: str, qg_func_name: str, *args):
-        """This function generates the main function required to perform
-        compilation. A new file named 'main_<qg_filename>' under the
-        `<build_dirname>` directory is generated to allocate this main
-        function.
-
-        Args:
-            qg_filename (str) :  the name of the Quingo file which contains the
-                quantum function called by the host program.
-            qg_func_name (str) : the name of the Quingo function.
-            args (list): a variable length of parameters passed to the quantum function
-        """
-        qg_file_content = self.resolved_qg_filename.open("r").read()
-        main_func_str = self.main_func(qg_filename, qg_func_name, *args)
-
-        try:
-            self.main_file_fn.write_text(qg_file_content + "\n" + main_func_str)
-        except:
-            raise IOError("Cannot write the file: ", self.main_file_fn)
-
-    def main_func(self, qg_filename: str, qg_func_name: str, *args):
-        """This function is used to generate string version of the main
-        function used to call quingo.
-
-        Args:
-            qg_func_name (str) : the name of called Quingo operation._name`.
-        """
-
-        var_name_list = []
-        arg_str_list = []
-
-        logger.debug(
-            "calling function '{}' with parameters: {}".format(qg_func_name, args)
-        )
-
-        if len(args) != 0:
-            for i, arg in enumerate(args):
-                var_name, var_def_str = dt.conv_arg_to_qg_str(i, arg)
-                var_name_list.append(var_name)
-                arg_str_list.append(var_def_str)
-
-        self.ret_type = get_ret_type(qg_filename, qg_func_name)
-
-        str_params = ", ".join(var_name_list)
-        arg_strs = "\n    ".join(arg_str_list)
-        if len(arg_strs) > 0:
-            arg_strs = "\n    " + arg_strs
-
-        if self.ret_type == "unit":
-            str_ret = ""
-        else:
-            str_ret = "return "
-
-        func_call = "    {ret}{func_name}({parameters});".format(
-            ret=str_ret, func_name=qg_func_name, parameters=str_params
-        )
-
-        func_str = "\noperation main() : {} {{{}\n{}\n}}".format(
-            self.ret_type, arg_strs, func_call
-        )
-
-        return func_str
-
-    def config_execution(self, mode: str, num_shots: int = 1):
-        """Configure the execution mode to 'one_shot' or 'state_vector'.
-        When the execution mode is 'one_shot', the number of times to run the uploaded quantum
-        circuit can be configured using the parameter `num_shots` at the same time.
-        """
-
-        if mode not in ["one_shot", "state_vector"]:
-            raise ValueError(
-                "Found unrecognized execution mode: '{}'.".format(mode)
-                + "Allowed values are: 'one_shot' or 'state_vector'."
-            )
-
-        self.mode = mode
-        self.num_shots = num_shots
-
-    def set_num_shots(self, num_shots: int):
-        """[Deprecated method]. Set the number of times to run the uploaded quantum circuit in
-        simulation. In other words, `num_shots` groups of measurement result will be generated.
-
-        Args:
-            num_shots (int): The number of times to run the quantum circuit.
-        """
-        # print("set_num_shots: ", num_shots)
-        self.num_shots = num_shots
 
     def read_result(self, start_addr):
         if self.success_on_last_execution is False:
