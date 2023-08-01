@@ -14,7 +14,7 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None):
     """Compile the quingo file with given parameters and return the path of
     the generated qasm file.
     """
-    logger.setLevel(logging.WARNING)
+    logger.setLevel(logging.INFO)
     gen_main_file(task.called_qu_fn, task.called_func, task.cl_entry_fn, params)
 
     if qasm_fn is None:
@@ -26,7 +26,7 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None):
     quingoc_path = Path(get_mlir_path())
 
     compile_cmd = compose_cl_cmd(task, qasm_fn, quingoc_path)
-    logger.debug(compile_cmd)
+    logger.info(compile_cmd)
     ret_value = subprocess.run(
         compile_cmd,
         stdout=subprocess.PIPE,

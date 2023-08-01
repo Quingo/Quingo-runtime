@@ -24,6 +24,7 @@ class TestCompileCmd:
             mlir_path,
         )
         cmd_eles = cmd.split()
+        print(cmd_eles)
         assert len(cmd_eles) == 9
         assert mlir_path.resolve().samefile(cmd_eles[0].strip('"'))
         assert cmd_eles[1] == '"{}"'.format(task.cl_entry_fn.resolve())

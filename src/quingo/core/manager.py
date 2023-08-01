@@ -36,7 +36,7 @@ def execute(qasm_fn: Path, be_type: BackendType, exe_config: ExeConfig = ExeConf
 def call(
     task: Quingo_task,
     params: tuple,
-    be_type: BackendType,
+    be_type: BackendType = BackendType.QUANTUM_SIM,
     exe_config: ExeConfig = ExeConfig(),
 ):
     """Execute the quingo task on the specified backend and return the result."""

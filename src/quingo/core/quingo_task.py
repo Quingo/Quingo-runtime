@@ -86,7 +86,7 @@ class Quingo_task:
             return self._build_dir
 
         if self.debug_mode:  # debug mode create `build` dir under the current dir
-            self._build_dir = self.called_qu_dir / gc.build_dirname
+            self._build_dir = Path.cwd() / gc.build_dirname
             create_empty_dir(self._build_dir)
 
         else:
