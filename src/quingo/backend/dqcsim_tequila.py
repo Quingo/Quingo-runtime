@@ -27,9 +27,9 @@ class DQCsim_tequila(If_backend):
             self.sim.simulate()
             res = self.sim.run(measure_mod=measure_mod, num_shots=exe_config.num_shots)
             self.sim.stop()
-            final_state = res["final_state"]
+            final_state = res["res"]
             final_state["quantum"] = tuple(final_state["quantum"])
-            return final_state
+            return final_state["quantum"]
 
         raise ValueError(
             "Unsupported execution mode ({}) for DQCSIM_TEQUILA.".format(

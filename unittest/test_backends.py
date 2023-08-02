@@ -76,19 +76,19 @@ class Test_backends:
         # single(IfSymQC)
 
     def test_get_from_hub(self):
-        def single(backend_type):
+        def single(backend_type, qasm_fn):
             hub = Backend_hub()
             sim = hub.get_instance(backend_type)
-            sim.upload_program(qcis_fn)
+            sim.upload_program(qasm_fn)
             exe_config = ExeConfig(ExeMode.SimFinalResult, 10)
             res = sim.execute(exe_config)
             assert res[0] == ["Q1", "Q2"]
             assert len(res[1]) == 10
             assert all(v in [[0, 0], [1, 1]] for v in res[1])
 
-        single(BackendType.TEUQILA)
-        single(BackendType.QUANTUM_SIM)
-        single(DQCsim_tequila)
+        single(BackendType.TEUQILA, qcis_fn)
+        single(BackendType.QUANTUM_SIM, qcis_fn)
+        single(BackendType.DQCSIM_TEQUILA, quiet_fn)
         # single(BackendType.SYMQC)
 
     def single_sim(backend_type, qcis_fn, exp_res):
