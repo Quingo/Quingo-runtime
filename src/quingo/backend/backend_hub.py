@@ -58,9 +58,9 @@ class Backend_hub:
                 Qisa.QCIS,
             ),
             BackendType.DQCSIM_TEQUILA: (
-                "Zuchongzhi",
-                "zuchongzhi",
-                False,
+                "DQCsim_tequila",
+                "dqcsim_tequila",
+                True,
                 Qisa.QUIET,
             ),
         }
