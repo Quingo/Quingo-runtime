@@ -23,11 +23,11 @@ class DQCsim_tequila(If_backend):
 
     def execute(self, exe_config: ExeConfig):
         if exe_config.mode == ExeMode.SimFinalResult:
-            measure_mod = "one_time"
+            measure_mod = "final_state"
             self.sim.simulate()
             res = self.sim.run(measure_mod=measure_mod)
             self.sim.stop()
-            return res
+            return res["final_state"]
 
         raise ValueError(
             "Unsupported execution mode ({}) for DQCSIM_TEQUILA.".format(
