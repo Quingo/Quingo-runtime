@@ -15,7 +15,7 @@ def get_qisa_name(qisa: Qisa):
     if qisa == Qisa.QCIS:
         return "qcis"
     if qisa == Qisa.QUIET:
-        return "quiet"
+        return "quiets"
     if qisa == Qisa.eQASM:
         return "eqasm"
     if qisa == Qisa.Quantify:

@@ -1,0 +1,24 @@
+  // an example of T1 experiment
+opaque X(q: qubit) : unit;
+opaque Y90(q: qubit) : unit;
+opaque measure(q: qubit[]): bool;
+opaque CZ(q:qubit, a:qubit): unit;
+opaque reset(q: qubit[]) : unit;
+
+
+operation t1(num: int) : bool[] {
+timer tmr;
+bool[num] results;
+using(q: qubit[1] = {5}){
+    time intervl = 20000 ns;
+    time step = 5000 ns;
+    sequential(int i = 0; i < num; i += 1) {
+        reset(q) !{tmr};
+        X(q[0]) @{tmr == 200000 ns}!{tmr};
+        results[i] = measure(q) @{tmr == intervl} !{tmr};
+        intervl = intervl + step;
+    }
+}
+return results;
+}
+

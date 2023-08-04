@@ -1,0 +1,38 @@
+opaque X(q: qubit) : unit;
+opaque Y(q: qubit) : unit;
+opaque Z(q: qubit) : unit;
+opaque S(q: qubit) : unit;
+opaque T(q: qubit) : unit;
+opaque H(q: qubit) : unit;
+opaque SWAP(q1: qubit, q2: qubit) : unit;
+opaque CNOT(control: qubit, target: qubit) : unit;
+opaque CZ(control: qubit, target: qubit) : unit;
+opaque Rx(q: qubit, angle: double) : unit;
+opaque Ry(q: qubit, angle: double) : unit;
+opaque Rz(q: qubit, angle: double) : unit;
+opaque measure(q: qubit) : bool;
+
+operation test() : (bool[], bool[], bool, double){
+    bool[5] res;
+    bool[3] ret;
+    double a;
+    using(qs : qubit[5]){
+        X(qs[0]);
+        Y(qs[1]);
+        Z(qs[2]);
+        S(qs[3]);
+        T(qs[4]);
+        H(qs[0]);
+        SWAP(qs[0], qs[1]);
+        CNOT(qs[0], qs[2]);
+        CZ(qs[0], qs[3]);
+        Rx(qs[0], 0.5);
+        Ry(qs[0], 0.5);
+        Rz(qs[0], 0.5);
+        res[2] = measure(qs[0]);
+        ret[1] = measure(qs[0]);
+        res[1] = ret[1]; 
+        res[3] = measure(qs[1]);
+    }
+    return (res, ret, res[2], a);
+}

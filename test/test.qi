@@ -1,0 +1,32 @@
+using im, fm
+.body:
+func main()-> (int[5] i_0, int[3] i_1, int i_2, double d_1):
+double d_0
+qubit q_0
+qubit q_1
+qubit q_2
+qubit q_3
+qubit q_4
+ldd d_0,0.500000
+ldd d_1,0.000000
+ X q_0
+ Y q_1
+ Z q_2
+ Rz(1.570796) q_3
+ Rz(0.785398) q_4
+ H q_0
+ CNOT q_0,q_1
+ CNOT q_1,q_0
+ CNOT q_0,q_1
+ CNOT q_0,q_2
+ CZ q_0,q_3
+ Rx(0.500000) q_0
+ Ry(0.500000) q_0
+ Rz(0.500000) q_0
+measure(q_0)-> i_0[2]
+measure(q_0)-> i_1[1]
+mov i_0[1],i_1[1]
+measure(q_1)-> i_0[3]
+mov i_2,i_0[2]
+end
+
