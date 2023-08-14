@@ -85,3 +85,7 @@ The result of bell_state is:
 
 ## 青果示例程序
 目前青果运行时系统中已经包含了`Bell_state`、`GHZ`、`VQE`等示例程序，详情可见[此处](https://gitee.com/quingo/quingo-runtime/tree/master/src/examples)。
+
+## CI构建
+
+支持Pull Request的CI自动构建，目前CI只进行pytest测试。
