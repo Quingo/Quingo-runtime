@@ -23,7 +23,7 @@ def check_equal(val1, val2):
       - True on equal, otherwise False.
     """
 
-    if type(val1) is type(val2):
+    if type(val1) is not type(val2):
         return False
 
     if isinstance(val1, float) or isinstance(val2, float):
