@@ -8,13 +8,13 @@ from dqcsim.host import *
 logger = get_logger((__name__).split(".")[-1])
 
 
-class DQCsim_tequila(If_backend):
+class DQCsim_quantumsim(If_backend):
     """A functional QCIS simulation backend using PyQCISim and Tequila."""
 
     def __init__(self):
-        super().__init__(BackendType.DQCSIM_TEQUILA)
+        super().__init__(BackendType.DQCSIM_QUANTUMSIM)
         self.sim = Simulator(stderr_verbosity=Loglevel.OFF)
-        self.sim.with_backend("tequila", verbosity=Loglevel.OFF)
+        self.sim.with_backend("quantumsim", verbosity=Loglevel.OFF)
         self.res = None
 
     def upload_program(self, prog_fn):

@@ -10,6 +10,7 @@ class BackendType(enum.Enum):
     QUANTIFY = enum.auto()
     ZUCHONGZHI = enum.auto()
     DQCSIM_TEQUILA = enum.auto()
+    DQCSIM_QUANTUMSIM = enum.auto()
 
 
 def singleton(cls):
@@ -60,6 +61,12 @@ class Backend_hub:
             BackendType.DQCSIM_TEQUILA: (
                 "DQCsim_tequila",
                 "dqcsim_tequila",
+                True,
+                Qisa.QUIET,
+            ),
+            BackendType.DQCSIM_QUANTUMSIM: (
+                "DQCsim_quantumsim",
+                "dqcsim_quantumsim",
                 True,
                 Qisa.QUIET,
             ),

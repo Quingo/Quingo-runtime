@@ -2,9 +2,9 @@ from pathlib import Path
 from quingo import *
 from quingo.backend.qisa import Qisa
 
-qu_file = Path(__file__).parent / "test_qu" / "quiets_test.qu"
+qu_file = Path(__file__).parent / "test_qu" / "bell.qu"
 
-task = Quingo_task(qu_file, "test", qisa=Qisa.QUIET)
+task = Quingo_task(qu_file, "bell_state", qisa=Qisa.QUIET, debug_mode=True)
 num_shot = 10
 cfg = ExeConfig(ExeMode.SimFinalResult, num_shot)
 

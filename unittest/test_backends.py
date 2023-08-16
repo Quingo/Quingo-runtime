@@ -1,6 +1,7 @@
 from quingo.backend.pyqcisim_quantumsim import PyQCISim_quantumsim
 from quingo.backend.pyqcisim_tequila import PyQCISim_tequila
 from quingo.backend.dqcsim_tequila import DQCsim_tequila
+from quingo.backend.dqcsim_quantumsim import DQCsim_quantumsim
 from quingo.backend.symqc import IfSymQC
 from pathlib import Path
 from quingo.backend.qisa import Qisa
@@ -29,6 +30,7 @@ class Test_backends:
         single(PyQCISim_quantumsim, BackendType.QUANTUM_SIM, Qisa.QCIS, True)
         single(IfSymQC, BackendType.SYMQC, Qisa.QCIS, True)
         single(DQCsim_tequila, BackendType.DQCSIM_TEQUILA, Qisa.QUIET, True)
+        single(DQCsim_quantumsim, BackendType.DQCSIM_QUANTUMSIM, Qisa.QUIET, True)
 
     def test_upload_program(self):
         def single(BackendClass, qasm_fn):
@@ -42,6 +44,7 @@ class Test_backends:
         single(PyQCISim_quantumsim, qcis_fn)
         single(IfSymQC, qcis_fn)
         single(DQCsim_tequila, quiet_fn)
+        single(DQCsim_quantumsim, quiet_fn)
 
     def test_execute(self):
         def single(BackendClass, qasm_fn):
@@ -56,6 +59,7 @@ class Test_backends:
         single(PyQCISim_tequila, qcis_fn)
         single(PyQCISim_quantumsim, qcis_fn)
         single(DQCsim_tequila, quiet_fn)
+        single(DQCsim_quantumsim, quiet_fn)
         # single(IfSymQC)
 
     def test_shots(self):
@@ -73,6 +77,7 @@ class Test_backends:
         single(PyQCISim_tequila, qcis_fn)
         single(PyQCISim_quantumsim, qcis_fn)
         single(DQCsim_tequila, quiet_fn)
+        single(DQCsim_quantumsim, quiet_fn)
         # single(IfSymQC)
 
     def test_get_from_hub(self):
@@ -89,6 +94,7 @@ class Test_backends:
         single(BackendType.TEUQILA, qcis_fn)
         single(BackendType.QUANTUM_SIM, qcis_fn)
         single(BackendType.DQCSIM_TEQUILA, quiet_fn)
+        single(BackendType.DQCSIM_QUANTUMSIM, quiet_fn)
         # single(BackendType.SYMQC)
 
     def single_sim(backend_type, qcis_fn, exp_res):
