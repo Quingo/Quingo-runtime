@@ -27,6 +27,7 @@ class DQCsim_quantumsim(If_backend):
             self.sim.simulate()
             res = self.sim.run(measure_mod=measure_mod, num_shots=exe_config.num_shots)
             self.sim.stop()
+            print(res)
             final_state = res["res"]
             final_state["quantum"] = tuple(final_state["quantum"])
             return final_state["quantum"]
