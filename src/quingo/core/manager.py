@@ -43,25 +43,3 @@ def call(
 
     qasm_fn = compile(task, params)
     return execute(qasm_fn, be_type, exe_config)
-
-
-# def read_result(self, start_addr):
-#     if self.success_on_last_execution is False:
-#         quingo_warning("Last execution fails and no result is read back.")
-#         return None
-
-#     qisa_used = self.get_backend().get_qisa()
-#     if qisa_used == "eqasm":
-#         data_trans = dt.Data_transfer()
-#         data_trans.set_data_block(self.result)
-#         pydata = data_trans.bin_to_pydata(self.ret_type, start_addr)
-#         logger.debug("The data converted from the binary is: \n{}\n".format(pydata))
-#         return pydata
-
-#     elif qisa_used == "qcis":
-#         return self.result
-
-#     else:
-#         raise ValueError(
-#             "Reading result from a program with unsupported QISA: {}".format(qisa_used)
-#         )

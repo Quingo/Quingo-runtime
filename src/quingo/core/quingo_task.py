@@ -90,7 +90,7 @@ class Quingo_task:
             create_empty_dir(self._build_dir)
 
         else:
-            self._build_dir = Path(tempfile.mkdtemp())
+            self._build_dir = Path(tempfile.mkdtemp(prefix="quingo-"))
 
         return self._build_dir
 
