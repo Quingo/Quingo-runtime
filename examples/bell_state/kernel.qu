@@ -1,8 +1,9 @@
 import std_ops
 
 operation bell_state() : unit {
-    using(q0: qubit, q1: qubit) {
+    using(q0: qubit, q1: qubit, q2: qubit) {
         H(q0);
+        H(q2);
         CNOT(q0, q1);
         measure(q0);
         measure(q1);

@@ -12,7 +12,13 @@ import random
 
 cur_dir = Path(__file__).parent
 qcis_fn = cur_dir / "test_qcis" / "bell.qcis"
+qcis_fn2 = cur_dir / "test_qcis" / "bell_copy.qcis"
 quiet_fn = cur_dir / "test_qcis" / "bell.qi"
+quiet_fn2 = cur_dir / "test_qcis" / "bell_copy.qi"
+
+
+def dist(a, b):
+    return (a.real - b.real) ** 2 + (a.imag - b.imag) ** 2
 
 
 # progress: 2023-08-02
@@ -97,6 +103,23 @@ class Test_backends:
         single(BackendType.DQCSIM_QUANTUMSIM, quiet_fn)
         # single(BackendType.SYMQC)
 
+    def test_state_vector(self):
+        def single(backend_type, qasm_fn):
+            hub = Backend_hub()
+            sim = hub.get_instance(backend_type)
+            sim.upload_program(qasm_fn)
+            exe_config = ExeConfig(ExeMode.SimStateVector, 1)
+            res = sim.execute(exe_config)
+            print(res)
+            assert res["quantum"][0] == ["Q1", "Q2"]
+            assert dist(res["quantum"][1][0], res["quantum"][1][3]) <= 0.01
+
+        single(BackendType.DQCSIM_TEQUILA, quiet_fn2)
+        single(BackendType.DQCSIM_QUANTUMSIM, quiet_fn2)
+        single(BackendType.DQCSIM_TEQUILA, qcis_fn2)
+        single(BackendType.DQCSIM_QUANTUMSIM, qcis_fn2)
+        single(BackendType.QUANTUM_SIM, qcis_fn2)
+
     def single_sim(backend_type, qcis_fn, exp_res):
         hub = Backend_hub()
         tequila = hub.get_instance(backend_type)
@@ -133,9 +156,10 @@ class Test_backends:
 
 if __name__ == "__main__":
     test = Test_backends()
-    test.test_basic()
-    test.test_upload_program()
-    test.test_execute()
-    test.test_shots()
-    test.test_get_from_hub()
-    test.test_sim_in_paral()
+    test.test_state_vector()
+    # test.test_basic()
+    # test.test_upload_program()
+    # test.test_execute()
+    # test.test_shots()
+    # test.test_get_from_hub()
+    # test.test_sim_in_paral()

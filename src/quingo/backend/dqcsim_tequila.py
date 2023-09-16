@@ -30,12 +30,13 @@ class DQCsim_tequila(If_backend):
             final_state = res["res"]
             final_state["quantum"] = tuple(final_state["quantum"])
             return final_state["quantum"]
-        elif exe_config.mode == ExeMode.SimStateVector:
+
+        if exe_config.mode == ExeMode.SimStateVector:
             measure_mod = "state_vector"
             self.sim.simulate()
             res = self.sim.run(measure_mod=measure_mod)
             self.sim.stop()
-            final_state = res["res"]
+            final_state = eval(res["res"])
             return final_state
 
         raise ValueError(
