@@ -1,13 +1,10 @@
 import std_ops
 
-operation bell_state() : (bool[], bool){
-    bool[5] res;
+operation bell_state() : bool[] {
+    bool[2] res;
     using(q0: qubit, q1: qubit) {
         H(q0);
-        CNOT(q0, q1);
-        res[1]=measure(q0);
-        res[2]=measure(q1);
+        res[0] = measure(q0);
     }
-    return (res, res[2]);
+    return res;
 }
-
