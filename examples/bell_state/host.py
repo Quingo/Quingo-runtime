@@ -10,7 +10,7 @@ def routine(circ_name, num_shots=1):
     cfg = ExeConfig(ExeMode.SimStateVector, 10)
     # qasm_fn = compile(task, params=())
     # res = execute(qasm_fn, BackendType.QUANTUM_SIM, cfg)
-    res = call(task, (), BackendType.SYMQC, cfg)
+    res = call(task, (), BackendType.DQCSIM_QUANTUMSIM, cfg)
     print("sim res: ", res)
 
 
