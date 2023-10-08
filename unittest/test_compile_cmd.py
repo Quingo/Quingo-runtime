@@ -16,11 +16,13 @@ class TestGetMlirPath:
 
 class TestCompileCmd:
     def test_gen_default(self):
-        task = Quingo_task("mock.qu", "foo")
+        mock_fn = cur_dir / "mock.qu"
+        task = Quingo_task(mock_fn, "foo")
         mlir_path = Path(get_mlir_path())
+        qasm_fn = compile(task, (1,2,), qasm_fn="mock.qcis")
         cmd = compose_cl_cmd(
             task,
-            "mock.qasm",
+            qasm_fn,
             mlir_path,
         )
         cmd_eles = cmd.split()
@@ -32,7 +34,7 @@ class TestCompileCmd:
         assert cmd_eles[4] == "-I"
         assert cmd_eles[6] == "--isa=qcis"
         assert cmd_eles[7] == "-o"
-        assert Path("mock.qasm").samefile(cmd_eles[8].strip('"'))
+        assert Path(qasm_fn).samefile(cmd_eles[8].strip('"'))
 
     def test_compile(self):
         bell_fn = cur_dir / "bell.qu"
