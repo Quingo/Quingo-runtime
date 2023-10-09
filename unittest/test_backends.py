@@ -1,10 +1,10 @@
 from quingo.backend.dqcsim_tequila import DQCsim_tequila
 from quingo.backend.dqcsim_quantumsim import DQCsim_quantumsim
 from quingo.backend.symqc import IfSymQC
-from pathlib import Path
-from quingo.backend.qisa import Qisa
 from quingo.backend.backend_hub import BackendType, Backend_hub
+from quingo.backend.qisa import Qisa
 from quingo.core.exe_config import *
+from pathlib import Path
 import threading
 import random
 
@@ -16,12 +16,14 @@ quiet_fn2 = cur_dir / "test_qcis" / "bell_copy.qi"
 
 
 def dist(a, b):
-    return (a.real - b.real) ** 2 + (a.imag - b.imag) ** 2
+    if isinstance(a, complex) and isinstance(b, complex):
+        return (a.real - b.real) ** 2 + (a.imag - b.imag) ** 2
+    else:
+        return (a.evalf() - b.evalf()) ** 2
 
 
-# progress: 2023-08-02
+# progress: 2023-10-09
 # finished test on quantumsim and Tequila.
-# TODO: modify the result format of SymQC to match the runtime system regulation.
 class Test_backends:
     def test_basic(self):
         def single(BackendClass, type, qisa, is_sim):
@@ -30,6 +32,7 @@ class Test_backends:
             assert sim.get_qisa() == qisa
             assert sim.is_simulator() == is_sim
 
+        # DQCsim_tequila and DQCsim_quantumsim default Qisa type is QCIS
         single(DQCsim_tequila, BackendType.DQCSIM_TEQUILA, Qisa.QCIS, True)
         single(DQCsim_quantumsim, BackendType.DQCSIM_QUANTUMSIM, Qisa.QCIS, True)
         single(IfSymQC, BackendType.SYMQC, Qisa.QCIS, True)
@@ -43,21 +46,20 @@ class Test_backends:
                 assert False, "upload_program failed: {}".format(e)
 
         single(DQCsim_tequila, qcis_fn)
-        single(DQCsim_quantumsim, qcis_fn)
-        single(IfSymQC, qcis_fn)
         single(DQCsim_tequila, quiet_fn)
+        single(DQCsim_quantumsim, qcis_fn)
         single(DQCsim_quantumsim, quiet_fn)
+        single(IfSymQC, qcis_fn)
 
     def test_execute(self):
         def single(BackendClass, qasm_fn):
             sim = BackendClass()
             sim.upload_program(qasm_fn)
-            exe_config = ExeConfig(ExeMode.SimFinalResult, 10)
+            exe_config = ExeConfig()
             res = sim.execute(exe_config)
-            print(res)
-            # assert len(res) == 2
-            # assert res[0] == ["Q1", "Q2"]
-            # assert all(v in [[0, 0], [1, 1]] for v in res[1])
+            assert len(res) == 2
+            assert res[0] == ["Q1", "Q2"]
+            assert all(v in [[0, 0], [1, 1]] for v in res[1])
 
         single(DQCsim_tequila, qcis_fn)
         single(DQCsim_quantumsim, qcis_fn)
@@ -81,7 +83,7 @@ class Test_backends:
         single(DQCsim_quantumsim, qcis_fn)
         single(DQCsim_tequila, quiet_fn)
         single(DQCsim_quantumsim, quiet_fn)
-        # single(IfSymQC)
+        single(IfSymQC, qcis_fn)
 
     def test_get_from_hub(self):
         def single(backend_type, qasm_fn):
@@ -107,23 +109,25 @@ class Test_backends:
             sim.upload_program(qasm_fn)
             exe_config = ExeConfig(ExeMode.SimStateVector, 1)
             res = sim.execute(exe_config)
-            print(res)
+            a = res["quantum"][1][0]
+            b = res["quantum"][1][3]
+
             assert res["quantum"][0] == ["Q1", "Q2"]
-            assert dist(res["quantum"][1][0], res["quantum"][1][3]) <= 0.01
+            assert dist(a, b) <= 0.01
 
         single(BackendType.DQCSIM_TEQUILA, quiet_fn2)
         single(BackendType.DQCSIM_QUANTUMSIM, quiet_fn2)
-        single(BackendType.DQCSIM_TEQUILA, qcis_fn2)
-        single(BackendType.DQCSIM_QUANTUMSIM, qcis_fn2)
+        single(BackendType.DQCSIM_TEQUILA, qcis_fn)
+        single(BackendType.DQCSIM_QUANTUMSIM, qcis_fn)
+        single(BackendType.SYMQC, qcis_fn)
 
     def single_sim(backend_type, qcis_fn, exp_res):
         hub = Backend_hub()
-        tequila = hub.get_instance(backend_type)
-        tequila.upload_program(qcis_fn)
+        sim = hub.get_instance(backend_type)
+        sim.upload_program(qcis_fn)
         exe_config = ExeConfig(ExeMode.SimFinalResult)
-        sim_result = tequila.execute(exe_config)
+        sim_result = sim.execute(exe_config)
         _, msmt_res = sim_result
-        # print("sim_result: ", sim_result)
         res = msmt_res[0]
         res.reverse()
         int_res = int("".join(map(str, res)), 2)
@@ -147,15 +151,14 @@ class Test_backends:
 
         single(BackendType.DQCSIM_TEQUILA)
         single(BackendType.DQCSIM_QUANTUMSIM)
-        # single(BackendType.SYMQC)
 
 
 if __name__ == "__main__":
     test = Test_backends()
-    # test.test_state_vector()
     # test.test_basic()
     # test.test_upload_program()
-    test.test_execute()
+    # test.test_execute()
     # test.test_shots()
     # test.test_get_from_hub()
+    test.test_state_vector()
     # test.test_sim_in_paral()

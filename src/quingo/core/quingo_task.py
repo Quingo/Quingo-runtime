@@ -110,9 +110,6 @@ class Quingo_task:
         ]:
             return Qisa.QCIS
 
-        if self._backend == BackendType.DQCSIM_TEQUILA:
-            return Qisa.QUIET
-
         if self._backend in [BackendType.QUANTIFY]:
             return Qisa.Quantify
 
