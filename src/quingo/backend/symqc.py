@@ -40,6 +40,7 @@ class IfSymQC(If_backend):
         """
         if exe_config.mode == ExeMode.SimStateVector:
             raw_res = self.sim.simulate("final_state")
+            print(raw_res)
             return raw_res["quantum"][1]
 
         if exe_config.mode == ExeMode.SimFinalResult:

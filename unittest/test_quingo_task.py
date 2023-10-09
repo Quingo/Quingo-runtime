@@ -35,10 +35,10 @@ class TestQuingoTask:
         assert task.debug_mode == True
         assert task.called_qu_dir.samefile(cur_dir)
         assert cur_dir in task.include_dir
-        #os_name = platform.system()
-        #print(task.build_dir)
-        #print(cur_dir / gc.build_dirname)
-        #assert task.build_dir.samefile(cur_dir / gc.build_dirname)
+        # os_name = platform.system()
+        # print(task.build_dir)
+        # print(cur_dir / gc.build_dirname)
+        # assert task.build_dir.samefile(cur_dir / gc.build_dirname)
         assert task.build_dir in task.include_dir
         assert task.called_qu_dir in task.include_dir
         assert task.cl_entry_fn.stem == "main_mock_bar"
@@ -50,9 +50,9 @@ class TestQuingoTask:
             assert task.qisa_type == qisa
 
         single_test(BackendType.SYMQC, Qisa.QCIS)
-        single_test(BackendType.TEUQILA, Qisa.QCIS)
+        single_test(BackendType.DQCSIM_TEQUILA, Qisa.QCIS)
         single_test(BackendType.ZUCHONGZHI, Qisa.QCIS)
-        single_test(BackendType.QUANTUM_SIM, Qisa.QCIS)
+        single_test(BackendType.DQCSIM_QUANTUMSIM, Qisa.QCIS)
         single_test(BackendType.QUANTIFY, Qisa.Quantify)
 
 
