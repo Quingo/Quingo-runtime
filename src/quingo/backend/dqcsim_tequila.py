@@ -8,6 +8,13 @@ from dqcsim.host import *
 logger = get_logger((__name__).split(".")[-1])
 
 
+def bitwise_reverse_sort(lst, k):
+    sorted_lst = []
+    for i in range(len(lst)):
+        sorted_lst.append(lst[int("0b" + bin(i)[2:].zfill(k)[::-1], 2)])
+    return sorted_lst
+
+
 class DQCsim_tequila(If_backend):
     """A functional QCIS simulation backend using PyQCISim and Tequila."""
 
@@ -37,6 +44,10 @@ class DQCsim_tequila(If_backend):
             res = self.sim.run(measure_mod=measure_mod)
             self.sim.stop()
             final_state = eval(res["res"])
+            qu = bitwise_reverse_sort(
+                final_state["quantum"][1], len(final_state["quantum"][0])
+            )
+            final_state["quantum"] = (final_state["quantum"][0], qu)
             return final_state
 
         raise ValueError(

@@ -127,10 +127,6 @@ def get_ansatz(circ_name, theta):
     qasm_fn = compile(task, (theta,),config_file="./std_qcis.qfg")
     res = execute(qasm_fn, BackendType.DQCSIM_QUANTUMSIM, cfg)
     print([i for i in res["quantum"][1]])
-    res = execute(qasm_fn, BackendType.DQCSIM_TEQUILA, cfg)
-    print([i for i in res["quantum"][1]])
-    res = execute(qasm_fn, BackendType.SYMQC, cfg)
-    print([i.evalf() for i in res["quantum"][1]])
     return res
 
 

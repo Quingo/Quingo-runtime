@@ -1,0 +1,10 @@
+import std_ops
+
+operation CCNOT(ctrl_qubit: qubit, ctrl_qubit2: qubit, target_qubit: qubit):unit{
+        H(ctrl_qubit);
+        H(ctrl_qubit2);
+        ctrl<ctrl_qubit, ctrl_qubit2> X(target_qubit);
+        measure(ctrl_qubit);
+        measure(ctrl_qubit2);
+        measure(target_qubit);
+}

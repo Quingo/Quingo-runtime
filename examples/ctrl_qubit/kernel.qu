@@ -1,0 +1,7 @@
+import ctrl_X
+
+operation main_ctrl() : unit {
+    using(ctrl_qubit1:qubit, ctrl_qubit2:qubit, target_qubit:qubit){
+        CCNOT(ctrl_qubit1, ctrl_qubit2, target_qubit);
+    }
+}
