@@ -4,7 +4,6 @@ opaque X2M(q: qubit) : unit;
 opaque Y2P(q: qubit) : unit;
 opaque Y2M(q: qubit) : unit;
 opaque RZ(q: qubit, angle: double) : unit;
-
 opaque CZ(q1: qubit, q2: qubit) : unit;
 opaque measure(q: qubit): bool;
 
@@ -18,9 +17,7 @@ operation init(q: qubit): unit{
     X(q);
 }
 
-operation ansatz(angle: double): unit {
-    
-    using(q0: qubit, q1: qubit) {
+operation ansatz(angle: double,q0: qubit, q1: qubit): unit {
         init(q0);
 
         X2M(q0);
@@ -30,11 +27,11 @@ operation ansatz(angle: double): unit {
         CNOT(q1, q0);
         X2P(q0);
         Y2M(q1);
-        measure(q0);
-        measure(q1);
-    }
-
 }
 
-
-
+operation main(): unit{
+    double angle = 0.0;
+    using(q0: qubit, q1: qubit){
+        ansatz(angle,q0, q1);
+    }
+}

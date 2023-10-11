@@ -1,5 +1,5 @@
 import logging
-from quingo import quingo_interface as qi
+from quingo import *
 from pathlib import Path
 import matplotlib.pyplot as plt
 # from scipy.optimize import minimize_scalar, minimize
@@ -7,10 +7,7 @@ from scipy.optimize import minimize_scalar
 from numpy import *
 import numpy as np
 
-qi.config_execution("state_vector")
-
-if qi.connect_backend('pyqcisim_quantumsim') is False:
-    exit(-1)
+cfg = ExeConfig(ExeMode.SimStateVector,10)
 
 qu_file = Path(__file__).parent / "kernel.qu"
 
@@ -125,9 +122,15 @@ def hamiltonian(g):
 
 
 def get_ansatz(circ_name, theta):
-    if not qi.call_quingo(qu_file, circ_name, theta):
-        print("Failed to call {}".format(circ_name))
-    res = qi.read_result()
+    task = Quingo_task(qu_file, circ_name)
+    #res = call(task, (theta,), BackendType.DQCSIM_TEQUILA, cfg,config_fn="./std_qcis.qfg")
+    qasm_fn = compile(task, (theta,),config_file="./std_qcis.qfg")
+    res = execute(qasm_fn, BackendType.DQCSIM_QUANTUMSIM, cfg)
+    print([i for i in res["quantum"][1]])
+    res = execute(qasm_fn, BackendType.DQCSIM_TEQUILA, cfg)
+    print([i for i in res["quantum"][1]])
+    res = execute(qasm_fn, BackendType.SYMQC, cfg)
+    print([i.evalf() for i in res["quantum"][1]])
     return res
 
 
@@ -178,4 +181,5 @@ def eval_all():
     plt.show()
 
 
-eval_all()
+#eval_all()
+get_ansatz("ansatz", 0.0)

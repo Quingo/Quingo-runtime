@@ -1,0 +1,24 @@
+---
+seed: 6855087608897190850
+plugins:
+  - name: front
+    executable: /home/install_test/anaconda3/envs/quingo/bin/dqcsfeqcis
+    script: tmp.qcis
+    init: []
+    env: []
+    work: "."
+  - name: back
+    executable: /home/install_test/anaconda3/envs/quingo/bin/dqcsbetequila
+    script: ~
+    init: []
+    env: []
+    work: "."
+host_calls:
+  - Start:
+      cbor:
+        - 160
+      args: []
+  - Wait
+hostname: qarch-vm
+username: install_test
+workdir: /home/install_test/Bob/quingo-runtime/examples/H2_VQE

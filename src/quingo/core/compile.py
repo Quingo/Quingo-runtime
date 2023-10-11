@@ -10,7 +10,7 @@ from quingo.backend.qisa import *
 logger = get_logger((__name__).split(".")[-1])
 
 
-def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None):
+def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None, config_file=""):
     """Compile the quingo file with given parameters and return the path of
     the generated qasm file.
     """
@@ -25,7 +25,7 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None):
 
     quingoc_path = Path(get_mlir_path())
 
-    compile_cmd = compose_cl_cmd(task, qasm_fn, quingoc_path)
+    compile_cmd = compose_cl_cmd(task, qasm_fn, quingoc_path,config_file)
     logger.info(compile_cmd)
     ret_value = subprocess.run(
         compile_cmd,
@@ -49,7 +49,7 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None):
         return qasm_fn
 
 
-def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path):
+def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path, configfile=""):
     qasm_fn = ensure_path(qasm_fn)
     quingoc_path = ensure_path(quingoc_path)
 
@@ -66,8 +66,12 @@ def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path):
 
     opt_out_fn = '-o "{}"'.format(str(qasm_fn))
 
-    cmd_eles = [cl_path, cl_entry_fn, opt_inc_dirs, opt_isa, opt_qubit_map, opt_out_fn]
+    config_fn = '--config-fn="{}"'.format(str(configfile))
+
+    cmd_eles = [cl_path, cl_entry_fn, opt_inc_dirs,config_fn, opt_isa, opt_qubit_map, opt_out_fn]
 
     compile_cmd = " ".join([ele for ele in cmd_eles if ele.strip() != ""])
+
+    print(compile_cmd)
 
     return compile_cmd
