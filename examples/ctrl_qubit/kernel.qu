@@ -1,7 +1,13 @@
 import ctrl_X
-
+import std_ops
 operation main_ctrl() : unit {
+    int res;
     using(ctrl_qubit1:qubit, ctrl_qubit2:qubit, target_qubit:qubit){
+        H(ctrl_qubit1);
+        ctrl<ctrl_qubit1> func_ctrl_X(ctrl_qubit2);
         CCNOT(ctrl_qubit1, ctrl_qubit2, target_qubit);
+        measure(ctrl_qubit1);
+        measure(ctrl_qubit2);
+        measure(target_qubit);
     }
 }
