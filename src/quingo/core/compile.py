@@ -72,6 +72,4 @@ def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path, configf
 
     compile_cmd = " ".join([ele for ele in cmd_eles if ele.strip() != ""])
 
-    print(compile_cmd)
-
     return compile_cmd

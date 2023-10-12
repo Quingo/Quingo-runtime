@@ -1,0 +1,208 @@
+import draper
+import std_ops
+import qft
+import utils
+
+/// 2-controlled modular adder:   |b>  ->  | (a + b) mod N>
+///  - given integer `a`, `N`, and number `b` in state |b>,
+///  - return | (a + b) mod N>
+///
+/// parameters:
+///  - c0, c1: the two control qubits
+///  -      b: qubits that hold integer ` b`, in the state after qft.
+///  -    anc: the ancilla qubit, which starts from |0> and end up in |0> as well.
+///  -   a, N: integer, in bit string format
+/// NOTE: b should be a register with n + 1 qubits to avoid overflow.
+///   this extra qubit is necessary which is used to revert the ancilla to |0>.
+operation mod_adder(c0: qubit, c1: qubit, b: qubit[], anc: qubit, a: int[],
+                    N: int[]) : unit {
+    int top_qubit_idx = b.length - 1;
+
+    ctrl<c0, c1>sc_adder(b, a, false);
+    sc_adder(b, N, true);
+
+    iqft_ns(b);
+    CNOT(b[top_qubit_idx], anc);
+    qft_ns(b);
+
+    ctrl<anc>sc_adder(b, N, false);
+
+    // uncompute
+    ctrl<c0, c1>sc_adder(b, a, true);
+
+    iqft_ns(b);
+    X(b[top_qubit_idx]);
+    CNOT(b[top_qubit_idx], anc);
+    X(b[top_qubit_idx]);
+    qft_ns(b);
+
+    ctrl<c0, c1>sc_adder(b, a, false);
+
+    return;
+}
+
+// a two-control adder, used for debugging.
+// | b >  ->   | a + b >
+operation ctrl_adder(c:qubit[2], b: qubit[], a: int[]) : unit {
+    int top_qubit_idx = b.length - 1;
+
+    ctrl<c[0], c[1]>sc_adder(b, a, false);
+}
+
+
+operation mod_adder_nc(b: qubit[], anc: qubit, a: int[], N: int[]) : unit {
+    int top_qubit_idx = b.length - 1;
+
+    sc_adder(b, a, false);
+    sc_adder(b, N, true);
+    iqft_ns(b);
+
+    CNOT(b[top_qubit_idx], anc);
+
+    qft_ns(b);
+    ctrl<anc>sc_adder(b, N, false);
+
+    sc_adder(b, a, true);
+
+    iqft_ns(b);
+    X(b[top_qubit_idx]);
+    CNOT(b[top_qubit_idx], anc);
+    X(b[top_qubit_idx]);
+    qft_ns(b);
+
+    sc_adder(b, a, false);
+    return;
+}
+
+// no control qubits
+// b + a - N + N
+// the ancilla qubit is not reset
+operation mod_add_back_nc(b: qubit[], anc: qubit, a: int[], N: int[]) : unit {
+    int top_qubit_idx = b.length - 1;
+
+    sc_adder(b, a, false);
+    sc_adder(b, N, true);
+    iqft_ns(b);
+
+    CNOT(b[top_qubit_idx], anc);
+
+    qft_ns(b);
+    sc_adder(b, N, false);
+
+    return;
+}
+
+
+operation test_ctrl_adder(c0: int, c1: int, a: int, b: int, width: int) : bool[] {
+    int[] a_bits = get_bin(a, width + 1);
+    int[] b_bits = get_bin(b, width + 1);
+    bool[width + 2] res;
+
+    using(c_qubits: qubit[2], b_qubits: qubit[width + 1]) {
+        for (int i = 0; i < width + 1; i += 1) {
+            if (b_bits[i] == 1) {
+                X(b_qubits[i]);
+            }
+        }
+        if (c0 == 1) {
+            X(c_qubits[0]);
+        }
+        if (c1 == 1) {
+            X(c_qubits[1]);
+        }
+
+        qft_ns(b_qubits);
+        ctrl_adder(c_qubits, b_qubits, a_bits);
+        iqft_ns(b_qubits);
+
+        for (int i = 0; i < width + 1; i += 1) {
+            res[i] = measure(b_qubits[i]);
+        }
+    }
+    return res;
+}
+
+
+
+operation test_mod_adder(c0: int, c1: int, a: int, b: int,  N: int,  width: int) : bool[] {
+    int[] a_bits = get_bin(a, width + 1);
+    int[] b_bits = get_bin(b, width + 1);
+    int[] N_bits = get_bin(N, width + 1);
+    bool[width + 2] res;
+
+    using(c_qubit0: qubit, c_qubit1: qubit, b_qubits: qubit[width + 1], anc: qubit) {
+        if (c0 == 1) {
+            X(c_qubit0);
+        }
+        if (c1 == 1) {
+            X(c_qubit1);
+        }
+
+        for (int i = 0; i < width + 1; i += 1) {
+            if (b_bits[i] == 1) {
+                X(b_qubits[i]);
+            }
+        }
+
+        qft_ns(b_qubits);
+        mod_adder(c_qubit0, c_qubit1, b_qubits, anc, a_bits, N_bits);
+        iqft_ns(b_qubits);
+
+        for (int i = 0; i < width + 1; i += 1) {
+            res[i] = measure(b_qubits[i]);
+        }
+        res[width + 1] = measure(anc);
+    }
+    return res;
+}
+
+operation test_mod_add_back_nc(a: int, b: int, N: int, width: int) : bool[] {
+    int[] a_bits = get_bin(a, width + 1);
+    int[] b_bits = get_bin(b, width + 1);
+    int[] N_bits = get_bin(N, width + 1);
+    bool[width + 2] res;
+
+    using(b_qubits: qubit[width + 1], anc: qubit) {
+        for (int i = 0; i < width + 1; i += 1) {
+            if (b_bits[i] == 1) {
+                X(b_qubits[i]);
+            }
+        }
+
+        qft_ns(b_qubits);
+        mod_add_back_nc(b_qubits, anc, a_bits, N_bits);
+        iqft_ns(b_qubits);
+
+        for (int i = 0; i < width + 1; i += 1) {
+            res[i] = measure(b_qubits[i]);
+        }
+        res[width + 1] = measure(anc);
+    }
+    return res;
+}
+
+operation test_mod_adder_nc(a: int, b: int, N: int, width: int) : bool[] {
+    int[] a_bits = get_bin(a, width + 1);
+    int[] b_bits = get_bin(b, width + 1);
+    int[] N_bits = get_bin(N, width + 1);
+    bool[width + 2] res;
+
+    using(b_qubits: qubit[width + 1], anc: qubit) {
+        for (int i = 0; i < width + 1; i += 1) {
+            if (b_bits[i] == 1) {
+                X(b_qubits[i]);
+            }
+        }
+
+        qft_ns(b_qubits);
+        mod_adder_nc(b_qubits, anc, a_bits, N_bits);
+        iqft_ns(b_qubits);
+
+        for (int i = 0; i < width + 1; i += 1) {
+            res[i] = measure(b_qubits[i]);
+        }
+        res[width + 1] = measure(anc);
+    }
+    return res;
+}
+

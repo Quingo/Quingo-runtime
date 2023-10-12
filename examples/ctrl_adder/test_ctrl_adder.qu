@@ -1,0 +1,72 @@
+import std_ops
+import utils
+import qft
+import cphases
+
+// operation ctrl_adder(c:qubit[2], b: qubit[], a: int[]) : unit {
+//     int top_qubit_idx = b.length - 1;
+
+//     ctrl<c[0], c[1]>sc_adder(b, a, false);
+// }
+
+
+// if reverse is true, and perform b - a -> b
+// if reverse is false, and perform b + a -> b
+operation ctrl_sc_adder(c: qubit[2], qb: qubit[], a: int[], no_ctrl: bool) : unit {
+    int size = a.length;
+    for (int i = size - 1; i >= 0; i -= 1) { // qubit b_{n-1}
+        double sum = 0.0;
+        for (int j = i; j >= 0; j -= 1) {  // qubit a{j}
+            if (a[j] == 1) {
+                sum += 1.0 / toDouble(power_of_2(i - j + 1));
+            }
+        }
+        double angle = 2.0 * pi * sum;
+        if (no_ctrl) {
+            P(qb[i], angle);
+        } else {
+            ctrl<c[0], c[1]>P(qb[i], angle);
+        }
+    }
+}
+
+
+operation test_ctrl_adder(c0: int, c1: int, a: int, b: int, width: int) : bool[] {
+    int[] a_bits = get_bin(a, width + 1);
+    int[] b_bits = get_bin(b, width + 1);
+    bool[width + 2] res;
+
+    // c_qubits: Q1, Q2
+    // b_qubits: Q3, Q4, Q5, Q6
+    using(c_qubits: qubit[2], b_qubits: qubit[width + 1]) {
+        for (int i = 0; i < width + 1; i += 1) {
+            if (b_bits[i] == 1) {
+                X(b_qubits[i]);
+            }
+        }
+        if (c0 == 1) {
+            X(c_qubits[0]);
+        }
+        if (c1 == 1) {
+            X(c_qubits[1]);
+        }
+
+        qft_ns(b_qubits);
+        // ctrl_adder(c_qubits, b_qubits, a_bits);
+        ctrl_sc_adder(c_qubits, b_qubits, a_bits, false);
+
+        iqft_ns(b_qubits);
+
+        for (int i = 0; i < width + 1; i += 1) {
+            res[i] = measure(b_qubits[i]);
+        }
+    }
+    return res;
+}
+
+// operation main() : bool[] {
+//     int a = 1;
+//     int b = 1;
+//     int width = 1;
+//     return test_ctrl_adder(1, 1, a, b, width);
+// }
