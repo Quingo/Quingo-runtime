@@ -1,0 +1,247 @@
+{
+    "op_list": [
+        {
+            "op_name": "X",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [1, 0, 0],
+                    "rot_angle": 3.141592653589793,
+                    "global_phase": 1.5707963267948966
+                }
+            }
+        },
+        {
+            "op_name": "Y",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0, 1, 0],
+                    "rot_angle": 3.141592653589793,
+                    "global_phase": 1.5707963267948966
+                }
+            }
+        },
+        {
+            "op_name": "Z",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0,0,1],
+                    "rot_angle": 3.141592653589793,
+                    "global_phase": 1.5707963267948966
+                }
+            }
+        },
+        {
+            "op_name": "Rx",
+            "op_def": {
+                "num_target_qubits": 1,
+                "params": [{ "name": "angle", "type": "double" }],
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [1, 0, 0],
+                    "rot_angle": "angle"
+                }
+            }
+        },
+        {
+            "op_name": "Ry",
+            "op_def": {
+                "num_target_qubits": 1,
+                "params": [{ "name": "angle", "type": "double" }],
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0, 1, 0],
+                    "rot_angle": "angle"
+                }
+            }
+        },
+        {
+            "op_name": "Rz",
+            "op_def": {
+                "num_target_qubits": 1,
+                "params": [{ "name": "angle", "type": "double" }],
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0, 0, 1],
+                    "rot_angle": "angle"
+                }
+            }
+        },
+        {
+            "op_name": "P",
+            "op_def": {
+                "num_target_qubits": 1,
+                "params": [{ "name": "angle", "type": "double" }],
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0, 0, 1],
+                    "phase": true,
+                    "rot_angle": "angle"
+                }
+            }
+        },
+        {
+            "op_name": "H",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0.7071067811865476, 0, 0.7071067811865476],
+                    "rot_angle": 3.141592653589793,
+                    "global_phase": 1.5707963267948966
+                }
+            }
+        },
+        {
+            "op_name": "S",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0,0,1],
+                    "rot_angle": 1.5707963267948966,
+                    "global_phase": -0.7853981633974483
+                }
+            }
+        },
+        {
+            "op_name": "Sdag",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0,0,1],
+                    "rot_angle": -1.5707963267948966,
+                    "global_phase": 0.7853981633974483
+                }
+            }
+        },
+        {
+            "op_name": "T",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0,0,1],
+                    "rot_angle": 0.7853981633974483,
+                    "global_phase": -0.3926990816987241
+                }
+            }
+        },
+        {
+            "op_name": "Tdag",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "rotation",
+                    "rot_axis": [0,0,1],
+                    "rot_angle": -0.7853981633974483,
+                    "global_phase": 0.3926990816987241
+                }
+            }
+        },
+        {
+            "op_name": "CZ",
+            "op_def": {
+                "num_target_qubits": 2,
+                "semantics": {
+                    "type": "matrix",
+                    "matrix":
+                        [
+                            [[1,0], [0,0], [0,0], [0,0]],
+                            [[0,0], [1,0], [0,0], [0,0]],
+                            [[0,0], [0,0], [1,0], [0,0]],
+                            [[0,0], [0,0], [0,0], [-1,0]]
+                        ]
+                }
+            }
+        },
+        {
+            "op_name": "CNOT",
+            "op_def": {
+                "num_target_qubits": 2,
+                "semantics": {
+                    "type": "matrix",
+                    "matrix":
+                        [
+                            [[1,0], [0,0], [0,0], [0,0]],
+                            [[0,0], [1,0], [0,0], [0,0]],
+                            [[0,0], [0,0], [0,0], [1,0]],
+                            [[0,0], [0,0], [1,0], [0,0]]
+                        ]
+                }
+            }
+        },
+        {
+            "op_name": "SWAP",
+            "op_def": {
+                "num_target_qubits": 2,
+                "semantics": {
+                    "type": "matrix",
+                    "matrix":
+                        [
+                            [[1,0], [0,0], [0,0], [0,0]],
+                            [[0,0], [0,0], [1,0], [0,0]],
+                            [[0,0], [1,0], [0,0], [0,0]],
+                            [[0,0], [0,0], [0,0], [1,0]]
+                        ]
+                }
+            }
+        },
+        {
+            "op_name": "Toffoli",
+            "op_def": {
+                "num_target_qubits": 3,
+                "semantics": {
+                    "type": "matrix",
+                    "matrix":
+                        [
+                            [[1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0]],
+                            [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0]]
+                        ]
+                }
+            }
+        },
+        {
+            "op_name": "Fredkin",
+            "op_def": {
+                "num_target_qubits": 3,
+                "semantics": {
+                    "type": "matrix",
+                    "matrix":
+                        [
+                            [[1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0]],
+                            [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0]]
+                        ]
+                }
+            }
+        },
+        {
+            "op_name":"measure",
+            "op_def": {
+                "num_target_qubits": 1,
+                "semantics": {
+                    "type": "measure",
+                    "return": "bool"
+                }
+            }
+        }
+    ]
+}

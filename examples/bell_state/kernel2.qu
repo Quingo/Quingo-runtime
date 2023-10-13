@@ -1,0 +1,12 @@
+opaque H (q:qubit): unit;
+opaque CNOT (control: qubit, target: qubit): unit;
+opaque measure (q: qubit): bool; 
+
+operation bell_state() : unit {
+    using(q0: qubit, q1: qubit) {
+        H(q0);
+        CNOT(q0, q1);
+        measure(q0);
+        measure(q1);
+    }
+}
