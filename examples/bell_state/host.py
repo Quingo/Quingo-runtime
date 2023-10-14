@@ -30,6 +30,6 @@ def routine(circ_name, num_shots=1):
     print("sim res: ", res)
 
 
-# SimFinalResult("bell_state", 10)
+SimFinalResult("bell_state", 10)
 # SimStateVector("bell_state")
-routine("bell_state", 5)
+# routine("bell_state", 5)
