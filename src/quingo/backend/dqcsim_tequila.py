@@ -31,24 +31,40 @@ class DQCsim_tequila(If_backend):
     def execute(self, exe_config: ExeConfig):
         if exe_config.mode == ExeMode.SimFinalResult:
             measure_mod = "one_shot"
-            self.sim.simulate()
-            res = self.sim.run(measure_mod=measure_mod, num_shots=exe_config.num_shots)
-            self.sim.stop()
-            final_state = res["res"]
-            final_state["quantum"] = tuple(final_state["quantum"])
-            return final_state["quantum"]
+            try:
+                self.sim.simulate()
+                res = self.sim.run(
+                    measure_mod=measure_mod, num_shots=exe_config.num_shots
+                )
+                self.sim.stop()
+                final_state = res["res"]
+                final_state["quantum"] = tuple(final_state["quantum"])
+                return final_state["quantum"]
+            except:
+                raise ValueError(
+                    "Here is some wrong with ({}) for DQCSIM_TEQUILA.".format(
+                        exe_config.mode
+                    )
+                )
 
         if exe_config.mode == ExeMode.SimStateVector:
             measure_mod = "state_vector"
-            self.sim.simulate()
-            res = self.sim.run(measure_mod=measure_mod)
-            self.sim.stop()
-            final_state = eval(res["res"])
-            qu = bitwise_reverse_sort(
-                final_state["quantum"][1], len(final_state["quantum"][0])
-            )
-            final_state["quantum"] = (final_state["quantum"][0], qu)
-            return final_state
+            try:
+                self.sim.simulate()
+                res = self.sim.run(measure_mod=measure_mod)
+                self.sim.stop()
+                final_state = eval(res["res"])
+                qu = bitwise_reverse_sort(
+                    final_state["quantum"][1], len(final_state["quantum"][0])
+                )
+                final_state["quantum"] = (final_state["quantum"][0], qu)
+                return final_state
+            except:
+                raise ValueError(
+                    "Here is some wrong with ({}) for DQCSIM_TEQUILA.".format(
+                        exe_config.mode
+                    )
+                )
 
         raise ValueError(
             "Unsupported execution mode ({}) for DQCSIM_TEQUILA.".format(
