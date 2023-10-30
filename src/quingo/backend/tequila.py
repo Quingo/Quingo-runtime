@@ -15,18 +15,23 @@ def bitwise_reverse_sort(lst, k):
     return sorted_lst
 
 
-class DQCsim_tequila(If_backend):
+class QuaLeSim_tequila(If_backend):
     """A functional QCIS simulation backend using PyQCISim and Tequila."""
 
     def __init__(self):
-        super().__init__(BackendType.DQCSIM_TEQUILA)
+        super().__init__(BackendType.TEQUILA)
         self.sim = Simulator(stderr_verbosity=Loglevel.OFF)
         self.sim.with_backend("tequila", verbosity=Loglevel.OFF)
         self.res = None
 
     def upload_program(self, prog_fn):
         prog_fn = ensure_path(prog_fn)
-        self.sim.with_frontend(str(prog_fn), verbosity=Loglevel.OFF)
+        if str(prog_fn).endswith(".qcis") or str(prog_fn).endswith(".qi"):
+            self.sim.with_frontend(str(prog_fn), verbosity=Loglevel.OFF)
+        else:
+            raise TypeError(
+                "The tequila simulator can only accept QCIS or QUIET-S instructions."
+            )
 
     def execute(self, exe_config: ExeConfig):
         if exe_config.mode == ExeMode.SimFinalResult:
@@ -42,9 +47,7 @@ class DQCsim_tequila(If_backend):
                 return final_state["quantum"]
             except:
                 raise ValueError(
-                    "Here is some wrong with ({}) for DQCSIM_TEQUILA.".format(
-                        exe_config.mode
-                    )
+                    "Here is some wrong with ({}) for TEQUILA.".format(exe_config.mode)
                 )
 
         if exe_config.mode == ExeMode.SimStateVector:
@@ -61,13 +64,9 @@ class DQCsim_tequila(If_backend):
                 return final_state
             except:
                 raise ValueError(
-                    "Here is some wrong with ({}) for DQCSIM_TEQUILA.".format(
-                        exe_config.mode
-                    )
+                    "Here is some wrong with ({}) for TEQUILA.".format(exe_config.mode)
                 )
 
         raise ValueError(
-            "Unsupported execution mode ({}) for DQCSIM_TEQUILA.".format(
-                exe_config.mode
-            )
+            "Unsupported execution mode ({}) for TEQUILA.".format(exe_config.mode)
         )

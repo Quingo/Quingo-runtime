@@ -1,5 +1,5 @@
-from quingo.backend.dqcsim_tequila import DQCsim_tequila
-from quingo.backend.dqcsim_quantumsim import DQCsim_quantumsim
+from quingo.backend.tequila import QuaLeSim_tequila
+from quingo.backend.quantumsim import QuaLeSim_quantumsim
 from quingo.backend.symqc import IfSymQC
 from quingo.backend.backend_hub import BackendType, Backend_hub
 from quingo.backend.qisa import Qisa
@@ -32,9 +32,9 @@ class Test_backends:
             assert sim.get_qisa() == qisa
             assert sim.is_simulator() == is_sim
 
-        # DQCsim_tequila and DQCsim_quantumsim default Qisa type is QCIS
-        single(DQCsim_tequila, BackendType.DQCSIM_TEQUILA, Qisa.QCIS, True)
-        single(DQCsim_quantumsim, BackendType.DQCSIM_QUANTUMSIM, Qisa.QCIS, True)
+        # QuaLeSim_tequila and QuaLeSim_quantumsim default Qisa type is QCIS
+        single(QuaLeSim_tequila, BackendType.TEQUILA, Qisa.QCIS, True)
+        single(QuaLeSim_quantumsim, BackendType.QUANTUMSIM, Qisa.QCIS, True)
         single(IfSymQC, BackendType.SYMQC, Qisa.QCIS, True)
 
     def test_upload_program(self):
@@ -45,10 +45,10 @@ class Test_backends:
             except Exception as e:
                 assert False, "upload_program failed: {}".format(e)
 
-        single(DQCsim_tequila, qcis_fn)
-        single(DQCsim_tequila, quiet_fn)
-        single(DQCsim_quantumsim, qcis_fn)
-        single(DQCsim_quantumsim, quiet_fn)
+        single(QuaLeSim_tequila, qcis_fn)
+        single(QuaLeSim_tequila, quiet_fn)
+        single(QuaLeSim_quantumsim, qcis_fn)
+        single(QuaLeSim_quantumsim, quiet_fn)
         single(IfSymQC, qcis_fn)
 
     def test_execute(self):
@@ -62,10 +62,10 @@ class Test_backends:
             #assert res[0] == ["Q1", "Q2"]
             #assert all(v in [[0, 0], [1, 1]] for v in res[1])
 
-        single(DQCsim_tequila, qcis_fn)
-        single(DQCsim_quantumsim, qcis_fn)
-        #single(DQCsim_tequila, quiet_fn)
-        #single(DQCsim_quantumsim, quiet_fn)
+        single(QuaLeSim_tequila, qcis_fn)
+        single(QuaLeSim_quantumsim, qcis_fn)
+        #single(QuaLeSim_tequila, quiet_fn)
+        #single(QuaLeSim_quantumsim, quiet_fn)
         single(IfSymQC, qcis_fn)
 
     def test_shots(self):
@@ -80,10 +80,10 @@ class Test_backends:
                 assert len(res[1]) == num_rep
                 assert all(v in [[0, 0], [1, 1]] for v in res[1])
 
-        single(DQCsim_tequila, qcis_fn)
-        single(DQCsim_quantumsim, qcis_fn)
-        single(DQCsim_tequila, quiet_fn)
-        single(DQCsim_quantumsim, quiet_fn)
+        single(QuaLeSim_tequila, qcis_fn)
+        single(QuaLeSim_quantumsim, qcis_fn)
+        single(QuaLeSim_tequila, quiet_fn)
+        single(QuaLeSim_quantumsim, quiet_fn)
         single(IfSymQC, qcis_fn)
 
     def test_get_from_hub(self):
@@ -97,10 +97,10 @@ class Test_backends:
             assert len(res[1]) == 10
             assert all(v in [[0, 0], [1, 1]] for v in res[1])
 
-        single(BackendType.DQCSIM_TEQUILA, qcis_fn)
-        single(BackendType.DQCSIM_QUANTUMSIM, qcis_fn)
-        single(BackendType.DQCSIM_TEQUILA, quiet_fn)
-        single(BackendType.DQCSIM_QUANTUMSIM, quiet_fn)
+        single(BackendType.TEQUILA, qcis_fn)
+        single(BackendType.QUANTUMSIM, qcis_fn)
+        single(BackendType.TEQUILA, quiet_fn)
+        single(BackendType.QUANTUMSIM, quiet_fn)
         single(BackendType.SYMQC, qcis_fn)
 
     def test_state_vector(self):
@@ -116,10 +116,10 @@ class Test_backends:
             assert res["quantum"][0] == ["Q1", "Q2"]
             assert dist(a, b) <= 0.01
 
-        single(BackendType.DQCSIM_TEQUILA, quiet_fn2)
-        single(BackendType.DQCSIM_QUANTUMSIM, quiet_fn2)
-        single(BackendType.DQCSIM_TEQUILA, qcis_fn)
-        single(BackendType.DQCSIM_QUANTUMSIM, qcis_fn)
+        single(BackendType.TEQUILA, quiet_fn2)
+        single(BackendType.QUANTUMSIM, quiet_fn2)
+        single(BackendType.TEQUILA, qcis_fn)
+        single(BackendType.QUANTUMSIM, qcis_fn)
         single(BackendType.SYMQC, qcis_fn)
 
     def single_sim(backend_type, qcis_fn, exp_res):
@@ -150,8 +150,8 @@ class Test_backends:
             t1.start()
             t2.start()
 
-        single(BackendType.DQCSIM_TEQUILA)
-        single(BackendType.DQCSIM_QUANTUMSIM)
+        single(BackendType.TEQUILA)
+        single(BackendType.QUANTUMSIM)
 
 
 if __name__ == "__main__":

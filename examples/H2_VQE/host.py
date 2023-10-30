@@ -15,9 +15,9 @@ qu_file = Path(__file__).parent / "kernel.qu"
 
 def get_ansatz(circ_name, theta):
     task = Quingo_task(qu_file, circ_name)
-    # res = call(task, (theta,), BackendType.DQCSIM_TEQUILA, cfg,config_fn="./std_qcis.qfg")
+    # res = call(task, (theta,), BackendType.TEQUILA, cfg,config_fn="./std_qcis.qfg")
     qasm_fn = compile(task, params=(theta,), config_file="./std_qcis.qfg")
-    res = execute(qasm_fn, BackendType.DQCSIM_QUANTUMSIM, cfg)
+    res = execute(qasm_fn, BackendType.QUANTUMSIM, cfg)
     print([i for i in res["quantum"][1]])
     return res
 

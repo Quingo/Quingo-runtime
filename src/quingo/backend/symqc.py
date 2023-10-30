@@ -23,7 +23,10 @@ class IfSymQC(If_backend):
             prog_fn: the name of the assembly file.
         """
         prog_fn = ensure_path(prog_fn)
-        self.sim.compile_file(prog_fn)
+        if str(prog_fn).endswith(".qcis"):
+            self.sim.compile_file(prog_fn)
+        else:
+            raise TypeError("The SymQC simulator can only accept QCIS instructions.")
 
     def execute(self, exe_config: ExeConfig):
         """Execute the given quantum circuit.

@@ -8,18 +8,23 @@ from dqcsim.host import *
 logger = get_logger((__name__).split(".")[-1])
 
 
-class DQCsim_quantumsim(If_backend):
+class QuaLeSim_quantumsim(If_backend):
     """A functional QCIS simulation backend using PyQCISim and Tequila."""
 
     def __init__(self):
-        super().__init__(BackendType.DQCSIM_QUANTUMSIM)
+        super().__init__(BackendType.QUANTUMSIM)
         self.sim = Simulator(stderr_verbosity=Loglevel.OFF)
         self.sim.with_backend("quantumsim", verbosity=Loglevel.OFF)
         self.res = None
 
     def upload_program(self, prog_fn):
         prog_fn = ensure_path(prog_fn)
-        self.sim.with_frontend(str(prog_fn), verbosity=Loglevel.OFF)
+        if str(prog_fn).endswith(".qcis") or str(prog_fn).endswith(".qi"):
+            self.sim.with_frontend(str(prog_fn), verbosity=Loglevel.OFF)
+        else:
+            raise TypeError(
+                "The quantumsim simulator can only accept QCIS or QUIET-S instructions."
+            )
 
     def execute(self, exe_config: ExeConfig):
         if exe_config.mode == ExeMode.SimFinalResult:
@@ -35,7 +40,7 @@ class DQCsim_quantumsim(If_backend):
                 return final_state["quantum"]
             except:
                 raise ValueError(
-                    "Here is some wrong with ({}) for DQCSIM_QUANTUMSIM.".format(
+                    "Here is some wrong with ({}) for QUANTUMSIM.".format(
                         exe_config.mode
                     )
                 )
@@ -50,13 +55,11 @@ class DQCsim_quantumsim(If_backend):
                 return final_state
             except:
                 raise ValueError(
-                    "Here is some wrong with ({}) for DQCSIM_QUANTUMSIM.".format(
+                    "Here is some wrong with ({}) for QUANTUMSIM.".format(
                         exe_config.mode
                     )
                 )
 
         raise ValueError(
-            "Here is some wrong with ({}) for DQCSIM_QUANTUMSIM.".format(
-                exe_config.mode
-            )
+            "Here is some wrong with ({}) for QUANTUMSIM.".format(exe_config.mode)
         )

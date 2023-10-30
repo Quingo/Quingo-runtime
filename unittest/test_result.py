@@ -1,5 +1,5 @@
-from quingo.backend.dqcsim_tequila import DQCsim_tequila
-from quingo.backend.dqcsim_quantumsim import DQCsim_quantumsim
+from quingo.backend.tequila import QuaLeSim_tequila
+from quingo.backend.quantumsim import QuaLeSim_quantumsim
 from quingo.backend.symqc import IfSymQC
 from quingo.backend.backend_hub import BackendType, Backend_hub
 from quingo.backend.qisa import Qisa
@@ -41,8 +41,8 @@ class Test_backends:
             assert all(v in [[0, 0], [1, 1]] for v in res[1])
             return res
 
-        res1 = single(DQCsim_tequila, qcis_fn, 10)
-        res2 = single(DQCsim_quantumsim, qcis_fn, 8)
+        res1 = single(QuaLeSim_tequila, qcis_fn, 10)
+        res2 = single(QuaLeSim_quantumsim, qcis_fn, 8)
         res3 = single(IfSymQC, qcis_fn, 1)
         assert res1[0] == res2[0]
         assert res2[0] == res3[0]
@@ -58,8 +58,8 @@ class Test_backends:
             assert res["quantum"][0] == ["Q1", "Q2"]
             return res
 
-        res1 = single(DQCsim_tequila, qcis_fn)
-        res2 = single(DQCsim_quantumsim, qcis_fn)
+        res1 = single(QuaLeSim_tequila, qcis_fn)
+        res2 = single(QuaLeSim_quantumsim, qcis_fn)
         res3 = single(IfSymQC, qcis_fn)
         assert is_similar_statevector(res1["quantum"][1], res2["quantum"][1])
         assert is_similar_statevector(res2["quantum"][1], res3["quantum"][1])

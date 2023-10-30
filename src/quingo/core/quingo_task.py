@@ -49,7 +49,7 @@ class Quingo_task:
         self.debug_mode = kwargs.get("debug_mode", False)
         # qisa and backend
         self._qisa = kwargs.get("qisa", None)
-        self._backend = kwargs.get("backend", BackendType.DQCSIM_QUANTUMSIM)
+        self._backend = kwargs.get("backend", BackendType.QUANTUMSIM)
 
     @property
     def qubits_info(self):
@@ -103,10 +103,10 @@ class Quingo_task:
             return self._qisa
 
         if self._backend in [
-            BackendType.DQCSIM_QUANTUMSIM,
+            BackendType.QUANTUMSIM,
             BackendType.SYMQC,
             BackendType.ZUCHONGZHI,
-            BackendType.DQCSIM_TEQUILA,
+            BackendType.TEQUILA,
         ]:
             return Qisa.QCIS
 

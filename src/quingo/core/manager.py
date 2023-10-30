@@ -36,7 +36,7 @@ def execute(qasm_fn: Path, be_type: BackendType, exe_config: ExeConfig = ExeConf
 def call(
     task: Quingo_task,
     params: tuple,
-    be_type: BackendType = BackendType.DQCSIM_QUANTUMSIM,
+    be_type: BackendType = BackendType.QUANTUMSIM,
     exe_config: ExeConfig = ExeConfig(),
     config_fn = ""
 ):
