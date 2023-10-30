@@ -9,12 +9,12 @@ def routine(circ_name, num_shots=1):
     task = Quingo_task(qu_file, circ_name)
     cfg = ExeConfig(ExeMode.SimFinalResult, 10)
     # exemod 1
-    res = call(task, (), BackendType.QUANTUMSIM, cfg)
+    res = call(task, (), BackendType.QUALESIM_QUANTUMSIM, cfg)
     # exemod2
     qasm_fn = compile(task, params=())
-    res = execute(qasm_fn, BackendType.QUANTUMSIM, cfg)
+    res = execute(qasm_fn, BackendType.QUALESIM_QUANTUMSIM, cfg)
     print("sim res: ", res)
-    res = execute(qasm_fn, BackendType.TEQUILA, cfg)
+    res = execute(qasm_fn, BackendType.QUALESIM_TEQUILA, cfg)
     print("sim res: ", res)
     res = execute(qasm_fn, BackendType.SYMQC, cfg)
     print("sim res: ", res)

@@ -36,11 +36,11 @@ def execute(qasm_fn: Path, be_type: BackendType, exe_config: ExeConfig = ExeConf
 def call(
     task: Quingo_task,
     params: tuple,
-    be_type: BackendType = BackendType.QUANTUMSIM,
+    be_type: BackendType = BackendType.QUALESIM_QUANTUMSIM,
     exe_config: ExeConfig = ExeConfig(),
-    config_fn = ""
+    config_fn="",
 ):
     """Execute the quingo task on the specified backend and return the result."""
 
-    qasm_fn = compile(task, params,config_file=config_fn)
+    qasm_fn = compile(task, params, config_file=config_fn)
     return execute(qasm_fn, be_type, exe_config)

@@ -4,11 +4,13 @@ from .qisa import Qisa
 
 
 class BackendType(enum.Enum):
+    QUANTUM_SIM = enum.auto()
+    TEUQILA = enum.auto()
     SYMQC = enum.auto()
     QUANTIFY = enum.auto()
     ZUCHONGZHI = enum.auto()
-    TEQUILA = enum.auto()
-    QUANTUMSIM = enum.auto()
+    QUALESIM_TEQUILA = enum.auto()
+    QUALESIM_QUANTUMSIM = enum.auto()
 
 
 def singleton(cls):
@@ -26,6 +28,18 @@ def singleton(cls):
 class Backend_hub:
     def __init__(self):
         self.backends = {
+            BackendType.QUANTUM_SIM: (
+                "PyQCISim_quantumsim",  # backend class name
+                "pyqcisim_quantumsim",  # module path
+                True,  # is_simulator
+                Qisa.QCIS,  # qisa
+            ),
+            BackendType.TEUQILA: (
+                "PyQCISim_tequila",
+                "pyqcisim_tequila",
+                True,
+                Qisa.QCIS,
+            ),
             BackendType.QUANTIFY: (
                 "quantify",
                 "to be added the hardware driver",
@@ -44,15 +58,15 @@ class Backend_hub:
                 False,
                 Qisa.QCIS,
             ),
-            BackendType.TEQUILA: (
+            BackendType.QUALESIM_TEQUILA: (
                 "QuaLeSim_tequila",
-                "tequila",
+                "qualesim_tequila",
                 True,
                 Qisa.QCIS,
             ),
-            BackendType.QUANTUMSIM: (
+            BackendType.QUALESIM_QUANTUMSIM: (
                 "QuaLeSim_quantumsim",
-                "quantumsim",
+                "qualesim_quantumsim",
                 True,
                 Qisa.QCIS,
             ),

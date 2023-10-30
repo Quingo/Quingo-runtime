@@ -8,13 +8,20 @@ from dqcsim.host import *
 logger = get_logger((__name__).split(".")[-1])
 
 
-class QuaLeSim_quantumsim(If_backend):
+def bitwise_reverse_sort(lst, k):
+    sorted_lst = []
+    for i in range(len(lst)):
+        sorted_lst.append(lst[int("0b" + bin(i)[2:].zfill(k)[::-1], 2)])
+    return sorted_lst
+
+
+class QuaLeSim_tequila(If_backend):
     """A functional QCIS simulation backend using PyQCISim and Tequila."""
 
     def __init__(self):
-        super().__init__(BackendType.QUANTUMSIM)
+        super().__init__(BackendType.QUALESIM_TEQUILA)
         self.sim = Simulator(stderr_verbosity=Loglevel.OFF)
-        self.sim.with_backend("quantumsim", verbosity=Loglevel.OFF)
+        self.sim.with_backend("tequila", verbosity=Loglevel.OFF)
         self.res = None
 
     def upload_program(self, prog_fn):
@@ -23,7 +30,7 @@ class QuaLeSim_quantumsim(If_backend):
             self.sim.with_frontend(str(prog_fn), verbosity=Loglevel.OFF)
         else:
             raise TypeError(
-                "The quantumsim simulator can only accept QCIS or QUIET-S instructions."
+                "The tequila simulator can only accept QCIS or QUIET-S instructions."
             )
 
     def execute(self, exe_config: ExeConfig):
@@ -40,7 +47,7 @@ class QuaLeSim_quantumsim(If_backend):
                 return final_state["quantum"]
             except:
                 raise ValueError(
-                    "Here is some wrong with ({}) for QUANTUMSIM.".format(
+                    "Here is some wrong with ({}) for QUALESIM_TEQUILA.".format(
                         exe_config.mode
                     )
                 )
@@ -52,14 +59,20 @@ class QuaLeSim_quantumsim(If_backend):
                 res = self.sim.run(measure_mod=measure_mod)
                 self.sim.stop()
                 final_state = eval(res["res"])
+                qu = bitwise_reverse_sort(
+                    final_state["quantum"][1], len(final_state["quantum"][0])
+                )
+                final_state["quantum"] = (final_state["quantum"][0], qu)
                 return final_state
             except:
                 raise ValueError(
-                    "Here is some wrong with ({}) for QUANTUMSIM.".format(
+                    "Here is some wrong with ({}) for QUALESIM_TEQUILA.".format(
                         exe_config.mode
                     )
                 )
 
         raise ValueError(
-            "Here is some wrong with ({}) for QUANTUMSIM.".format(exe_config.mode)
+            "Unsupported execution mode ({}) for QUALESIM_TEQUILA.".format(
+                exe_config.mode
+            )
         )

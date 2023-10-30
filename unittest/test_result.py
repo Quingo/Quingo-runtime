@@ -1,5 +1,5 @@
-from quingo.backend.tequila import QuaLeSim_tequila
-from quingo.backend.quantumsim import QuaLeSim_quantumsim
+from quingo.backend.qualesim_tequila import QuaLeSim_tequila
+from quingo.backend.qualesim_quantumsim import QuaLeSim_quantumsim
 from quingo.backend.symqc import IfSymQC
 from quingo.backend.backend_hub import BackendType, Backend_hub
 from quingo.backend.qisa import Qisa
