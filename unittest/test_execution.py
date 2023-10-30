@@ -1,11 +1,13 @@
-from quingo import *
 from pathlib import Path
-
+from quingo.core.manager import call, compile, execute
+from quingo.core.exe_config import *
+from quingo.core.quingo_task import Quingo_task
+from quingo.backend.backend_hub import BackendType, Backend_hub
 
 qu_file = Path(__file__).parent / "test_qu" / "bell.qu"
 
 
-class test_execution:
+class Test_execution:
     def test_execute(self):
         task = Quingo_task(qu_file, "bell_state")
         num_shot = 4
@@ -26,6 +28,6 @@ class test_execution:
 
 
 if __name__ == "__main__":
-    test = test_execution()
+    test = Test_execution()
     test.test_execute()
     test.test_call()
