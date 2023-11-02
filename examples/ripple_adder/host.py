@@ -15,7 +15,7 @@ def routine(circ_name, num_qubits=1, a=[0], b=[0]):
             a,
             b,
         ),
-        BackendType.QUALESIM_QUANTUMSIM,
+        BackendType.QUANTUM_SIM,
         cfg,
     )
     return res

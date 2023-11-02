@@ -1,15 +1,4 @@
-using im, fm
-.body:
-func main ()-> (int[] res_i_0):
-  qubit q_0
-  qubit q_1
-  int i_1
-  int i_2
-  H q_0
-  CNOT q_0, q_1
-  measure(q_0) -> i_1
-  mov res_i_0[0], i_1
-  measure(q_1) -> i_2
-  mov res_i_0[1], i_2
-end
-
+    H    Q1
+ CNOT    Q1           Q2
+    M    Q1
+    M    Q2

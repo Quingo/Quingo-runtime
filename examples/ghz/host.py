@@ -8,7 +8,7 @@ qu_file = Path(__file__).parent / "kernel.qu"
 def routine(circ_name, num_shots=1, num_qubits=1):
     task = Quingo_task(qu_file, circ_name)
     cfg = ExeConfig(ExeMode.SimFinalResult, num_shots)
-    res = call(task, (num_qubits,), BackendType.QUALESIM_QUANTUMSIM, cfg)
+    res = call(task, (num_qubits,), BackendType.QUANTUM_SIM, cfg)
     print("sim res:", res)
 
 

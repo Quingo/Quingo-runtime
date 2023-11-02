@@ -4,7 +4,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 # from scipy.optimize import minimize_scalar, minimize
-from scipy.optimize import minimize_scalar
 from numpy import *
 import numpy as np
 
@@ -17,8 +16,8 @@ def get_ansatz(circ_name, theta):
     task = Quingo_task(qu_file, circ_name)
     # res = call(task, (theta,), BackendType.QUALESIM_TEQUILA, cfg,config_fn="./std_qcis.qfg")
     qasm_fn = compile(task, params=(theta,), config_file="./std_qcis.qfg")
-    res = execute(qasm_fn, BackendType.QUALESIM_QUANTUMSIM, cfg)
-    print([i for i in res["quantum"][1]])
+    res = execute(qasm_fn, BackendType.QUANTUM_SIM, cfg)
+    print(res)
     return res
 
 
