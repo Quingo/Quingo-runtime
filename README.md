@@ -12,6 +12,20 @@ Install Quingo runtime system with required simulators using the following comma
 pip install quingo
 ```
 
+```sh
+# for simulators used:
+git clone https://gitee.com/hpcl_quanta/tequila.git
+git checkout xbackend
+pip install -e .
+
+git clone https://gitee.com/quingo/pyqcisim.git
+git checkout bug-fix
+pip install -e .
+
+git clone https://gitee.com/quingo/SymQC.git
+pip install -e .
+```
+
 Upon success, it will automatically install the Quingo runtime system (this package), the PyQCAS simulator and the PyQCISim simulator.
 
 ### Install the Quingo compiler

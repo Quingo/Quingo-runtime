@@ -13,6 +13,20 @@
 pip install quingo
 ```
 
+```sh
+# for simulators used:
+git clone https://gitee.com/hpcl_quanta/tequila.git
+git checkout xbackend
+pip install -e .
+
+git clone https://gitee.com/quingo/pyqcisim.git
+git checkout bug-fix
+pip install -e .
+
+git clone https://gitee.com/quingo/SymQC.git
+pip install -e .
+```
+
 ### 安装青果编译器
 
 Quingo提供两种方式安装基于`mlir`的青果编译器
