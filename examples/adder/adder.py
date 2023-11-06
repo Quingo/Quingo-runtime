@@ -7,7 +7,6 @@ import threading
 from pathlib import Path
 
 sys.path.append(dirname(dirname(abspath(__file__))))
-print(sys.path)
 from my_utils import *
 from classical_behavior import adder_behavior, subtracter_behavior
 

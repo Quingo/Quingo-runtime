@@ -1,8 +1,0 @@
-import std_ops
-
-operation bell(a: int) : unit {
-    using(q1: qubit, q2: qubit) {
-        H(q1);
-        CNOT(q1, q2);
-    }
-}

@@ -2,10 +2,11 @@ import pytest
 from quingo.core.quingo_task import *
 from pathlib import Path
 from quingo.core.compile import *
-
 from quingo.core.compiler_config import get_mlir_path
+from global_config import SRC_PATH
 
-cur_dir = Path(__file__).parent
+cur_dir = SRC_PATH / "unittest" / ""
+qu_dir = cur_dir / "test_qu" / ""
 
 
 class TestGetMlirPath:
@@ -16,10 +17,17 @@ class TestGetMlirPath:
 
 class TestCompileCmd:
     def test_gen_default(self):
-        mock_fn = cur_dir / "mock.qu"
+        mock_fn = qu_dir / "mock.qu"
         task = Quingo_task(mock_fn, "foo")
         mlir_path = Path(get_mlir_path())
-        qasm_fn = compile(task, (1,2,), qasm_fn="mock.qcis")
+        qasm_fn = compile(
+            task,
+            (
+                1,
+                2,
+            ),
+            qasm_fn=cur_dir / "mock.qcis",
+        )
         cmd = compose_cl_cmd(
             task,
             qasm_fn,
@@ -34,22 +42,22 @@ class TestCompileCmd:
         assert cmd_eles[4] == "-I"
         assert cmd_eles[7] == "--isa=qcis"
         assert cmd_eles[8] == "-o"
-        #assert Path(qasm_fn).samefile(cmd_eles[8].strip('"'))
+        # assert Path(qasm_fn).samefile(cmd_eles[8].strip('"'))
 
     def test_compile(self):
-        bell_fn = cur_dir / "bell.qu"
+        bell_fn = qu_dir / "bell.qu"
         task = Quingo_task(bell_fn, "bell")
-        qasm_fn = compile(task, (1,))
+        qasm_fn = compile(task, ())
         with qasm_fn.open("r") as f:
             lines = f.readlines()
         assert lines[0].strip() == "H    Q1"
         assert lines[1].strip() == "CNOT    Q1           Q2"
 
     def test_compile2(self):
-        bell_fn = cur_dir / "bell.qu"
+        bell_fn = qu_dir / "bell.qu"
         task = Quingo_task(bell_fn, "bell")
-        qasm_fn = compile(task, (1,), qasm_fn="out_bell.qcis")
-        assert qasm_fn.samefile("out_bell.qcis")
+        qasm_fn = compile(task, (), qasm_fn=cur_dir / "out_bell.qcis")
+        assert qasm_fn.samefile(cur_dir / "out_bell.qcis")
         with qasm_fn.open("r") as f:
             lines = f.readlines()
         assert lines[0].strip() == "H    Q1"
@@ -57,7 +65,7 @@ class TestCompileCmd:
 
 
 if __name__ == "__main__":
-    #TestGetMlirPath().test_get_path()
+    # TestGetMlirPath().test_get_path()
     TestCompileCmd().test_gen_default()
-    #TestCompileCmd().test_compile()
-    #TestCompileCmd().test_compile2()
+    # TestCompileCmd().test_compile()
+    # TestCompileCmd().test_compile2()

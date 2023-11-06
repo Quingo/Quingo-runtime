@@ -1,6 +1,6 @@
 import std_ops
 
-operation bell_state() : unit {
+operation bell() : unit {
     using(q0: qubit, q1: qubit) {
         H(q0);
         CNOT(q0, q1);

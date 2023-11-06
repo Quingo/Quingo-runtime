@@ -25,8 +25,8 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None, config_file=
 
     quingoc_path = Path(get_mlir_path())
 
-    compile_cmd = compose_cl_cmd(task, qasm_fn, quingoc_path,config_file)
-    logger.info(compile_cmd)
+    compile_cmd = compose_cl_cmd(task, qasm_fn, quingoc_path, config_file)
+    # logger.info(compile_cmd)
     ret_value = subprocess.run(
         compile_cmd,
         stdout=subprocess.PIPE,
@@ -68,7 +68,15 @@ def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path, configf
 
     config_fn = '--config-fn="{}"'.format(str(configfile))
 
-    cmd_eles = [cl_path, cl_entry_fn, opt_inc_dirs,config_fn, opt_isa, opt_qubit_map, opt_out_fn]
+    cmd_eles = [
+        cl_path,
+        cl_entry_fn,
+        opt_inc_dirs,
+        config_fn,
+        opt_isa,
+        opt_qubit_map,
+        opt_out_fn,
+    ]
 
     compile_cmd = " ".join([ele for ele in cmd_eles if ele.strip() != ""])
 

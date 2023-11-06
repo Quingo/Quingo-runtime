@@ -7,8 +7,9 @@ from quingo.core.exe_config import *
 from pathlib import Path
 import threading
 import random
+from global_config import SRC_PATH
 
-cur_dir = Path(__file__).parent
+cur_dir = SRC_PATH / "unittest" / ""
 qcis_fn = cur_dir / "test_qcis" / "bell.qcis"
 qcis_fn2 = cur_dir / "test_qcis" / "bell_copy.qcis"
 quiet_fn = cur_dir / "test_qcis" / "bell.qi"

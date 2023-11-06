@@ -1,8 +1,10 @@
 import pytest
 from quingo.core.preparation import *
 from pathlib import Path
+from global_config import SRC_PATH
 
-cur_dir = Path(__file__).parent
+cur_dir = SRC_PATH / "unittest" / ""
+qu_dir = cur_dir / "test_qu" / ""
 
 
 class TestPrepareMain:
@@ -67,8 +69,8 @@ operation foo(a: int, b: int): int {
         assert lines[5].startswith("return foo(var0_int, var1_int);")
 
     def test_gen_main_file(self):
-        mock_file = cur_dir / "mock.qu"
-        mock_main_fn = cur_dir / "mock_main.qu"
+        mock_file = qu_dir / "mock.qu"
+        mock_main_fn = qu_dir / "mock_main.qu"
         mock_main_fn.unlink(missing_ok=True)
 
         gen_main_file(mock_file, "foo", mock_main_fn, (1, 2))

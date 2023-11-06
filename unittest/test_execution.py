@@ -3,13 +3,15 @@ from quingo.core.manager import call, compile, execute
 from quingo.core.exe_config import *
 from quingo.core.quingo_task import Quingo_task
 from quingo.backend.backend_hub import BackendType, Backend_hub
+from global_config import SRC_PATH
 
-qu_file = Path(__file__).parent / "test_qu" / "bell.qu"
+cur_dir = SRC_PATH / "unittest" / ""
+qu_file = cur_dir / "test_qu" / "bell.qu"
 
 
 class Test_execution:
     def test_execute(self):
-        task = Quingo_task(qu_file, "bell_state")
+        task = Quingo_task(qu_file, "bell")
         num_shot = 4
         cfg = ExeConfig(ExeMode.SimFinalResult, num_shot)
         qasm_fn = compile(task, params=())
@@ -19,7 +21,7 @@ class Test_execution:
         assert len(res[1]) == 4
 
     def test_call(self):
-        task = Quingo_task(qu_file, "bell_state")
+        task = Quingo_task(qu_file, "bell")
         cfg = ExeConfig(ExeMode.SimFinalResult, 4)
         res = call(task, (), BackendType.QUANTUM_SIM, cfg)
 
