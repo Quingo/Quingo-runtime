@@ -14,7 +14,7 @@ cfg = ExeConfig(ExeMode.SimFinalResult, num_shots)
 # the input param num_qubits
 num_qubits = 5
 
-
-task = Quingo_task(qu_file, circ_name)
+# add debug_mode to output the compile infomation
+task = Quingo_task(qu_file, circ_name, debug_mode=True)
 res = call(task, (num_qubits,), BackendType.QUANTUM_SIM, cfg)
 print("sim res:", res)

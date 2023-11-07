@@ -1,3 +1,14 @@
+def adder_behavior(a, b, num_qubits):
+    return (a + b) % (1 << num_qubits)
+
+
+def subtracter_behavior(a, b, num_qubits):
+    if a >= b:
+        return a - b
+    else:
+        return (1 << num_qubits) - (b - a)
+
+
 def is_number(s):
     try:
         float(s)
@@ -29,7 +40,6 @@ def test_int2bits():
     assert int2bit_list(3, 3) == [1, 1, 0]
     assert int2bit_list(7, 3) == [1, 1, 1]
     assert int2bit_list(1089, 15) == [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0]
-
 
 
 import logging
@@ -96,7 +106,6 @@ def ensure_path(fn) -> Path:
     if isinstance(fn, str):
         fn = Path(fn).resolve()
     return fn
-
 
 
 if __name__ == "__main__":

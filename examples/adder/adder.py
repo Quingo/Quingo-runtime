@@ -5,10 +5,9 @@ from os.path import abspath, dirname
 import termcolor as tc
 import threading
 from pathlib import Path
+from my_utils import *
 
 sys.path.append(dirname(dirname(abspath(__file__))))
-from my_utils import *
-from classical_behavior import adder_behavior, subtracter_behavior
 
 
 def get_first_non_zero_res(sim_result, integer_format=True):
@@ -82,14 +81,14 @@ class Test_Draper_adder:
         num_qubits = 3
         for i in range(1 << 2):
             for j in range(1 << 2):
-                trigger_task(Test_Draper_adder.add_or_sub, (i, j, num_qubits), False)
+                trigger_task(Test_Draper_adder.add_or_sub, (i, j, num_qubits), True)
 
     def test_subtracter(self):
         num_qubits = 3
         for i in range(1 << 2):
             for j in range(1 << 2):
                 trigger_task(
-                    Test_Draper_adder.add_or_sub, (i, j, num_qubits, True), False
+                    Test_Draper_adder.add_or_sub, (i, j, num_qubits, True), True
                 )
 
 
