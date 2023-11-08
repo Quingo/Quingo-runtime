@@ -10,7 +10,7 @@
 
 依次执行以下命令便可以安装青果运行时系统、PyQCAS模拟器以及PyQCISim模拟器。
 ```sh
-pip install quingo
+pip install -e .
 ```
 
 ```sh
@@ -26,6 +26,7 @@ pip install -e .
 git clone https://gitee.com/quingo/SymQC.git
 pip install -e .
 ```
+
 
 ### 安装青果编译器
 
@@ -53,11 +54,11 @@ python host.py
 ```
 如果一切正常，将会输出如下结果：
 ```sh
-connecting pyqcisim_quantumsim...
-num_qubits:  2
-The result of bell_state is:
-(['q0', 'q1'], {'00': 504, '01': 0, '10': 0, '11': 496})
+sim res:  (['Q1', 'Q2'], [[0, 0], [0, 0], [1, 1], [1, 1], [0, 0], [0, 0], [0, 0], [1, 1], [0, 0], [1, 1]])
 ```
+针对不同的模拟后端，详见`src/examples/sim_backend`，其中展示了目前稳定运行的SymQC、QuantumSim何Tequila后端的使用。
+
+针对不同的模拟模式，详见`src/examples/sim_exemode`，展示了对于目前的两种不同的模拟结果的输出。
 
 ## 青果运行时系统提供的API
 `Quingo_interface`类提供了以下方法:

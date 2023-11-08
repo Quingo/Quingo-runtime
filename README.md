@@ -9,7 +9,7 @@ The Quingo installation comprises of two main steps:
 ### Install the Runtime system and simulator
 Install Quingo runtime system with required simulators using the following command:
 ```sh
-pip install quingo
+pip install -e .
 ```
 
 ```sh
@@ -54,11 +54,11 @@ python host.py
 ```
 If everything runs correctly, you should see the following output:
 ```sh
-connecting pyqcisim_quantumsim...
-num_qubits:  2
-The result of bell_state is:
-(['q0', 'q1'], {'00': 504, '01': 0, '10': 0, '11': 496})
+sim res:  (['Q1', 'Q2'], [[0, 0], [0, 0], [1, 1], [1, 1], [0, 0], [0, 0], [0, 0], [1, 1], [0, 0], [1, 1]])
 ```
+For different simulation backend, please refer to `src/examples/sim_backend`, which shows the use of SymQC, QuantumSim, and Tequila backend that are currently running stably.
+
+For different simulation modes, please refer to `src/examples/sim_exemode`, which displays the output of two different simulation results currently available.
 
 ## APIs of the Quingo runtime system
 The `Quingo_interface` class expose the following methods:
