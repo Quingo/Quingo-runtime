@@ -1,12 +1,9 @@
 from pathlib import Path
 
-compiler_fn = "quingo.jar"
 qgrtsys_root_dir = Path(__file__).absolute().parent
-xtext_compiler_config_path = qgrtsys_root_dir / "core" / "xtext_compiler_path.txt"
 mlir_compiler_config_path = qgrtsys_root_dir / "core" / "mlir_compiler_path.txt"
 
 default_mlir_compiler_path = Path.home() / ".quingo" / "quingoc"
-default_xtext_compiler_path = Path.home() / ".quingo" / "quingo.jar"
 
 std_op_fn = "standard_operations.qu"
 std_qfg_fn = "config-quingo.qfg"

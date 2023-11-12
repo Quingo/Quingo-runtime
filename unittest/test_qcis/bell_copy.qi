@@ -1,0 +1,7 @@
+.body:
+    func main()->(int c1, int c2):
+        qubit Q1
+        qubit Q2
+        H Q1
+        CNOT Q1, Q2
+    end

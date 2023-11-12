@@ -1,0 +1,21 @@
+import std_ops
+
+operation func_ctrl_X(qubit1: qubit):unit{
+        X(qubit1);
+}
+
+operation CCNOT(ctrl_qubit1: qubit, ctrl_qubit2: qubit, target_qubit: qubit):unit{
+        ctrl<ctrl_qubit1, ctrl_qubit2> X(target_qubit);
+}
+
+operation main_ctrl() : unit {
+    int res;
+    using(ctrl_qubit1:qubit, ctrl_qubit2:qubit, target_qubit:qubit){
+        H(ctrl_qubit1);
+        ctrl<ctrl_qubit1> func_ctrl_X(ctrl_qubit2);
+        CCNOT(ctrl_qubit1, ctrl_qubit2, target_qubit);
+        measure(ctrl_qubit1);
+        measure(ctrl_qubit2);
+        measure(target_qubit);
+    }
+}

@@ -10,17 +10,25 @@
 
 依次执行以下命令便可以安装青果运行时系统、PyQCAS模拟器以及PyQCISim模拟器。
 ```sh
-pip install quingo
+pip install -e .
 ```
 
+```sh
+# for simulators used:
+git clone https://gitee.com/hpcl_quanta/tequila.git
+git checkout xbackend
+pip install -e .
+
+git clone https://gitee.com/quingo/pyqcisim.git
+git checkout bug-fix
+pip install -e .
+
+git clone https://gitee.com/quingo/SymQC.git
+pip install -e .
+```
+
+
 ### 安装青果编译器
-
-目前的青果编译器有两个版本：
-
-1. 基于`mlir`的青果编译器，该编译器可以生成能够被PyQCISim模拟器模拟的QCIS指令。
-2. 基于`xtext`的青果编译器，该编译器可以生成能够被PyQCAS模拟器模拟的eQASM指令。
-
-#### 安装基于`mlir`的青果编译器
 
 Quingo提供两种方式安装基于`mlir`的青果编译器
 
@@ -38,18 +46,6 @@ Quingo提供两种方式安装基于`mlir`的青果编译器
   + Macos:解压dmg压缩包，将Quingoc可执行文件拷贝到用户指定的目录下，并添加该目录加入到系统环境变量PATH中
 
 
-
-#### 安装基于`xtext`的青果编译器
-
-目前，基于`xtext`的青果编译器还未实现自动下载，故用户需要单独下载[java二进制文件](https://github.com/Quingo/compiler_xtext/releases)来获取青果编译器。
-
-下载二进制文件后，需使用以下命令来指定编译器的路径：
-```python
-import quingo
-# xtext编译器
-quingo.set_xtext_compiler_path(<path-to-quingo.jar>)
-```
-
 ## 使用
 一个简单的例子可以在目录`src/examples`中找到。您可以通过执行以下命令简单地运行`Bell_state`示例：
 ```sh
@@ -58,18 +54,17 @@ python host.py
 ```
 如果一切正常，将会输出如下结果：
 ```sh
-connecting pyqcisim_quantumsim...
-num_qubits:  2
-The result of bell_state is:
-(['q0', 'q1'], {'00': 504, '01': 0, '10': 0, '11': 496})
+sim res:  (['Q1', 'Q2'], [[0, 0], [0, 0], [1, 1], [1, 1], [0, 0], [0, 0], [0, 0], [1, 1], [0, 0], [1, 1]])
 ```
+针对不同的模拟后端，详见`src/examples/sim_backend`，其中展示了目前稳定运行的SymQC、QuantumSim何Tequila后端的使用。
+
+针对不同的模拟模式，详见`src/examples/sim_exemode`，展示了对于目前的两种不同的模拟结果的输出。
 
 ## 青果运行时系统提供的API
 `Quingo_interface`类提供了以下方法:
  - `set_log_level(<log_level>)`: 该方法中`<log_level>`的值可以是`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`中的任意一个。
  - `connect_backend(<backend>)`: 该方法中`<backend>`的值目前可以是`'pyqcas_quantumsim'`或者`'pyqcisim_quantumsim'`。
 - `get_backend_name()`方法返回正在使用的后端名称。如果没有设置后端，将返回一个空字符串。
-- `set_compiler(<compiler_name>)`: `<compiler_name>`中的值可以是`'mlir'` 或者`'xtext'`。
 - `get_last_qasm()`用来获取上次执行生成的qasm指令代码。
 - `config_execution(<mode>, <num_shots>)`:
   -  `config_execution`能够将执行模式配置为`'one_shot'`或`'state_vector'`.
