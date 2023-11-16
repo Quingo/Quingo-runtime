@@ -62,11 +62,11 @@ def expectation(h, state):
     return get_real(np.dot(t_conj_state, np.dot(h, state_matrix)))
 
 
-def energy_theta(qu_file, circ_name, params: np.array, paulis, coeffs):
+def energy_theta(qu_file, circ_name, backend, params: np.array, paulis, coeffs):
     """Return the calculated energy for the given parameter theta."""
     pr = tuple(params)
     ansatz_state = get_ansatz(
-        qu_file, circ_name, params=pr, config_file="./std_qcis.qfg"
+        qu_file, circ_name, backend, params=pr, config_file="./std_qcis.qfg"
     )
     h = hamiltonian(paulis, coeffs)
     energy = expectation(h, ansatz_state)
@@ -74,11 +74,19 @@ def energy_theta(qu_file, circ_name, params: np.array, paulis, coeffs):
     return energy
 
 
-def vqe(qu_file, circ_name, num_theta: int, paulis, coeffs, method="Nelder-Mead"):
+def vqe(
+    qu_file,
+    circ_name,
+    num_theta: int,
+    paulis,
+    coeffs,
+    backend=BackendType.QUANTUM_SIM,
+    method="Nelder-Mead",
+):
     """Return the calculated energy for the given parameter theta."""
 
     def func(params):
-        return energy_theta(qu_file, circ_name, params, paulis, coeffs).A[0][0]
+        return energy_theta(qu_file, circ_name, backend, params, paulis, coeffs).A[0][0]
 
     theta = random.uniform(0, 2 * np.pi)
     x1 = np.array([theta] * num_theta)
