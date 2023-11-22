@@ -43,7 +43,7 @@ class IfSymQC(If_backend):
         """
         if exe_config.mode == ExeMode.SimStateVector:
             raw_res = self.sim.simulate("final_state")
-            return raw_res
+            return [complex(i) for i in raw_res["quantum"][1]]
 
         if exe_config.mode == ExeMode.SimFinalResult:
             return self.sim.simulate("one_shot", exe_config.num_shots)

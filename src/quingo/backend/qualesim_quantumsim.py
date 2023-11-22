@@ -52,7 +52,7 @@
 #                 res = self.sim.run(measure_mod=measure_mod)
 #                 self.sim.stop()
 #                 final_state = eval(res["res"])
-#                 return final_state
+#                 return final_state["quantum"][1]
 #             except:
 #                 raise ValueError(
 #                     "Here is some wrong with ({}) for QUALESIM_QUANTUMSIM.".format(

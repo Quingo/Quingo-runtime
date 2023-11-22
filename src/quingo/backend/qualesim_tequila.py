@@ -63,7 +63,7 @@
 #                     final_state["quantum"][1], len(final_state["quantum"][0])
 #                 )
 #                 final_state["quantum"] = (final_state["quantum"][0], qu)
-#                 return final_state
+#                 return final_state["quantum"][1]
 #             except:
 #                 raise ValueError(
 #                     "Here is some wrong with ({}) for QUALESIM_TEQUILA.".format(

@@ -1,6 +1,9 @@
 from pathlib import Path
 import matplotlib.pyplot as plt
 from VQE import vqe
+from ansatz import Ansatz_circuit
+from Hamiltonian import Hamiltonian
+from quingo import *
 
 bond_h_decompose = [
     [0.20, 2.8489, 0.5678, -1.4508, 0.6799, 0.0791, 0.0791],
@@ -67,13 +70,19 @@ def eval_all_vqe():
     qu_file = Path(__file__).parent / "kernel.qu"
     circ_name = "ansatz"
     num_theta = 2
+    circ = Ansatz_circuit(qu_file, circ_name, num_theta)
     for b in bond_h_decompose:
         bond_length.append(b[0])
         coeffs = b[1:]
+        h = Hamiltonian(paulis, coeffs)
 
         # --------------- optimization based on searching ---------------
         minimum = vqe(
-            qu_file, circ_name, num_theta, paulis, coeffs, method="Nelder-Mead"
+            circ,
+            h,
+            backend=BackendType.QUANTUM_SIM,
+            method="Nelder-Mead",
+            circ_cfg_file="./std_qcis.qfg",
         )
         print(minimum.fun)
         print("-----------------------------------")
@@ -86,4 +95,4 @@ def eval_all_vqe():
     plt.show()
 
 
-# eval_all_vqe()
+eval_all_vqe()

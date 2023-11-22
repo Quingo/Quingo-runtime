@@ -1,6 +1,6 @@
 # 1. 构造哈密顿量
-from Hamiltonian import hamiltonian
-from ansatz import get_ansatz
+from Hamiltonian import hamiltonian, Hamiltonian
+from ansatz import Ansatz_circuit
 
 # 验证 hamiltonian 的正确性
 """
@@ -51,44 +51,44 @@ from typing import List
 import random
 
 
-def get_real(c):
-    return np.real(c)
-
-
 def expectation(h, state):
     """Return the expectation value of the given state under the given hamiltonian."""
     state_matrix = np.mat(state).T
     t_conj_state = state_matrix.T.conjugate()
-    return get_real(np.dot(t_conj_state, np.dot(h, state_matrix)))
+    return np.real(np.dot(t_conj_state, np.dot(h, state_matrix)))
 
 
-def energy_theta(qu_file, circ_name, backend, params: np.array, paulis, coeffs):
+def energy_theta(
+    circ: Ansatz_circuit,
+    params: np.array,
+    hamiltonian: Hamiltonian,
+    backend=BackendType.QUANTUM_SIM,
+    config_file="",
+):
     """Return the calculated energy for the given parameter theta."""
-    pr = tuple(params)
-    ansatz_state = get_ansatz(
-        qu_file, circ_name, backend, params=pr, config_file="./std_qcis.qfg"
-    )
-    h = hamiltonian(paulis, coeffs)
+    circ.params = params
+    circ.with_backend(backend)
+    circ.with_config_file(config_file)
+    ansatz_state = circ.get_ansatz()
+    h = hamiltonian.to_matrix()
     energy = expectation(h, ansatz_state)
     print(energy)
     return energy
 
 
 def vqe(
-    qu_file,
-    circ_name,
-    num_theta: int,
-    paulis,
-    coeffs,
+    circ: Ansatz_circuit,
+    hamiltonian: Hamiltonian,
     backend=BackendType.QUANTUM_SIM,
     method="Nelder-Mead",
+    circ_cfg_file="",
 ):
     """Return the calculated energy for the given parameter theta."""
 
     def func(params):
-        return energy_theta(qu_file, circ_name, backend, params, paulis, coeffs).A[0][0]
+        return energy_theta(circ, params, hamiltonian, backend, circ_cfg_file).A[0][0]
 
     theta = random.uniform(0, 2 * np.pi)
-    x1 = np.array([theta] * num_theta)
+    x1 = np.array([theta] * circ.num_params)
     minimum = minimize(fun=func, x0=x1, method=method)
     return minimum
