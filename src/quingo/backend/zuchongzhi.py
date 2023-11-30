@@ -57,7 +57,7 @@ class Zuchongzhi(If_backend):
         result = self.format_result(result)
         return result
 
-    def set_account(self, login_key, machine_name, lab_id=None):
+    def set_account(self, login_key, machine_name):
         self.account = Account(login_key=login_key, machine_name=machine_name)
         print(f"Set account successfully:")
         print(f"   login key = {login_key[0:5]}" + "*" * (len(login_key) - 5))
