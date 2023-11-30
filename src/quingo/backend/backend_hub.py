@@ -55,7 +55,7 @@ class Backend_hub:
             BackendType.ZUCHONGZHI: (
                 "Zuchongzhi",
                 "zuchongzhi",
-                False,
+                True,
                 Qisa.QCIS,
             ),
             # BackendType.QUALESIM_TEQUILA: (

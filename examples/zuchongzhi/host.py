@@ -15,7 +15,7 @@ def routine(circ_name, num_shots=1):
     )
     qasm_fn = compile(task, params=(), config_file="")
     res = execute(qasm_fn, BackendType.ZUCHONGZHI, cfg)
-    print("sim res: ", res)
+    print("result: ", res)
 
 
 routine("bell_state", 10)

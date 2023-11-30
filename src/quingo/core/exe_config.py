@@ -22,10 +22,12 @@ class ExeConfig:
         mode: ExeMode = ExeMode.SimFinalResult,
         num_shots: int = 1,
         zcz_login_key: str = None,  # use for connecting Zuchongzhi
+        zcz_machine_name: str = None,  # use for connecting Zuchongzhi
     ):
         self.mode = mode
         self.num_shots = num_shots
         self.zcz_login_key = zcz_login_key
+        self.zcz_machine_name = zcz_machine_name
 
     def __str__(self) -> str:
         return str(self.mode)
