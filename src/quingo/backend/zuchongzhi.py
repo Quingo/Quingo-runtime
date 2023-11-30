@@ -13,7 +13,6 @@ class Zuchongzhi(If_backend):
     def __init__(self):
         super().__init__(BackendType.ZUCHONGZHI)
         self.account = None
-        self.res = None
         self.qcis_circuit = None
 
     def upload_program(self, prog_fn):
@@ -32,19 +31,16 @@ class Zuchongzhi(If_backend):
           - mode (str): the simulation mode to use:
               - "one_shot": the simulation result is a dictionary with each key being a qubit
                   measured, and the value is the outcome of measuring this qubit.
-              - "final_state": the simulation result is a two-level dictionary:
-                  {
-                    'classical': {'Q1': 1, 'Q2': 0},
-                    'quantum': (['Q3', 'Q4'], array([0, 1, 0, 0]))
-                  }
           - num_shots (int): the number of iterations performed in `one_shot` mode.
+          - zcz_login_key (str): login key to connect zuchongzhi
+          - zcz_machine_name (str): name of machine name to execute qcis
         """
         if not exe_config.mode == ExeMode.RealMachine:
             raise ValueError(
                 f"Unsupported execution mode ({exe_config.mode}) for Zuchongzhi."
             )
 
-        # connect to zuchongzhi
+        # connect zuchongzhi
         self.set_account(exe_config.zcz_login_key, exe_config.zcz_machine_name)
 
         # submit job
@@ -54,7 +50,7 @@ class Zuchongzhi(If_backend):
 
         # invalid query
         if not query_id:
-            raise EnvironmentError("Fail to connect with Zuchongzhi!")
+            raise EnvironmentError("Fail to connect Zuchongzhi!")
 
         # read result
         result = self.account.query_experiment(query_id, max_wait_time=360000)
