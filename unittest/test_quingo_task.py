@@ -51,7 +51,7 @@ class TestQuingoTask:
             assert task.qisa_type == qisa
 
         single_test(BackendType.SYMQC, Qisa.QCIS)
-        single_test(BackendType.TEUQILA, Qisa.QCIS)
+        single_test(BackendType.TEQUILA, Qisa.QCIS)
         single_test(BackendType.QUANTUM_SIM, Qisa.QCIS)
         # single_test(BackendType.QUALESIM_TEQUILA, Qisa.QCIS)
         # single_test(BackendType.QUALESIM_QUANTUMSIM, Qisa.QCIS)

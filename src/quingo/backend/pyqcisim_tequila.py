@@ -11,7 +11,7 @@ class PyQCISim_tequila(If_backend):
     """A functional QCIS simulation backend using PyQCISim and Tequila."""
 
     def __init__(self):
-        super().__init__(BackendType.TEUQILA)
+        super().__init__(BackendType.TEQUILA)
         self.sim = PyQCISim()
         self.sim.setBackend("tequila")
         self.res = None
