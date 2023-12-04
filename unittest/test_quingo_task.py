@@ -55,7 +55,7 @@ class TestQuingoTask:
         single_test(BackendType.QUANTUM_SIM, Qisa.QCIS)
         # single_test(BackendType.QUALESIM_TEQUILA, Qisa.QCIS)
         # single_test(BackendType.QUALESIM_QUANTUMSIM, Qisa.QCIS)
-        single_test(BackendType.ZUCHONGZHI, Qisa.QCIS)
+        single_test(BackendType.XIAOHONG, Qisa.QCIS)
         single_test(BackendType.QUANTIFY, Qisa.Quantify)
 
 

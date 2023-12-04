@@ -10,11 +10,11 @@ def routine(circ_name, num_shots=1):
     cfg = ExeConfig(
         ExeMode.RealMachine,
         num_shots,
-        zcz_login_key="7e6999bab11453428b8ded1fac00b3ea",
-        zcz_machine_name="Transponder",
+        xh_login_key="7e6999bab11453428b8ded1fac00b3ea",
+        xh_machine_name="Transponder",
     )
     qasm_fn = compile(task, params=(), config_file="")
-    res = execute(qasm_fn, BackendType.ZUCHONGZHI, cfg)
+    res = execute(qasm_fn, BackendType.XIAOHONG, cfg)
     print("result: ", res)
 
 

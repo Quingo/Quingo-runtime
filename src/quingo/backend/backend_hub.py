@@ -8,7 +8,7 @@ class BackendType(enum.Enum):
     TEQUILA = enum.auto()
     SYMQC = enum.auto()
     QUANTIFY = enum.auto()
-    ZUCHONGZHI = enum.auto()
+    XIAOHONG = enum.auto()
     # QUALESIM_TEQUILA = enum.auto()
     # QUALESIM_QUANTUMSIM = enum.auto()
 
@@ -52,9 +52,9 @@ class Backend_hub:
                 True,
                 Qisa.QCIS,
             ),
-            BackendType.ZUCHONGZHI: (
-                "Zuchongzhi",
-                "zuchongzhi",
+            BackendType.XIAOHONG: (
+                "XIAOHONG",
+                "XIAOHONG",
                 False,
                 Qisa.QCIS,
             ),
