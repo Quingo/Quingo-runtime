@@ -46,7 +46,9 @@ class XiaoHong(If_backend):
         # submit job
         print(f"Start execute:")
         print(f"num shots = {exe_config.num_shots}")
-        query_id = self.account.submit_job(self.qcis_circuit, exe_config.num_shots)
+        query_id = self.account.submit_job(
+            self.qcis_circuit, num_shots=exe_config.num_shots
+        )
 
         # invalid query
         if not query_id:
