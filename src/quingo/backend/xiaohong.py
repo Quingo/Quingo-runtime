@@ -9,7 +9,7 @@ from pyezQ import *
 logger = get_logger((__name__).split(".")[-1])
 
 
-class XIAOHONG(If_backend):
+class XiaoHong(If_backend):
     def __init__(self):
         super().__init__(BackendType.XIAOHONG)
         self.account = None
@@ -32,15 +32,15 @@ class XIAOHONG(If_backend):
               - "one_shot": the simulation result is a dictionary with each key being a qubit
                   measured, and the value is the outcome of measuring this qubit.
           - num_shots (int): the number of iterations performed in `one_shot` mode.
-          - xh_login_key (str): login key to connect XIAOHONG
+          - xh_login_key (str): login key to connect XiaoHong
           - xh_machine_name (str): name of machine name to execute qcis
         """
         if not exe_config.mode == ExeMode.RealMachine:
             raise ValueError(
-                f"Unsupported execution mode ({exe_config.mode}) for XIAOHONG."
+                f"Unsupported execution mode ({exe_config.mode}) for XiaoHong."
             )
 
-        # connect XIAOHONG
+        # connect XiaoHong
         self.set_account(exe_config.xh_login_key, exe_config.xh_machine_name)
 
         # submit job
@@ -50,7 +50,7 @@ class XIAOHONG(If_backend):
 
         # invalid query
         if not query_id:
-            raise EnvironmentError("Fail to connect XIAOHONG!")
+            raise EnvironmentError("Fail to connect XiaoHong!")
 
         # read result
         result = self.account.query_experiment(query_id, max_wait_time=360000)

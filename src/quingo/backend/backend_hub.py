@@ -53,8 +53,8 @@ class Backend_hub:
                 Qisa.QCIS,
             ),
             BackendType.XIAOHONG: (
-                "XIAOHONG",
-                "XIAOHONG",
+                "XiaoHong",
+                "xiaohong",
                 False,
                 Qisa.QCIS,
             ),
