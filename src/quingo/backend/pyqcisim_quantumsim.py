@@ -42,8 +42,17 @@ class PyQCISim_quantumsim(If_backend):
             return raw_res
 
         if exe_config.mode == ExeMode.SimFinalResult:
-            return self.sim.simulate("one_shot", exe_config.num_shots)
+            result = self.sim.simulate("one_shot", exe_config.num_shots)
+            return self.format_result(result)
 
         raise ValueError(
             "Unsupported execution mode ({}) for quantumsim.".format(exe_config.mode)
         )
+
+    def format_result(self, result):
+        new_meas = []
+        for k,v in result[1].items():
+            meas_list = [int(x) for x in k]
+            for _ in range(v):
+                new_meas.append(meas_list.copy())
+        return (result[0], new_meas)
