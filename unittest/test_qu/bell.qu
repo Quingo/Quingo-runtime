@@ -1,0 +1,11 @@
+import std_ops
+
+operation bell() : unit {
+    using(q0: qubit, q1: qubit) {
+        H(q0);
+        CNOT(q0, q1);
+        measure(q0);
+        measure(q1);
+    }
+}
+

@@ -1,0 +1,4 @@
+    H    Q1
+ CNOT    Q1           Q2
+    M    Q1
+    M    Q2

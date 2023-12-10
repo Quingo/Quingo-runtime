@@ -1,0 +1,239 @@
+    X    Q1
+    X    Q2
+    H    Q4
+ CNOT    Q3           Q4
+   RZ    Q4   -0.7853982
+ CNOT    Q3           Q4
+   RZ    Q4    0.7853982
+   RZ    Q3    0.7853982
+ CNOT    Q2           Q4
+   RZ    Q4   -0.3926991
+ CNOT    Q2           Q4
+   RZ    Q4    0.3926991
+   RZ    Q2    0.3926991
+ CNOT    Q1           Q4
+   RZ    Q4   -0.1963495
+ CNOT    Q1           Q4
+   RZ    Q4    0.1963495
+   RZ    Q1    0.1963495
+    H    Q3
+ CNOT    Q2           Q3
+   RZ    Q3   -0.7853982
+ CNOT    Q2           Q3
+   RZ    Q3    0.7853982
+   RZ    Q2    0.7853982
+ CNOT    Q1           Q3
+   RZ    Q3   -0.3926991
+ CNOT    Q1           Q3
+   RZ    Q3    0.3926991
+   RZ    Q1    0.3926991
+    H    Q2
+ CNOT    Q1           Q2
+   RZ    Q2   -0.7853982
+ CNOT    Q1           Q2
+   RZ    Q2    0.7853982
+   RZ    Q1    0.7853982
+    H    Q1
+   RZ    Q4    2.7488936
+   RZ    Q3    5.4977871
+   RZ    Q2    4.7123890
+   RZ    Q1    3.1415927
+   RZ    Q4   -3.1415927
+    H    Q1
+ CNOT    Q1           Q2
+   RZ    Q2    0.7853982
+ CNOT    Q1           Q2
+   RZ    Q2   -0.7853982
+   RZ    Q1   -0.7853982
+    H    Q2
+ CNOT    Q1           Q3
+   RZ    Q3    0.3926991
+ CNOT    Q1           Q3
+   RZ    Q3   -0.3926991
+   RZ    Q1   -0.3926991
+ CNOT    Q2           Q3
+   RZ    Q3    0.7853982
+ CNOT    Q2           Q3
+   RZ    Q3   -0.7853982
+   RZ    Q2   -0.7853982
+    H    Q3
+ CNOT    Q1           Q4
+   RZ    Q4    0.1963495
+ CNOT    Q1           Q4
+   RZ    Q4   -0.1963495
+   RZ    Q1   -0.1963495
+ CNOT    Q2           Q4
+   RZ    Q4    0.3926991
+ CNOT    Q2           Q4
+   RZ    Q4   -0.3926991
+   RZ    Q2   -0.3926991
+ CNOT    Q3           Q4
+   RZ    Q4    0.7853982
+ CNOT    Q3           Q4
+   RZ    Q4   -0.7853982
+   RZ    Q3   -0.7853982
+    H    Q4
+ CNOT    Q4           Q5
+    H    Q4
+ CNOT    Q3           Q4
+   RZ    Q4   -0.7853982
+ CNOT    Q3           Q4
+   RZ    Q4    0.7853982
+   RZ    Q3    0.7853982
+ CNOT    Q2           Q4
+   RZ    Q4   -0.3926991
+ CNOT    Q2           Q4
+   RZ    Q4    0.3926991
+   RZ    Q2    0.3926991
+ CNOT    Q1           Q4
+   RZ    Q4   -0.1963495
+ CNOT    Q1           Q4
+   RZ    Q4    0.1963495
+   RZ    Q1    0.1963495
+    H    Q3
+ CNOT    Q2           Q3
+   RZ    Q3   -0.7853982
+ CNOT    Q2           Q3
+   RZ    Q3    0.7853982
+   RZ    Q2    0.7853982
+ CNOT    Q1           Q3
+   RZ    Q3   -0.3926991
+ CNOT    Q1           Q3
+   RZ    Q3    0.3926991
+   RZ    Q1    0.3926991
+    H    Q2
+ CNOT    Q1           Q2
+   RZ    Q2   -0.7853982
+ CNOT    Q1           Q2
+   RZ    Q2    0.7853982
+   RZ    Q1    0.7853982
+    H    Q1
+ CNOT    Q5           Q4
+   RZ    Q4   -1.5707963
+ CNOT    Q5           Q4
+   RZ    Q4    1.5707963
+   RZ    Q5    1.5707963
+ CNOT    Q5           Q3
+ CNOT    Q5           Q3
+ CNOT    Q5           Q2
+ CNOT    Q5           Q2
+ CNOT    Q5           Q1
+ CNOT    Q5           Q1
+   RZ    Q4   -2.7488936
+   RZ    Q3   -5.4977871
+   RZ    Q2   -4.7123890
+   RZ    Q1   -3.1415927
+    H    Q1
+ CNOT    Q1           Q2
+   RZ    Q2    0.7853982
+ CNOT    Q1           Q2
+   RZ    Q2   -0.7853982
+   RZ    Q1   -0.7853982
+    H    Q2
+ CNOT    Q1           Q3
+   RZ    Q3    0.3926991
+ CNOT    Q1           Q3
+   RZ    Q3   -0.3926991
+   RZ    Q1   -0.3926991
+ CNOT    Q2           Q3
+   RZ    Q3    0.7853982
+ CNOT    Q2           Q3
+   RZ    Q3   -0.7853982
+   RZ    Q2   -0.7853982
+    H    Q3
+ CNOT    Q1           Q4
+   RZ    Q4    0.1963495
+ CNOT    Q1           Q4
+   RZ    Q4   -0.1963495
+   RZ    Q1   -0.1963495
+ CNOT    Q2           Q4
+   RZ    Q4    0.3926991
+ CNOT    Q2           Q4
+   RZ    Q4   -0.3926991
+   RZ    Q2   -0.3926991
+ CNOT    Q3           Q4
+   RZ    Q4    0.7853982
+ CNOT    Q3           Q4
+   RZ    Q4   -0.7853982
+   RZ    Q3   -0.7853982
+    H    Q4
+    X    Q4
+ CNOT    Q4           Q5
+    X    Q4
+    H    Q4
+ CNOT    Q3           Q4
+   RZ    Q4   -0.7853982
+ CNOT    Q3           Q4
+   RZ    Q4    0.7853982
+   RZ    Q3    0.7853982
+ CNOT    Q2           Q4
+   RZ    Q4   -0.3926991
+ CNOT    Q2           Q4
+   RZ    Q4    0.3926991
+   RZ    Q2    0.3926991
+ CNOT    Q1           Q4
+   RZ    Q4   -0.1963495
+ CNOT    Q1           Q4
+   RZ    Q4    0.1963495
+   RZ    Q1    0.1963495
+    H    Q3
+ CNOT    Q2           Q3
+   RZ    Q3   -0.7853982
+ CNOT    Q2           Q3
+   RZ    Q3    0.7853982
+   RZ    Q2    0.7853982
+ CNOT    Q1           Q3
+   RZ    Q3   -0.3926991
+ CNOT    Q1           Q3
+   RZ    Q3    0.3926991
+   RZ    Q1    0.3926991
+    H    Q2
+ CNOT    Q1           Q2
+   RZ    Q2   -0.7853982
+ CNOT    Q1           Q2
+   RZ    Q2    0.7853982
+   RZ    Q1    0.7853982
+    H    Q1
+   RZ    Q4    2.7488936
+   RZ    Q3    5.4977871
+   RZ    Q2    4.7123890
+   RZ    Q1    3.1415927
+    H    Q1
+ CNOT    Q1           Q2
+   RZ    Q2    0.7853982
+ CNOT    Q1           Q2
+   RZ    Q2   -0.7853982
+   RZ    Q1   -0.7853982
+    H    Q2
+ CNOT    Q1           Q3
+   RZ    Q3    0.3926991
+ CNOT    Q1           Q3
+   RZ    Q3   -0.3926991
+   RZ    Q1   -0.3926991
+ CNOT    Q2           Q3
+   RZ    Q3    0.7853982
+ CNOT    Q2           Q3
+   RZ    Q3   -0.7853982
+   RZ    Q2   -0.7853982
+    H    Q3
+ CNOT    Q1           Q4
+   RZ    Q4    0.1963495
+ CNOT    Q1           Q4
+   RZ    Q4   -0.1963495
+   RZ    Q1   -0.1963495
+ CNOT    Q2           Q4
+   RZ    Q4    0.3926991
+ CNOT    Q2           Q4
+   RZ    Q4   -0.3926991
+   RZ    Q2   -0.3926991
+ CNOT    Q3           Q4
+   RZ    Q4    0.7853982
+ CNOT    Q3           Q4
+   RZ    Q4   -0.7853982
+   RZ    Q3   -0.7853982
+    H    Q4
+    M    Q1
+    M    Q2
+    M    Q3
+    M    Q4
+    M    Q5
