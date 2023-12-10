@@ -50,8 +50,8 @@ class TestCompileCmd:
         qasm_fn = compile(task, ())
         with qasm_fn.open("r") as f:
             lines = f.readlines()
-        assert lines[0].strip() == "H    Q1"
-        assert lines[1].strip() == "CNOT    Q1           Q2"
+        assert lines[0].strip() == "H    Q0"
+        assert lines[2].strip() == "CZ    Q0           Q1"
 
     def test_compile2(self):
         bell_fn = qu_dir / "bell.qu"
@@ -60,8 +60,8 @@ class TestCompileCmd:
         assert qasm_fn.samefile(cur_dir / "out_bell.qcis")
         with qasm_fn.open("r") as f:
             lines = f.readlines()
-        assert lines[0].strip() == "H    Q1"
-        assert lines[1].strip() == "CNOT    Q1           Q2"
+        assert lines[0].strip() == "H    Q0"
+        assert lines[2].strip() == "CZ    Q0           Q1"
 
 
 if __name__ == "__main__":
