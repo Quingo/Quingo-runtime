@@ -1,4 +1,4 @@
-from quingo.backend.zuchongzhi import Zuchongzhi
+from quingo.backend.xiaohong import XiaoHong
 from pathlib import Path
 from quingo.backend.qisa import Qisa
 from quingo.backend.backend_hub import BackendType
@@ -8,32 +8,32 @@ cur_dir = Path(__file__).parent
 qcis_fn = cur_dir / "test_qcis" / "bell.qcis"
 
 
-class Test_zuchongzhi:
+class Test_xiaohong:
     def test_basic(self):
-        tequila = Zuchongzhi()
-        assert tequila.get_type() == BackendType.ZUCHONGZHI
+        tequila = XiaoHong()
+        assert tequila.get_type() == BackendType.XIAOHONG
         assert tequila.get_qisa() == Qisa.QCIS
         assert tequila.is_simulator() == False
 
     def test_upload_program(self):
-        tequila = Zuchongzhi()
+        tequila = XiaoHong()
         try:
             tequila.upload_program(qcis_fn)
         except Exception as e:
             assert False, "upload_program failed: {}".format(e)
 
     def test_execute(self):
-        tequila = Zuchongzhi()
+        tequila = XiaoHong()
         tequila.upload_program(qcis_fn)
-        key_fn = cur_dir / "zuchongzhi_key.txt"
+        key_fn = cur_dir / "xiaohong_key.txt"
         key = key_fn.read_text()
-        exe_config = ExeConfig(zcz_login_key=key)
+        exe_config = ExeConfig(xh_login_key=key)
         res = tequila.execute(exe_config)
         print(res)
 
 
 if __name__ == "__main__":
-    test = Test_zuchongzhi()
+    test = Test_xiaohong()
     test.test_basic()
     test.test_upload_program()
     test.test_execute()

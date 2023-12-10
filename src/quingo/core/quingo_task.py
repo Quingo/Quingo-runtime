@@ -104,9 +104,9 @@ class Quingo_task:
 
         if self._backend in [
             BackendType.QUANTUM_SIM,
-            BackendType.TEUQILA,
+            BackendType.TEQUILA,
             BackendType.SYMQC,
-            BackendType.ZUCHONGZHI,
+            BackendType.XIAOHONG,
             # BackendType.QUALESIM_QUANTUMSIM,
             # BackendType.QUALESIM_TEQUILA,
         ]:

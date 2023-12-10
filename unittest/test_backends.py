@@ -36,7 +36,7 @@ class Test_backends:
         # QuaLeSim_tequila and QuaLeSim_quantumsim default Qisa type is QCIS
         # single(QuaLeSim_tequila, BackendType.QUALESIM_TEQUILA, Qisa.QCIS, True)
         # single(QuaLeSim_quantumsim, BackendType.QUALESIM_QUANTUMSIM, Qisa.QCIS, True)
-        single(PyQCISim_tequila, BackendType.TEUQILA, Qisa.QCIS, True)
+        single(PyQCISim_tequila, BackendType.TEQUILA, Qisa.QCIS, True)
         single(PyQCISim_quantumsim, BackendType.QUANTUM_SIM, Qisa.QCIS, True)
         single(IfSymQC, BackendType.SYMQC, Qisa.QCIS, True)
 
@@ -110,7 +110,7 @@ class Test_backends:
         # single(BackendType.QUALESIM_QUANTUMSIM, qcis_fn)
         # single(BackendType.QUALESIM_TEQUILA, quiet_fn)
         # single(BackendType.QUALESIM_QUANTUMSIM, quiet_fn)
-        single(BackendType.TEUQILA, qcis_fn)
+        single(BackendType.TEQUILA, qcis_fn)
         single(BackendType.QUANTUM_SIM, qcis_fn)
         single(BackendType.SYMQC, qcis_fn)
 
@@ -165,7 +165,7 @@ class Test_backends:
         # single(BackendType.QUALESIM_TEQUILA)
         # single(BackendType.QUALESIM_QUANTUMSIM)
         single(BackendType.QUANTUM_SIM)
-        single(BackendType.TEUQILA)
+        single(BackendType.TEQUILA)
 
 
 if __name__ == "__main__":

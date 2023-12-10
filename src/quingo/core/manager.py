@@ -12,7 +12,7 @@ logger = get_logger((__name__).split(".")[-1])
 
 def verify_backend_config(backend: BackendType, exe_config: ExeConfig) -> bool:
     """Check if the combination of backend and execution configuration is valid."""
-    if backend == BackendType.ZUCHONGZHI and is_simulation(exe_config.mode):
+    if backend == BackendType.XIAOHONG and is_simulation(exe_config.mode):
         return False
 
     if backend == BackendType.QUANTIFY:
@@ -23,7 +23,7 @@ def verify_backend_config(backend: BackendType, exe_config: ExeConfig) -> bool:
 def execute(qasm_fn: Path, be_type: BackendType, exe_config: ExeConfig = ExeConfig()):
     """Execute the quingo task on the specified backend and return the result."""
 
-    if verify_backend_config(be_type, exe_config) is False:
+    if not verify_backend_config(be_type, exe_config):
         raise ValueError(
             "Error configuration {} on the backend {}".format(str(exe_config), backend)
         )

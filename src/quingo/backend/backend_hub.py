@@ -5,10 +5,10 @@ from .qisa import Qisa
 
 class BackendType(enum.Enum):
     QUANTUM_SIM = enum.auto()
-    TEUQILA = enum.auto()
+    TEQUILA = enum.auto()
     SYMQC = enum.auto()
     QUANTIFY = enum.auto()
-    ZUCHONGZHI = enum.auto()
+    XIAOHONG = enum.auto()
     # QUALESIM_TEQUILA = enum.auto()
     # QUALESIM_QUANTUMSIM = enum.auto()
 
@@ -34,7 +34,7 @@ class Backend_hub:
                 True,  # is_simulator
                 Qisa.QCIS,  # qisa
             ),
-            BackendType.TEUQILA: (
+            BackendType.TEQUILA: (
                 "PyQCISim_tequila",
                 "pyqcisim_tequila",
                 True,
@@ -52,9 +52,9 @@ class Backend_hub:
                 True,
                 Qisa.QCIS,
             ),
-            BackendType.ZUCHONGZHI: (
-                "Zuchongzhi",
-                "zuchongzhi",
+            BackendType.XIAOHONG: (
+                "XiaoHong",
+                "xiaohong",
                 False,
                 Qisa.QCIS,
             ),

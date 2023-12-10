@@ -15,7 +15,7 @@ def routine(circ_name, num_shots=1):
     # qasm_fn = compile(task, params=())
     # res = execute(qasm_fn, BackendType.QUANTUM_SIM, cfg)
     # print("sim res: ", res)
-    # res = execute(qasm_fn, BackendType.TEUQILA, cfg)
+    # res = execute(qasm_fn, BackendType.TEQUILA, cfg)
     # print("sim res: ", res)
     # res = execute(qasm_fn, BackendType.SYMQC, cfg)
     # print("sim res: ", res)
