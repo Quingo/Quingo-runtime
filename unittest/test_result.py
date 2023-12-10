@@ -56,7 +56,6 @@ class Test_backends:
         def single(BackendClass, qasm_fn):
             sim = BackendClass()
             sim.upload_program(qasm_fn)
-            num_shots = 10
             exe_config = ExeConfig(ExeMode.SimStateVector)
             res = sim.execute(exe_config)
             print(res)
