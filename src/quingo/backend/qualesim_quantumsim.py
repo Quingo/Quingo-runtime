@@ -2,8 +2,8 @@ from .backend_hub import BackendType
 from .if_backend import If_backend
 from quingo.core.exe_config import *
 from quingo.core.utils import *
-from dqcsim.plugin import *
-from dqcsim.host import *
+from qualesim.plugin import *
+from qualesim.host import *
 
 logger = get_logger((__name__).split(".")[-1])
 
