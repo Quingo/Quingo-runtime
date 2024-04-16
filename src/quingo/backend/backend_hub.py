@@ -1,6 +1,7 @@
 import importlib
 import enum
-from .qisa import Qisa
+from quingo.backend.qisa import Qisa
+from quingo.utils import singleton
 
 
 class BackendType(enum.Enum):
@@ -9,19 +10,8 @@ class BackendType(enum.Enum):
     SYMQC = enum.auto()
     QUANTIFY = enum.auto()
     XIAOHONG = enum.auto()
-    # QUALESIM_TEQUILA = enum.auto()
     QUALESIM_QUANTUMSIM = enum.auto()
-
-
-def singleton(cls):
-    _instance = {}
-
-    def inner():
-        if cls not in _instance:
-            _instance[cls] = cls()
-        return _instance[cls]
-
-    return inner
+    # QUALESIM_TEQUILA = enum.auto()
 
 
 @singleton

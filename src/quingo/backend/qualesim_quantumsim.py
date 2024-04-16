@@ -27,6 +27,28 @@ class QuaLeSim_quantumsim(If_backend):
             )
 
     def execute(self, exe_config: ExeConfig):
+        if exe_config.mode == ExeMode.SimShots:
+            measure_mod = "one_shot"
+            try:
+                self.sim.simulate()
+                res = self.sim.run(
+                    measure_mod=measure_mod, num_shots=exe_config.num_shots
+                )
+                self.sim.stop()
+
+                final_state = res["res"]
+                final_state["quantum"] = tuple(final_state["quantum"])
+                result = final_state["quantum"]
+
+                return result
+
+            except Exception as e:
+                raise ValueError(
+                    "error in QuaLeSim_QuantumSim simulation with mode ({}): {}".format(
+                        exe_config.mode, e
+                    )
+                )
+
         if exe_config.mode == ExeMode.SimFinalResult:
             measure_mod = "one_shot"
             try:
@@ -38,10 +60,11 @@ class QuaLeSim_quantumsim(If_backend):
                 final_state = res["res"]
                 final_state["quantum"] = tuple(final_state["quantum"])
                 return final_state["quantum"]
-            except:
+
+            except Exception as e:
                 raise ValueError(
-                    "Here is some wrong with ({}) for QUALESIM_QUANTUMSIM.".format(
-                        exe_config.mode
+                    "error in QuaLeSim_QuantumSim simulation with mode ({}): {}".format(
+                        exe_config.mode, e
                     )
                 )
 
@@ -53,15 +76,16 @@ class QuaLeSim_quantumsim(If_backend):
                 self.sim.stop()
                 final_state = eval(res["res"])
                 return final_state
-            except:
+
+            except Exception as e:
                 raise ValueError(
-                    "Here is some wrong with ({}) for QUALESIM_QUANTUMSIM.".format(
-                        exe_config.mode
+                    "error in QuaLeSim_QuantumSim simulation with mode ({}): {}".format(
+                        exe_config.mode, e
                     )
                 )
 
         raise ValueError(
-            "Here is some wrong with ({}) for QUALESIM_QUANTUMSIM.".format(
+            "Unsupported execution mode ({}) for QuaLeSim_QuantumSim.".format(
                 exe_config.mode
             )
         )

@@ -23,8 +23,24 @@ class PyQCISim_tequila(If_backend):
         self.sim.compile(program)
 
     def execute(self, exe_config: ExeConfig):
-        if exe_config.mode == ExeMode.SimFinalResult:
+        """Execute the given quantum circuit.
+        Args:
+          - exe_config (ExeConfig): the configuration used to perform simulation by SymQC.
+
+        The number of shots is specified in exe_config.num_shots, which is only valid for
+          ExeMode.SimShots.
+        """
+
+        if exe_config.mode == ExeMode.SimShots:
             return self.sim.simulate("one_shot", exe_config.num_shots)
+
+        if exe_config.mode == ExeMode.SimFinalResult:
+            return self.sim.simulate("final_result")
+
+        if exe_config.mode == ExeMode.SimStateVector:
+            raw_res = self.sim.simulate("state_vector")
+            print("result from pyqcisim_tequila: ", raw_res)
+            return raw_res
 
         raise ValueError(
             "Unsupported execution mode ({}) for TEQUILA.".format(exe_config.mode)
