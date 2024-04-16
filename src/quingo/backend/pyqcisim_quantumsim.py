@@ -42,7 +42,7 @@ class PyQCISim_quantumsim(If_backend):
 
         if exe_config.mode == ExeMode.SimStateVector:
             raw_res = self.sim.simulate("state_vector")
-            return raw_res["quantum"]
+            return raw_res
 
         raise ValueError(
             "Unsupported execution mode ({}) for quantumsim.".format(exe_config.mode)

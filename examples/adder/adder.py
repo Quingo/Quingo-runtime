@@ -10,34 +10,6 @@ from my_utils import *
 sys.path.append(dirname(dirname(abspath(__file__))))
 
 
-def get_first_non_zero_res(sim_result, integer_format=True):
-    """This function is used to get the first non-zero result from the measurement results.
-
-    sim_result format: (qubit_list, msmt res list).
-        An Example result of a simulation with num_shots=3:
-            ```
-            (['Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
-            [[1, 1, 0, 0, 0],
-                [1, 1, 0, 0, 0],
-                [1, 1, 0, 0, 0]])
-            ```
-    return: the first non-zero result (in integer format) in the measurement results.
-    """
-    if sim_result is None:
-        raise ValueError("No measure results found")
-    _, msmt_res = sim_result
-
-    if msmt_res is None:
-        raise ValueError("No measure results found")
-
-    res = msmt_res[0]
-    res.reverse()
-    if integer_format:
-        return int("".join(map(str, res)), 2)
-    else:
-        return msmt_res[0]
-
-
 logger = get_logger("adder_test")
 logger.setLevel(logging.INFO)
 
