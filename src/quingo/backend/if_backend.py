@@ -1,9 +1,5 @@
-import re
-from quingo.core.utils import *
-import logging
-from pathlib import Path
 from .backend_hub import BackendType, Backend_hub
-from quingo.core.exe_config import *
+from quingo.core.exe_config import ExeConfig
 
 
 class If_backend:

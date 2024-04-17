@@ -1,13 +1,16 @@
-from pathlib import Path
-import quingo.core.data_transfer as dt
-from .exe_config import *
-from .quingo_task import Quingo_task
-from .compile import compile
-from .utils import get_logger
-from quingo.backend.backend_hub import BackendType, Backend_hub
-from quingo.backend.qisa import *
+from __future__ import annotations
+from numpy.typing import NDArray
+from typing import List, Union
+import numpy as np
+import array
+import sympy as sp
 
-logger = get_logger((__name__).split(".")[-1])
+from pathlib import Path
+
+from quingo.core.exe_config import ExeConfig, ExeMode
+from quingo.core.quingo_task import Quingo_task
+from quingo.core.compile import compile
+from quingo.backend.backend_hub import BackendType, Backend_hub
 
 
 def verify_backend_config(backend: BackendType, exe_config: ExeConfig) -> bool:
@@ -20,7 +23,9 @@ def verify_backend_config(backend: BackendType, exe_config: ExeConfig) -> bool:
     return True
 
 
-def execute(qasm_fn: Path, be_type: BackendType, exe_config: ExeConfig = ExeConfig()):
+def execute(
+    qasm_fn: Path, be_type: BackendType, exe_config: ExeConfig = ExeConfig()
+) -> Union[List | NDArray]:
     """Execute the quingo task on the specified backend and return the result."""
 
     if not verify_backend_config(be_type, exe_config):
@@ -30,7 +35,31 @@ def execute(qasm_fn: Path, be_type: BackendType, exe_config: ExeConfig = ExeConf
 
     backend = Backend_hub().get_instance(be_type)
     backend.upload_program(qasm_fn)
-    return backend.execute(exe_config)
+    result = backend.execute(exe_config)
+    if exe_config.mode == ExeMode.SimStateVector:
+        names, array_values = result
+        if len(names) == 0:
+            return ([], 1)
+
+        if isinstance(array_values, list):
+            if len(array_values) == 0:
+                return ([], 1)
+
+            array_values = np.array(array_values)
+
+        elif isinstance(array_values, array.array):
+            array_values = np.array(array_values)
+
+        elif isinstance(array_values, sp.Matrix):
+            array_values = np.array(array_values).astype(np.complex64)
+
+        else:
+            assert isinstance(array_values, np.ndarray)
+
+        array_values = array_values.flatten()
+        return (names, array_values)
+
+    return result
 
 
 def call(

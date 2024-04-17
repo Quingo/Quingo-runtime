@@ -1,11 +1,8 @@
+from quingo.utils import ensure_path
 from .backend_hub import BackendType
 from .if_backend import If_backend
-from quingo.core.exe_config import *
-from quingo.core.utils import *
+from quingo.core.exe_config import ExeConfig, ExeMode
 from symqc.simulator import SymQC
-
-
-logger = get_logger((__name__).split(".")[-1])
 
 
 class IfSymQC(If_backend):

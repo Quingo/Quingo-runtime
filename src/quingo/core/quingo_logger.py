@@ -3,7 +3,6 @@ from logging.handlers import TimedRotatingFileHandler
 import sys
 import colorama as cm
 import termcolor as tc
-from pathlib import Path
 
 cm.init()
 
@@ -55,10 +54,3 @@ def get_logger(logger_name):
     # with this pattern, it's rarely necessary to propagate the error up to parent
     logger.propagate = False
     return logger
-
-
-def ensure_path(fn) -> Path:
-    assert isinstance(fn, (str, Path))
-    if isinstance(fn, str):
-        fn = Path(fn).resolve()
-    return fn

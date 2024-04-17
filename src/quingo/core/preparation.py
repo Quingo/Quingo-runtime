@@ -1,11 +1,10 @@
 """The task of this module is to prepare the Quingo source file for the compilation.
 """
 
-
 import re
 from pathlib import Path
-from quingo.core.utils import get_logger
 import logging
+from quingo.core.quingo_logger import get_logger
 import quingo.core.data_transfer as dt
 
 logger = get_logger((__name__).split(".")[-1])

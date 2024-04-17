@@ -1,9 +1,10 @@
 from quingo.backend.backend_hub import BackendType, Backend_hub
 from quingo.core.exe_config import ExeConfig, ExeMode
 from quingo import execute
-from quingo.utils import number_distance
+from quingo.utils import number_distance, state_fidelity
 from pathlib import Path
 import pytest
+import numpy as np
 
 cur_dir = Path(__file__).parent
 
@@ -75,65 +76,27 @@ def test_final_result_without_msmt(get_simulator, get_num_shots):
     print("result: ", result)
 
 
-class TestStateVector:
-    """When simulating a quantum program in the state vector mode,
-    the result should be a tuple:
-        (
-            ["Q1", "Q2"],
-            [0.7071067811865475, 0.0, 0.0, 0.7071067811865475]
-        )
-    """
+def test_state_vector_without_msmt(get_simulator):
+    simulator = get_simulator
+    exe_config = ExeConfig(ExeMode.SimStateVector)
+    qubit_names, state_vec = execute(bell_no_msmt_qcis_fn, simulator, exe_config)
 
-    def vec_tests(self):
-        def vec_test_without_msmt(simulator):
-            exe_config = ExeConfig(ExeMode.SimStateVector)
-            state_vec_res = execute(bell_no_msmt_qcis_fn, simulator, exe_config)
-            assert len(state_vec_res) == 2
-            assert state_vec_res[0] == ["Q1", "Q2"]
-
-            assert len(state_vec_res[1]) == 4
-
-        vec_test_without_msmt(BackendType.TEQUILA)
-        vec_test_without_msmt(BackendType.QUANTUM_SIM)
-        vec_test_without_msmt(BackendType.SYMQC)
-        vec_test_without_msmt(BackendType.QUALESIM_QUANTUMSIM)
-
-    def vec_tests_with_msmt(self):
-
-        def vec_test_with_msmt(simulator):
-            exe_config = ExeConfig(ExeMode.SimStateVector)
-            state_vec_res = execute(bell_qcis_fn, simulator, exe_config)
-            assert len(state_vec_res) == 2
-            assert state_vec_res[0] == ["Q1", "Q2"]
-
-            assert len(state_vec_res[1]) == 4
-
-        vec_test_with_msmt(BackendType.TEQUILA)
-        vec_test_with_msmt(BackendType.QUANTUM_SIM)
-        vec_test_with_msmt(BackendType.SYMQC)
-        vec_test_with_msmt(BackendType.QUALESIM_QUANTUMSIM)
-
-    def test_quantumsim_with_msmt(self):
-        exe_config = ExeConfig(ExeMode.SimStateVector)
-        state_vec_res = execute(
-            bell_no_msmt_qcis_fn, BackendType.QUANTUM_SIM, exe_config
-        )
-        assert len(state_vec_res) == 2
-        assert state_vec_res[0] == ["Q1", "Q2"]
-
-        assert len(state_vec_res[1]) == 4
+    assert qubit_names == ["Q1", "Q2"]
+    assert isinstance(state_vec, (list, np.ndarray))
+    assert state_vec.shape == (4,)
+    assert state_fidelity(
+        state_vec, [0.7071067811865475, 0.0, 0.0, 0.7071067811865475]
+    ) == pytest.approx(1)
 
 
-if __name__ == "__main__":
-    # test_final_result_with_msmt()
-    test_shot_without_msmt(BackendType.QUANTUM_SIM, 10)
-    # test = TestFinalResult()
-    # # test.test_sim_with_msmt()
-    # # test.test_sim_without_msmt()
+def test_state_vector_with_msmt(get_simulator):
+    simulator = get_simulator
+    exe_config = ExeConfig(ExeMode.SimStateVector)
+    qubit_names, state_vec = execute(bell_qcis_fn, simulator, exe_config)
 
-    # # test = TestStateVector()
-    # # test.test_symqc_with_msmt()
-    # # test.test_symqc_without_msmt()
-    # # test.test_quantumsim_with_msmt()
-    # test = TestShots()
-    # test.test_shots()
+    assert qubit_names == ["Q1", "Q2"]
+    assert isinstance(state_vec, (list, np.ndarray))
+    assert state_vec.shape == (4,)
+    assert state_fidelity(
+        state_vec, [0.7071067811865475, 0.0, 0.0, 0.7071067811865475]
+    ) == pytest.approx(1)

@@ -1,7 +1,12 @@
+from __future__ import annotations
+from numpy.typing import NDArray
+from typing import List, Union
+
+
+from quingo.utils import ensure_path
 from .backend_hub import BackendType
 from .if_backend import If_backend
-from quingo.core.exe_config import *
-from quingo.core.utils import *
+from quingo.core.exe_config import ExeMode, ExeConfig
 from pyqcisim.simulator import PyQCISim
 
 
@@ -24,7 +29,7 @@ class PyQCISim_quantumsim(If_backend):
         program = prog_fn.open("r").read()
         self.sim.compile(program)
 
-    def execute(self, exe_config: ExeConfig):
+    def execute(self, exe_config: ExeConfig) -> Union[List | NDArray]:
         """Execute the given quantum circuit.
         Args:
           - mode (str): the simulation mode to use:

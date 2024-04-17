@@ -4,7 +4,8 @@ import numpy
 
 import quingo.global_config as gc
 from quingo.core.data import Time
-from quingo.core.utils import *
+import logging
+from quingo.core.quingo_logger import get_logger
 from typing import Tuple
 
 logger = get_logger((__name__).split(".")[-1])

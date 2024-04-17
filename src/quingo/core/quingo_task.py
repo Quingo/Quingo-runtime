@@ -4,7 +4,7 @@ import quingo.global_config as gc
 import tempfile
 from quingo.backend.backend_hub import BackendType
 from quingo.backend.qisa import Qisa
-from quingo.core.utils import ensure_path
+from quingo.utils import ensure_path
 
 DEBUG_MODE = False
 

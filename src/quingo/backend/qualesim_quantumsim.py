@@ -1,11 +1,8 @@
+from quingo.utils import ensure_path
 from .backend_hub import BackendType
 from .if_backend import If_backend
-from quingo.core.exe_config import *
-from quingo.core.utils import *
-from qualesim.plugin import *
-from qualesim.host import *
-
-logger = get_logger((__name__).split(".")[-1])
+from quingo.core.exe_config import ExeConfig, ExeMode
+from qualesim.plugin import Simulator, Loglevel
 
 
 class QuaLeSim_quantumsim(If_backend):
@@ -75,7 +72,7 @@ class QuaLeSim_quantumsim(If_backend):
                 res = self.sim.run(measure_mod=measure_mod)
                 self.sim.stop()
                 final_state = eval(res["res"])
-                return final_state
+                return final_state["quantum"]
 
             except Exception as e:
                 raise ValueError(
