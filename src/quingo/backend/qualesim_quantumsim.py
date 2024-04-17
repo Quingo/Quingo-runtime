@@ -2,7 +2,8 @@ from quingo.utils import ensure_path
 from .backend_hub import BackendType
 from .if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
-from qualesim.plugin import Simulator, Loglevel
+from qualesim.plugin import Loglevel
+from qualesim.host import Simulator
 
 
 class QuaLeSim_quantumsim(If_backend):
