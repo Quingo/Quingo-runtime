@@ -1,5 +1,5 @@
 from pathlib import Path
-from .utils import quingo_err, quingo_info
+from quingo.core.quingo_logger import quingo_err, quingo_info
 import quingo.global_config as gc
 import distutils.spawn
 import requests

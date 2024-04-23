@@ -4,11 +4,10 @@ from quingo.backend.backend_hub import BackendType
 from quingo.backend.qisa import Qisa
 from pathlib import Path
 import platform
-from global_config import SRC_PATH
 
 
-cur_dir = SRC_PATH / "unittest" / ""
-qu_dir = cur_dir / "test_qu" / ""
+unittest_dir = Path(__file__).parent
+qu_dir = unittest_dir / "test_qu"
 
 
 class TestQuingoTask:

@@ -9,7 +9,7 @@ circ_name = "ghz"
 
 # configure the execution mode
 num_shots = 4
-cfg = ExeConfig(ExeMode.SimFinalResult, num_shots)
+cfg = ExeConfig(ExeMode.SimShots, num_shots)
 
 # the input param num_qubits
 num_qubits = 5

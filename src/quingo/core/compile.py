@@ -1,10 +1,11 @@
-import subprocess, logging
 from pathlib import Path
-from .compiler_config import get_mlir_path
+import subprocess, logging
+from quingo.core.compiler_config import get_mlir_path
 from quingo.core.quingo_task import Quingo_task
 from quingo.core.preparation import gen_main_file
-from quingo.core.utils import quingo_err, get_logger, ensure_path
-from quingo.backend.qisa import *
+from quingo.core.quingo_logger import quingo_err, get_logger
+from quingo.utils import ensure_path
+from quingo.backend.qisa import Qisa, get_qisa_name, get_suffix
 
 
 logger = get_logger((__name__).split(".")[-1])
