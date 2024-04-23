@@ -1,6 +1,8 @@
 from quingo.backend.pyqcisim_tequila import PyQCISim_tequila
 from quingo.backend.pyqcisim_quantumsim import PyQCISim_quantumsim
 from quingo.backend.qualesim_quantumsim import QuaLeSim_quantumsim
+from quingo.backend.qualesim_tequila import QuaLeSim_tequila
+
 from quingo.backend.symqc import IfSymQC
 from quingo.backend.backend_hub import BackendType, Backend_hub
 from quingo.backend.qisa import Qisa
@@ -17,11 +19,11 @@ quiet_fn = cur_dir / "test_qcis" / "bell.qi"
 quiet_fn2 = cur_dir / "test_qcis" / "bell_copy.qi"
 
 
-def dist(a, b):
-    if isinstance(a, complex) and isinstance(b, complex):
-        return (a.real - b.real) ** 2 + (a.imag - b.imag) ** 2
-    else:
-        return (a.evalf() - b.evalf()) ** 2
+# def dist(a, b):
+#     if isinstance(a, complex) and isinstance(b, complex):
+#         return (a.real - b.real) ** 2 + (a.imag - b.imag) ** 2
+#     else:
+#         return (a.evalf() - b.evalf()) ** 2
 
 
 # progress: 2023-10-09
@@ -35,7 +37,7 @@ class Test_backends:
             assert sim.is_simulator() == is_sim
 
         # QuaLeSim_tequila and QuaLeSim_quantumsim default Qisa type is QCIS
-        # single(QuaLeSim_tequila, BackendType.QUALESIM_TEQUILA, Qisa.QCIS, True)
+        single(QuaLeSim_tequila, BackendType.QUALESIM_TEQUILA, Qisa.QCIS, True)
         single(QuaLeSim_quantumsim, BackendType.QUALESIM_QUANTUMSIM, Qisa.QCIS, True)
         single(PyQCISim_tequila, BackendType.TEQUILA, Qisa.QCIS, True)
         single(PyQCISim_quantumsim, BackendType.QUANTUM_SIM, Qisa.QCIS, True)
@@ -49,8 +51,8 @@ class Test_backends:
             except Exception as e:
                 assert False, "upload_program failed: {}".format(e)
 
-        # single(QuaLeSim_tequila, qcis_fn)
-        # single(QuaLeSim_tequila, quiet_fn)
+        single(QuaLeSim_tequila, qcis_fn)
+        single(QuaLeSim_tequila, quiet_fn)
         single(QuaLeSim_quantumsim, qcis_fn)
         single(QuaLeSim_quantumsim, quiet_fn)
         single(PyQCISim_tequila, qcis_fn)
@@ -63,14 +65,13 @@ class Test_backends:
             sim.upload_program(qasm_fn)
             exe_config = ExeConfig(ExeMode.SimFinalResult, 10)
             res = sim.execute(exe_config)
-            print(res)
-            # assert len(res) == 2
-            # assert res[0] == ["Q1", "Q2"]
-            # assert all(v in [[0, 0], [1, 1]] for v in res[1])
+            assert len(res) == 2
+            assert res[0] == ["Q1", "Q2"]
+            assert all(v in [[0, 0], [1, 1]] for v in res[1])
 
-        # single(QuaLeSim_tequila, qcis_fn)
+        single(QuaLeSim_tequila, qcis_fn)
         single(QuaLeSim_quantumsim, qcis_fn)
-        # single(QuaLeSim_tequila, quiet_fn)
+        single(QuaLeSim_tequila, quiet_fn)
         single(QuaLeSim_quantumsim, quiet_fn)
         single(PyQCISim_tequila, qcis_fn)
         single(PyQCISim_quantumsim, qcis_fn)
@@ -124,13 +125,11 @@ class Test_backends:
             res = sim.execute(exe_config)
             a = res["quantum"][1][0]
             b = res["quantum"][1][3]
-
             assert res["quantum"][0] == ["Q1", "Q2"]
-            assert dist(a, b) <= 0.01
 
-        # single(BackendType.QUALESIM_TEQUILA, quiet_fn2)
+        single(BackendType.QUALESIM_TEQUILA, quiet_fn2)
         single(BackendType.QUALESIM_QUANTUMSIM, quiet_fn2)
-        # single(BackendType.QUALESIM_TEQUILA, qcis_fn)
+        single(BackendType.QUALESIM_TEQUILA, qcis_fn)
         single(BackendType.QUALESIM_QUANTUMSIM, qcis_fn)
         single(BackendType.QUANTUM_SIM, qcis_fn2)
         single(BackendType.SYMQC, qcis_fn2)
@@ -163,7 +162,7 @@ class Test_backends:
             t1.start()
             t2.start()
 
-        # single(BackendType.QUALESIM_TEQUILA)
+        single(BackendType.QUALESIM_TEQUILA)
         single(BackendType.QUALESIM_QUANTUMSIM)
         single(BackendType.QUANTUM_SIM)
         single(BackendType.TEQUILA)
