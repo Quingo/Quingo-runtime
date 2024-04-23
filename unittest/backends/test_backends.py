@@ -1,6 +1,6 @@
 from quingo.backend.pyqcisim_tequila import PyQCISim_tequila
 from quingo.backend.pyqcisim_quantumsim import PyQCISim_quantumsim
-from quingo.backend.qualesim_quantumsim import QuaLeSim_quantumsim
+from quingo.backend.qualesim import QuaLeSim
 from quingo.backend.symqc import IfSymQC
 from quingo.backend.backend_hub import BackendType, Backend_hub
 from quingo.backend.qisa import Qisa
@@ -29,7 +29,7 @@ class Test_backends:
 
         # QuaLeSim_tequila and QuaLeSim_quantumsim default Qisa type is QCIS
         # single(QuaLeSim_tequila, BackendType.QUALESIM_TEQUILA, Qisa.QCIS, True)
-        single(QuaLeSim_quantumsim, BackendType.QUALESIM_QUANTUMSIM, Qisa.QCIS, True)
+        single(QuaLeSim, BackendType.QUALESIM_QUANTUMSIM, Qisa.QCIS, True)
         single(PyQCISim_tequila, BackendType.TEQUILA, Qisa.QCIS, True)
         single(PyQCISim_quantumsim, BackendType.QUANTUM_SIM, Qisa.QCIS, True)
         single(IfSymQC, BackendType.SYMQC, Qisa.QCIS, True)
@@ -44,8 +44,8 @@ class Test_backends:
 
         # single(QuaLeSim_tequila, qcis_fn)
         # single(QuaLeSim_tequila, quiet_fn)
-        single(QuaLeSim_quantumsim, qcis_fn)
-        single(QuaLeSim_quantumsim, quiet_fn)
+        single(QuaLeSim, qcis_fn)
+        single(QuaLeSim, quiet_fn)
         single(PyQCISim_tequila, qcis_fn)
         single(PyQCISim_quantumsim, qcis_fn)
         single(IfSymQC, qcis_fn)
@@ -58,7 +58,7 @@ class Test_backends:
 
         single(BackendType.QUANTUM_SIM, PyQCISim_quantumsim)
         single(BackendType.TEQUILA, PyQCISim_tequila)
-        single(BackendType.QUALESIM_QUANTUMSIM, QuaLeSim_quantumsim)
+        single(BackendType.QUALESIM_QUANTUMSIM, QuaLeSim)
         single(BackendType.SYMQC, IfSymQC)
 
 

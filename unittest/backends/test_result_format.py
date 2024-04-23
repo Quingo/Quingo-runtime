@@ -19,8 +19,9 @@ quiet_fn2 = cur_dir / ".." / "test_qcis" / "bell_no_msmt.qi"
 backends = [
     BackendType.QUANTUM_SIM,
     BackendType.TEQUILA,
-    BackendType.QUALESIM_QUANTUMSIM,
     BackendType.SYMQC,
+    BackendType.QUALESIM_QUANTUMSIM,
+    BackendType.QUALESIM_TEQUILA,
 ]
 num_shots = [5, 10]
 

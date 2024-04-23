@@ -1,27 +1,39 @@
+from __future__ import annotations
+from typing import Union
 from quingo.utils import ensure_path
-from .backend_hub import BackendType
-from .if_backend import If_backend
+from pathlib import Path
+from quingo.backend.backend_hub import BackendType
+from quingo.backend.if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
 from qualesim.plugin import Loglevel
 from qualesim.host import Simulator
 
 
-class QuaLeSim_quantumsim(If_backend):
-    """A functional QCIS simulation backend using PyQCISim and Tequila."""
+class QuaLeSim(If_backend):
 
-    def __init__(self):
-        super().__init__(BackendType.QUALESIM_QUANTUMSIM)
+    def __init__(self, backend_type=BackendType.QUALESIM_QUANTUMSIM):
+        super().__init__(backend_type)
         self.sim = Simulator(stderr_verbosity=Loglevel.OFF)
-        self.sim.with_backend("quantumsim", verbosity=Loglevel.OFF)
+        if backend_type == BackendType.QUALESIM_QUANTUMSIM:
+            self.sim.with_backend("quantumsim", verbosity=Loglevel.OFF)
+        elif backend_type == BackendType.QUALESIM_TEQUILA:
+            self.sim.with_backend("tequila", verbosity=Loglevel.OFF)
+        else:
+            raise ValueError(
+                "The QuaLeSim backend only supports QUALESIM_QUANTUMSIM and QUALESIM_TEQUILA."
+            )
+
         self.res = None
 
-    def upload_program(self, prog_fn):
+    def upload_program(self, prog_fn: Union[Path | str]):
         prog_fn = ensure_path(prog_fn)
-        if str(prog_fn).endswith(".qcis") or str(prog_fn).endswith(".qi"):
+
+        if prog_fn.suffix in [".qcis", ".qi"]:
             self.sim.with_frontend(str(prog_fn), verbosity=Loglevel.OFF)
         else:
             raise TypeError(
-                "The quantumsim simulator can only accept QCIS or QUIET-S instructions."
+                "found unsupported file suffix ({}). Currently supported are "
+                "'.qcis' (for QCIS) and '.qi' (for QUIET-s)".format(prog_fn.suffix)
             )
 
     def execute(self, exe_config: ExeConfig):
@@ -42,7 +54,7 @@ class QuaLeSim_quantumsim(If_backend):
 
             except Exception as e:
                 raise ValueError(
-                    "error in QuaLeSim_QuantumSim simulation with mode ({}): {}".format(
+                    "error in QuaLeSim simulation with mode ({}): {}".format(
                         exe_config.mode, e
                     )
                 )
@@ -61,7 +73,7 @@ class QuaLeSim_quantumsim(If_backend):
 
             except Exception as e:
                 raise ValueError(
-                    "error in QuaLeSim_QuantumSim simulation with mode ({}): {}".format(
+                    "error in QuaLeSim simulation with mode ({}): {}".format(
                         exe_config.mode, e
                     )
                 )
@@ -77,7 +89,7 @@ class QuaLeSim_quantumsim(If_backend):
 
             except Exception as e:
                 raise ValueError(
-                    "error in QuaLeSim_QuantumSim simulation with mode ({}): {}".format(
+                    "error in QuaLeSim simulation with mode ({}): {}".format(
                         exe_config.mode, e
                     )
                 )
