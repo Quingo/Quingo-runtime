@@ -108,7 +108,7 @@ class Quingo_task:
             BackendType.SYMQC,
             BackendType.XIAOHONG,
             BackendType.QUALESIM_QUANTUMSIM,
-            # BackendType.QUALESIM_TEQUILA,
+            BackendType.QUALESIM_TEQUILA,
         ]:
             return Qisa.QCIS
 
