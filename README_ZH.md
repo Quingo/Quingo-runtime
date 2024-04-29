@@ -8,22 +8,15 @@
 
 ### 安装运行时系统以及模拟器
 
-依次执行以下命令便可以安装青果运行时系统、PyQCAS模拟器以及PyQCISim模拟器。
+依次执行以下命令便可以安装青果运行时系统、`SymQC` 模拟器、`PyQCISim` 模拟器以及 `QuaLeSim` 模拟器。
 ```sh
 pip install -e .
 ```
 
 ```sh
 # for simulators used:
+# Tequila 后端尚未开源，需要单独安装。
 git clone https://gitee.com/hpcl_quanta/tequila.git
-git checkout xbackend
-pip install -e .
-
-git clone https://gitee.com/quingo/pyqcisim.git
-git checkout bug-fix
-pip install -e .
-
-git clone https://gitee.com/quingo/SymQC.git
 pip install -e .
 ```
 
@@ -58,25 +51,27 @@ sim res:  (['Q1', 'Q2'], [[0, 0], [0, 0], [1, 1], [1, 1], [0, 0], [0, 0], [0, 0]
 ```
 针对不同的模拟后端，详见`src/examples/sim_backend`，其中展示了目前稳定运行的SymQC、QuantumSim何Tequila后端的使用。
 
-针对不同的模拟模式，详见`src/examples/sim_exemode`，展示了对于目前的两种不同的模拟结果的输出。
+针对不同模式的输出格式，详见`src/quingo/backend/quingo_result_format_spec.md`
 
 ## 青果运行时系统提供的API
-`Quingo_interface`类提供了以下方法:
- - `set_log_level(<log_level>)`: 该方法中`<log_level>`的值可以是`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`中的任意一个。
- - `connect_backend(<backend>)`: 该方法中`<backend>`的值目前可以是`'pyqcas_quantumsim'`或者`'pyqcisim_quantumsim'`。
-- `get_backend_name()`方法返回正在使用的后端名称。如果没有设置后端，将返回一个空字符串。
-- `get_last_qasm()`用来获取上次执行生成的qasm指令代码。
-- `config_execution(<mode>, <num_shots>)`:
-  -  `config_execution`能够将执行模式配置为`'one_shot'`或`'state_vector'`.
-  -  当执行模式为`'one_shot'`时，可以同时使用参数`num_shots`来配置量子线路的运行次数。
--  `call_quingo(<qg_filename>, <qg_func_name>, *args)`:
-   - `call_quingo`方法是调用Quingo操作的主要入口。
-   - `<qg_filename (str)>`中的值为青果文件的名称，该青果文件中包含被宿主程序调用的量子操作。
-   - `<qg_func_name (str)>`中的值为量子操作的名称。
-   - `<args (dict)>`中的值为可变长度的参数，这些参数用来以 `qg_func_name(<args>)` 形式来调用青果操作。
-- `read_result()`方法负责从量子内核中读取计算结果。
-   - 对于能够执行eQASM指令的后端，结果是对量子计算结果进行编码的二进制块。
-   - 对于能够执行QCIS指令的后端，结果的格式由PyQCISim进行定义。详情请参考`quingo.if_backend.non_arch_backend.pyqcisim_quantumsim.PyQCISim_quantumsim::execute()`中的文档描述。
+1. `Quingo_task`类:
+   - 输入：
+      - `called_qu_fn`: `Path`，qu文件路径。
+      - `called_func`: `str`，调用 quingo 函数名。
+      - `debug_mode`(optional): `True` or `False`。
+      - `qisa`(optional): 前端指令集类型。
+      - `backend`(optional): 后端模拟器类型。
+2. `compile`:
+   - 输入：
+      - `Quingo_task`: 待编译 qu 任务
+      - `params`: `Quingo_task` 中调用函数 `called_func` 所需参数
+   - 输出：`qasm_fn`：输出对应指令集文件(.qcis / .qi)
+3. `execute`:
+   - 输入：
+      - `qasm_fn`: `Path`，对应指令集文件(.qcis / .qi)
+      - `be_type`: `BackendType`，模拟器后端类型
+      - `exe_config`: 执行模式，`ExeMode.SimShots`、`ExeMode.SimFinalResult`、`ExeMode.SimStateVector` 
+   - 输出：`sim_result`：具体输出格式详见`src/quingo/backend/quingo_result_format_spec.md`
 
 ## 青果示例程序
 目前青果运行时系统中已经包含了`Bell_state`、`GHZ`、`VQE`等示例程序，详情可见[此处](https://gitee.com/quingo/quingo-runtime/tree/master/src/examples)。

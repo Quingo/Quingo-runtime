@@ -2,24 +2,27 @@ import enum
 
 
 class ExeMode(enum.Enum):
+    """
+    Enumeration representing different result format.
+
+    Attributes:
+        SimFinalResult: for obtaining the final result.
+        SimStateVector: Simulation mode for obtaining the state vector.
+        SimMatrix: Simulation mode for obtaining the matrix representation.
+        RealMachine: Mode for executing on a real quantum machine.
+    """
+
+    SimShots = enum.auto()
     SimFinalResult = enum.auto()
     SimStateVector = enum.auto()
-    SimMatrix = enum.auto()
+    SymbolicStateVector = enum.auto()
     RealMachine = enum.auto()
-
-
-def is_simulation(exe_mode):
-    return exe_mode in [
-        ExeMode.SimFinalResult,
-        ExeMode.SimStateVector,
-        ExeMode.SimMatrix,
-    ]
 
 
 class ExeConfig:
     def __init__(
         self,
-        mode: ExeMode = ExeMode.SimFinalResult,
+        mode: ExeMode = ExeMode.SimShots,
         num_shots: int = 1,
         xh_login_key: str = None,  # use for connecting XIAOHONG
         xh_machine_name: str = None,  # use for connecting XIAOHONG

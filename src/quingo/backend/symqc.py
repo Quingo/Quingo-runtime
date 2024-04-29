@@ -1,11 +1,8 @@
+from quingo.utils import ensure_path
 from .backend_hub import BackendType
 from .if_backend import If_backend
-from quingo.core.exe_config import *
-from quingo.core.utils import *
+from quingo.core.exe_config import ExeConfig, ExeMode
 from symqc.simulator import SymQC
-
-
-logger = get_logger((__name__).split(".")[-1])
 
 
 class IfSymQC(If_backend):
@@ -31,27 +28,21 @@ class IfSymQC(If_backend):
     def execute(self, exe_config: ExeConfig):
         """Execute the given quantum circuit.
         Args:
-          - mode (str): the simulation mode to use:
-              - "one_shot": the simulation result is a dictionary with each key being a qubit
-                  measured, and the value is the outcome of measuring this qubit.
-              - "final_state": the simulation result is a two-level dictionary:
-                  {
-                    'classical': {'Q1': 1, 'Q2': 0},
-                    'quantum': (['Q3', 'Q4'], array([0, 1, 0, 0]))
-                  }
-          - num_shots (int): the number of iterations performed in `one_shot` mode.
+          - exe_config (ExeConfig): the configuration used to perform simulation by SymQC.
+
+        The number of shots is specified in exe_config.num_shots, which is only valid for
+          ExeMode.SimShots.
         """
-        if exe_config.mode == ExeMode.SimStateVector:
+        if exe_config.mode == ExeMode.SimShots:
+            return self.sim.simulate("one_shot", exe_config.num_shots)
+
+        if exe_config.mode == ExeMode.SimFinalResult:
             raw_res = self.sim.simulate("final_state")
             return raw_res
 
-        if exe_config.mode == ExeMode.SimFinalResult:
-            return self.sim.simulate("one_shot", exe_config.num_shots)
-
-        if exe_config.mode == ExeMode.SimMatrix:
-            raise NotImplementedError(
-                "Runtime has not supported SimMatrix with SymQC yet."
-            )
+        if exe_config.mode == ExeMode.SimStateVector:
+            raw_res = self.sim.simulate("final_state")
+            return raw_res["quantum"]
 
         raise ValueError(
             "Unsupported execution mode ({}) for symqc.".format(exe_config.mode)

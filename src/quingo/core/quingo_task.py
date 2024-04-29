@@ -4,7 +4,7 @@ import quingo.global_config as gc
 import tempfile
 from quingo.backend.backend_hub import BackendType
 from quingo.backend.qisa import Qisa
-from quingo.core.utils import ensure_path
+from quingo.utils import ensure_path
 
 DEBUG_MODE = False
 
@@ -107,8 +107,8 @@ class Quingo_task:
             BackendType.TEQUILA,
             BackendType.SYMQC,
             BackendType.XIAOHONG,
-            # BackendType.QUALESIM_QUANTUMSIM,
-            # BackendType.QUALESIM_TEQUILA,
+            BackendType.QUALESIM_QUANTUMSIM,
+            BackendType.QUALESIM_TEQUILA,
         ]:
             return Qisa.QCIS
 
