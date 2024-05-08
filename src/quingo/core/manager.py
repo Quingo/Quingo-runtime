@@ -28,11 +28,13 @@ def verify_backend_config(backend: BackendType, exe_config: ExeConfig) -> bool:
 
 
 def execute(
-    qasm_fn: Path, be_type: BackendType, exe_config: ExeConfig = ExeConfig(), **kwargs
+    qasm_fn: Path,
+    be_type: BackendType,
+    exe_config: ExeConfig = ExeConfig(),
+    debug_mode=False,
 ) -> Union[List | NDArray]:
     """Execute the quingo task on the specified backend and return the result."""
     logger.setLevel(logging.INFO)
-    debug_mode = kwargs.get("debug_mode", False)
 
     if not verify_backend_config(be_type, exe_config):
         raise ValueError(
