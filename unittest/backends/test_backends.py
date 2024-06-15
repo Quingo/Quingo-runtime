@@ -50,6 +50,19 @@ class Test_backends:
         single(PyQCISim_quantumsim, qcis_fn)
         single(IfSymQC, qcis_fn)
 
+    def test_upload_program_str(self):
+        def single(BackendClass, qasm):
+            sim = BackendClass()
+            try:
+                sim.upload_program_str(qasm)
+            except Exception as e:
+                assert False, "upload_program failed: {}".format(e)
+
+        qasm_str = "H Q0\nCNOT Q0 Q1\nMEASURE Q0\nMEASURE Q1"
+        single(PyQCISim_tequila, qasm_str)
+        single(PyQCISim_quantumsim, qasm_str)
+        single(IfSymQC, qasm_str)
+
     def test_get_from_hub(self):
         def single(backend_type, simulator_class):
             hub = Backend_hub()

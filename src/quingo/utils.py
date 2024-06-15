@@ -10,6 +10,28 @@ def ensure_path(fn) -> Path:
     return fn
 
 
+def validate_path(fn) -> Path:
+    """
+    Validates the given file path.
+
+    Args:
+        fn (str or Path): The file path to validate.
+
+    Returns:
+        Path: The validated file path as a `Path` object, or `None` if the path is invalid.
+    """
+    if not isinstance(fn, (str, Path)):
+        return None
+
+    if isinstance(fn, str):
+        fn = Path(fn).resolve()
+
+    if not fn.exists():
+        return None
+
+    return fn
+
+
 def is_number(s):
     try:
         float(s)

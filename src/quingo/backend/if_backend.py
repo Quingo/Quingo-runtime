@@ -23,5 +23,8 @@ class If_backend:
     def upload_program(self, program):
         raise NotImplementedError
 
+    def upload_program_str(self, program: str):
+        raise NotImplementedError
+
     def execute(self, exe_config: ExeConfig):
         raise NotImplementedError

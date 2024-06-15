@@ -25,6 +25,10 @@ class IfSymQC(If_backend):
         else:
             raise TypeError("The SymQC simulator can only accept QCIS instructions.")
 
+    def upload_program_str(self, program: str):
+        """upload the program string to the simulator."""
+        self.sim.compile(program)
+
     def execute(self, exe_config: ExeConfig):
         """Execute the given quantum circuit.
         Args:
