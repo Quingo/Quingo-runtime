@@ -96,7 +96,7 @@ def compose_cl_cmd(
 
     config_fn = '--config-fn="{}"'.format(str(configfile))
 
-    chip_path_ = '--chip-path="{}"'.format(str(chip_path))
+    chip_path_ = '--chip-config="{}"'.format(str(chip_path))
 
     target_ = '--target="{}"'.format(str(target))
     mq_path = '--mq-path="{}"'.format(str(mq_fn))
