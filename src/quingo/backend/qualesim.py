@@ -5,14 +5,15 @@ from pathlib import Path
 from quingo.backend.backend_hub import BackendType
 from quingo.backend.if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
-from qualesim.plugin import Loglevel
-from qualesim.host import Simulator
 
 
 class QuaLeSim(If_backend):
 
     def __init__(self, backend_type=BackendType.QUALESIM_QUANTUMSIM):
         super().__init__(backend_type)
+        from qualesim.plugin import Loglevel
+        from qualesim.host import Simulator
+
         self.sim = Simulator(stderr_verbosity=Loglevel.OFF)
         if backend_type == BackendType.QUALESIM_QUANTUMSIM:
             self.sim.with_backend("quantumsim", verbosity=Loglevel.OFF)
@@ -29,6 +30,8 @@ class QuaLeSim(If_backend):
         prog_fn = ensure_path(prog_fn)
 
         if prog_fn.suffix in [".qcis", ".qi"]:
+            from qualesim.plugin import Loglevel
+
             self.sim.with_frontend(str(prog_fn), verbosity=Loglevel.OFF)
         else:
             raise TypeError(

@@ -11,22 +11,40 @@ from quingo.backend.qisa import Qisa, get_qisa_name, get_suffix
 logger = get_logger((__name__).split(".")[-1])
 
 
-def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None, config_file=""):
+def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None, **kwargs):
     """Compile the quingo file with given parameters and return the path of
     the generated qasm file.
     """
+    if "config_file" in kwargs:
+        config_file = kwargs["config_file"]
+    else:
+        config_file = ""
+    if "target" in kwargs:
+        target = kwargs["target"]
+    else:
+        target = ""
+    if "chip_path" in kwargs:
+        chip_path = kwargs["chip_path"]
+    else:
+        chip_path = ""
+
     logger.setLevel(logging.INFO)
     gen_main_file(task.called_qu_fn, task.called_func, task.cl_entry_fn, params)
 
     if qasm_fn is None:
         suffix = get_suffix(task.qisa_type)
         qasm_fn = task.cl_entry_fn.with_suffix(suffix)
+        mq_fn = task.cl_entry_fn.with_suffix(".json")
     else:
         qasm_fn = ensure_path(qasm_fn)
+        mq_fn = qasm_fn.stem + ".json"
+        mq_fn = ensure_path(mq_fn)
 
     quingoc_path = Path(get_mlir_path())
 
-    compile_cmd = compose_cl_cmd(task, qasm_fn, quingoc_path, config_file)
+    compile_cmd = compose_cl_cmd(
+        task, qasm_fn, quingoc_path, config_file, target, chip_path, mq_fn
+    )
     if task.debug_mode:
         logger.info(compile_cmd)
     ret_value = subprocess.run(
@@ -51,7 +69,15 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None, config_file=
         return qasm_fn
 
 
-def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path, configfile=""):
+def compose_cl_cmd(
+    task: Quingo_task,
+    qasm_fn: Path,
+    quingoc_path: Path,
+    configfile="",
+    target="",
+    chip_path="",
+    mq_fn="",
+):
     qasm_fn = ensure_path(qasm_fn)
     quingoc_path = ensure_path(quingoc_path)
 
@@ -70,11 +96,19 @@ def compose_cl_cmd(task: Quingo_task, qasm_fn: Path, quingoc_path: Path, configf
 
     config_fn = '--config-fn="{}"'.format(str(configfile))
 
+    chip_path_ = '--chip-config="{}"'.format(str(chip_path))
+
+    target_ = '--target="{}"'.format(str(target))
+    mq_path = '--mq-path="{}"'.format(str(mq_fn))
+
     cmd_eles = [
         cl_path,
         cl_entry_fn,
         opt_inc_dirs,
         config_fn,
+        chip_path_,
+        target_,
+        mq_path,
         opt_isa,
         opt_qubit_map,
         opt_out_fn,

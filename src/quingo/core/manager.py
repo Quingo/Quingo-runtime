@@ -88,9 +88,9 @@ def call(
     params: tuple,
     be_type: BackendType = BackendType.QUANTUM_SIM,
     exe_config: ExeConfig = ExeConfig(),
-    config_fn="",
+    **kwargs,
 ):
     """Execute the quingo task on the specified backend and return the result."""
 
-    qasm_fn = compile(task, params, config_file=config_fn)
+    qasm_fn = compile(task, params, **kwargs)
     return execute(qasm_fn, be_type, exe_config, debug_mode=task.debug_mode)
