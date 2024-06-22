@@ -12,6 +12,7 @@ class BackendType(enum.Enum):
     XIAOHONG = enum.auto()
     QUALESIM_TEQUILA = enum.auto()
     QUALESIM_QUANTUMSIM = enum.auto()
+    QOS = enum.auto()
 
 
 @singleton
@@ -58,6 +59,12 @@ class Backend_hub:
                 "QuaLeSim",
                 "qualesim",
                 True,
+                Qisa.QCIS,
+            ),
+            BackendType.QOS: (
+                "QOS",
+                "qos",
+                False,
                 Qisa.QCIS,
             ),
         }
