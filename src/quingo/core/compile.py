@@ -99,7 +99,7 @@ def compose_cl_cmd(
     chip_path_ = '--chip-config="{}"'.format(str(chip_path))
 
     target_ = '--target="{}"'.format(str(target))
-    mq_path = '--mq-path="{}"'.format(str(mq_fn))
+    # mq_path = '--mq-path="{}"'.format(str(mq_fn))
 
     cmd_eles = [
         cl_path,
@@ -108,7 +108,7 @@ def compose_cl_cmd(
         config_fn,
         chip_path_,
         target_,
-        mq_path,
+        # mq_path,
         opt_isa,
         opt_qubit_map,
         opt_out_fn,
