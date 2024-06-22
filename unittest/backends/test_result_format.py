@@ -64,8 +64,14 @@ def test_final_result_with_msmt(get_simulator, get_num_shots):
     num_shots = get_num_shots
 
     exe_config = ExeConfig(ExeMode.SimFinalResult, num_shots=num_shots)
-    result = execute(bell_qcis_fn, simulator, exe_config)
-    print("result: ", result)
+    result_dict = execute(bell_qcis_fn, simulator, exe_config)
+    assert "classical" in result_dict and "quantum" in result_dict
+    assert isinstance(result_dict["classical"], dict)
+    assert len(result_dict["classical"]) == 2
+    assert len(result_dict["quantum"]) == 2
+    names, state_vec = result_dict["quantum"]
+    assert names == []
+    assert state_vec.shape == (2 ** len(names),)
 
 
 def test_final_result_without_msmt(get_simulator, get_num_shots):
@@ -73,8 +79,14 @@ def test_final_result_without_msmt(get_simulator, get_num_shots):
     num_shots = get_num_shots
 
     exe_config = ExeConfig(ExeMode.SimFinalResult, num_shots=num_shots)
-    result = execute(bell_no_msmt_qcis_fn, simulator, exe_config)
-    print("result: ", result)
+    result_dict = execute(bell_no_msmt_qcis_fn, simulator, exe_config)
+    assert "classical" in result_dict and "quantum" in result_dict
+    assert isinstance(result_dict["classical"], dict)
+    assert len(result_dict["classical"]) == 0
+    assert len(result_dict["quantum"]) == 2
+    names, state_vec = result_dict["quantum"]
+    assert names == ["Q1", "Q2"]
+    assert state_vec.shape == (2 ** len(names),)
 
 
 def test_state_vector_without_msmt(get_simulator):
@@ -95,6 +107,8 @@ def test_state_vector_with_msmt(get_simulator):
     exe_config = ExeConfig(ExeMode.SimStateVector)
     qubit_names, state_vec = execute(bell_qcis_fn, simulator, exe_config)
 
+    print("sim: ", simulator)
+    print("state vec: ", state_vec)
     assert qubit_names == ["Q1", "Q2"]
     assert isinstance(state_vec, (list, np.ndarray))
     assert state_vec.shape == (4,)
