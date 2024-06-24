@@ -27,12 +27,14 @@ class ExeConfig:
         xh_login_key: str = None,  # use for connecting XIAOHONG
         xh_machine_name: str = None,  # use for connecting XIAOHONG
         qos_circuit_times: int = 100,  # use for connecting QOS
+        noise_config=None,
     ):
         self.mode = mode
         self.num_shots = num_shots
         self.xh_login_key = xh_login_key
         self.xh_machine_name = xh_machine_name
         self.qos_circuit_times = qos_circuit_times
+        self.noise_config = noise_config
 
     def __str__(self) -> str:
         return str(self.mode)
