@@ -16,6 +16,7 @@ class ExeMode(enum.Enum):
     SimFinalResult = enum.auto()
     SimStateVector = enum.auto()
     SymbolicStateVector = enum.auto()
+    SimProbability = enum.auto()
     RealMachine = enum.auto()
 
 

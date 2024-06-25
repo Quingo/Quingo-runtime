@@ -50,6 +50,9 @@ class PyQCISim_tequila(If_backend):
             )
             return (names, nd_array_values)
 
+        if exe_config.mode == ExeMode.SimProbability:
+            return self.sim.simulate("probability")
+
         raise ValueError(
             "Unsupported execution mode ({}) for TEQUILA.".format(exe_config.mode)
         )

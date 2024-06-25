@@ -1,6 +1,7 @@
 import sympy as sp
 from pathlib import Path
 import numpy as np
+import os
 
 
 def ensure_path(fn) -> Path:
@@ -24,12 +25,15 @@ def validate_path(fn) -> Path:
         return None
 
     if isinstance(fn, str):
-        fn = Path(fn).resolve()
+        if os.path.isfile(fn):
+            return Path(fn).resolve()
+        else:
+            return None
 
     if not fn.exists():
         return None
-
-    return fn
+    else:
+        return Path(fn).resolve()
 
 
 def is_number(s):
