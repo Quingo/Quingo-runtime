@@ -21,6 +21,10 @@ class PyQCISim_tequila(If_backend):
         program = prog_fn.open("r").read()
         self.sim.compile(program)
 
+    def upload_program_str(self, program: str):
+        """upload the program string to the simulator."""
+        self.sim.compile(program)
+
     def execute(self, exe_config: ExeConfig):
         """Execute the given quantum circuit.
         Args:
@@ -39,6 +43,9 @@ class PyQCISim_tequila(If_backend):
         if exe_config.mode == ExeMode.SimStateVector:
             names, nd_array_values = self.sim.simulate("state_vector")
             return (names, nd_array_values)
+
+        if exe_config.mode == ExeMode.SimProbability:
+            return self.sim.simulate("probability")
 
         raise ValueError(
             "Unsupported execution mode ({}) for TEQUILA.".format(exe_config.mode)

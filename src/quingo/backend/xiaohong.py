@@ -21,6 +21,10 @@ class XiaoHong(If_backend):
         prog_fn = ensure_path(prog_fn)
         self.qcis_circuit = prog_fn.open("r").read()
 
+    def upload_program_str(self, program: str):
+        """upload the program string to the simulator."""
+        self.qcis_circuit = program
+
     def execute(self, exe_config: ExeConfig):
         """Execute the given quantum circuit.
         Args:
