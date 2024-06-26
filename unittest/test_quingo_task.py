@@ -57,6 +57,53 @@ class TestQuingoTask:
         single_test(BackendType.XIAOHONG, Qisa.QCIS)
         single_test(BackendType.QUANTIFY, Qisa.Quantify)
 
+class TestQuingoTask2:
+    def test_init(self):
+        mock_fn = qu_dir / "mock.qu"
+        task = Quingo_task(mock_fn, "foo")
+        assert task.called_qu_fn == mock_fn
+        assert task.called_func == "foo"
+        assert task.debug_mode == False
+        assert task.qubits_info == None
+        assert task._backend == BackendType.QUANTUM_SIM
+        assert task._qisa == None
+        assert task.build_dir is not None
+
+    def test_qubits_info(self):
+        mock_fn = qu_dir / "mock.qu"
+        task = Quingo_task(mock_fn, "foo", qubits_info="qubits_info")
+        assert task.qubits_info == "qubits_info"
+
+    def test_cl_entry_fn(self):
+        mock_fn = qu_dir / "mock.qu"
+        task = Quingo_task(mock_fn, "foo")
+        assert task.cl_entry_fn.stem == "main_mock_foo"
+
+    def test_build_dir(self):
+        mock_fn = qu_dir / "mock.qu"
+        task = Quingo_task(mock_fn, "foo", debug_mode=True)
+        assert task.build_dir.samefile(Path.cwd() / gc.build_dirname)
+        task = Quingo_task(mock_fn, "foo", debug_mode=False)
+        assert str(task.build_dir).startswith("/tmp")
+
+    def test_qisa_type(self):
+        mock_fn = qu_dir / "mock.qu"
+        task = Quingo_task(mock_fn, "foo", backend=BackendType.QUANTUM_SIM)
+        assert task.qisa_type == Qisa.QCIS
+        task = Quingo_task(mock_fn, "foo", backend=BackendType.QUANTIFY)
+        assert task.qisa_type == Qisa.Quantify
+
+    def test_called_qu_dir(self):
+        mock_fn = qu_dir / "mock.qu"
+        task = Quingo_task(mock_fn, "foo")
+        assert task.called_qu_dir == mock_fn.parent
+
+    def test_include_dir(self):
+        mock_fn = qu_dir / "mock.qu"
+        task = Quingo_task(mock_fn, "foo")
+        assert task.called_qu_dir in task.include_dir
+        assert task.build_dir in task.include_dir
+
 
 if __name__ == "__main__":
     TestQuingoTask().test_init_1()
