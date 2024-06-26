@@ -19,6 +19,7 @@ def test_tequila(circ_name, num_shots=1):
     # execute the task on tequila backend.
     sim_result = tequila_backend.execute(cfg)
     
+    print("Backend: ", Backend_hub().backends[BackendType.TEQUILA][1])
     print(sim_result)
 
 
