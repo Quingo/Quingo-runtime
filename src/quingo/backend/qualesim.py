@@ -39,6 +39,9 @@ class QuaLeSim(If_backend):
                 "'.qcis' (for QCIS) and '.qi' (for QUIET-s)".format(prog_fn.suffix)
             )
 
+    def upload_program_str(self, program: str):
+        pass
+
     def execute(self, exe_config: ExeConfig):
         if exe_config.mode == ExeMode.SimShots:
             measure_mod = "one_shot"

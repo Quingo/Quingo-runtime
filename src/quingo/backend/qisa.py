@@ -33,7 +33,7 @@ def get_suffix(qisa: Qisa):
 
     if qisa == Qisa.QCIS:
         return ".qcis"
-    if qisa == Qisa.QUIET:
+    if qisa == Qisa.QUIET or qisa == Qisa.BRANCH_QUIET:
         return ".qi"
     if qisa == Qisa.eQASM:
         return ".eqasm"
