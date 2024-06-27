@@ -4,6 +4,7 @@ import enum
 class Qisa(enum.Enum):
     QCIS = enum.auto()
     QUIET = enum.auto()
+    BRANCH_QUIET = enum.auto()
     eQASM = enum.auto()
     Quantify = enum.auto()
 
@@ -16,6 +17,8 @@ def get_qisa_name(qisa: Qisa):
         return "qcis"
     if qisa == Qisa.QUIET:
         return "quiets"
+    if qisa == Qisa.BRANCH_QUIET:
+        return "branch-quiets"
     if qisa == Qisa.eQASM:
         return "eqasm"
     if qisa == Qisa.Quantify:
