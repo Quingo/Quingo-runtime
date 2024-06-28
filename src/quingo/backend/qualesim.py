@@ -5,6 +5,7 @@ from pathlib import Path
 from quingo.backend.backend_hub import BackendType
 from quingo.backend.if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
+import numpy as np
 
 
 class QuaLeSim(If_backend):
