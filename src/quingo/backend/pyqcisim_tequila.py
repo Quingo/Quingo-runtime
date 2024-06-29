@@ -35,13 +35,19 @@ class PyQCISim_tequila(If_backend):
         """
 
         if exe_config.mode == ExeMode.SimShots:
-            return self.sim.simulate("one_shot", exe_config.num_shots)
+            return self.sim.simulate(
+                "one_shot", exe_config.num_shots, noise_config=exe_config.noise_config
+            )
 
         if exe_config.mode == ExeMode.SimFinalResult:
-            return self.sim.simulate("final_result")
+            return self.sim.simulate(
+                "final_result", noise_config=exe_config.noise_config
+            )
 
         if exe_config.mode == ExeMode.SimStateVector:
-            names, nd_array_values = self.sim.simulate("state_vector")
+            names, nd_array_values = self.sim.simulate(
+                "state_vector", noise_config=exe_config.noise_config
+            )
             return (names, nd_array_values)
 
         if exe_config.mode == ExeMode.SimProbability:

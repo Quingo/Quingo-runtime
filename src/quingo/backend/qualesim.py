@@ -5,6 +5,7 @@ from pathlib import Path
 from quingo.backend.backend_hub import BackendType
 from quingo.backend.if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
+import numpy as np
 
 
 class QuaLeSim(If_backend):
@@ -38,6 +39,9 @@ class QuaLeSim(If_backend):
                 "found unsupported file suffix ({}). Currently supported are "
                 "'.qcis' (for QCIS) and '.qi' (for QUIET-s)".format(prog_fn.suffix)
             )
+
+    def upload_program_str(self, program: str):
+        pass
 
     def execute(self, exe_config: ExeConfig):
         if exe_config.mode == ExeMode.SimShots:

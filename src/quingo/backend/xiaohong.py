@@ -2,7 +2,7 @@ from quingo.utils import ensure_path
 from .backend_hub import BackendType
 from .if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
-import pyezQ
+from quingo.lib.pyezQ import Account
 
 
 class XiaoHong(If_backend):
@@ -60,7 +60,7 @@ class XiaoHong(If_backend):
         return result
 
     def set_account(self, login_key, machine_name):
-        self.account = pyezQ.Account(login_key=login_key, machine_name=machine_name)
+        self.account = Account(login_key=login_key, machine_name=machine_name)
         print(f"Set account successfully:")
         print(f"   login key = {login_key[0:5]}" + "*" * (len(login_key) - 5))
         print(f"   machine name = {machine_name}")
