@@ -83,22 +83,32 @@ def state_fidelity(state_a: np.ndarray, state_b: np.ndarray):
     return np.vdot(state_a, state_b)
 
 
-def verify_qubit_map(qubit_map):
-    num_qubits = len(qubit_map)
-    inv_map = {v: k for k, v in qubit_map.items()}
-    if set(inv_map.keys()) != set(qubit_map.keys()):
-        raise ValueError("qubit map is not valid")
-
-    for k, v in qubit_map.items():
-        if inv_map[v] != k:
-            raise ValueError("qubit map is not valid")
+def verify_qubit_map(old_qubit_order, new_qubit_order):
+    if len(set(old_qubit_order)) != len(set(new_qubit_order)):
+        raise ValueError(
+            "The old and new qubit orders do not have the same qubits: \n{}\n{}".format(
+                old_qubit_order, new_qubit_order
+            )
+        )
 
 
 def shuffle_qubits_in_state(
-    qubit_map: dict, old_qubit_order: list, state: np.ndarray
+    old_qubit_order: list, new_qubit_order, state: np.ndarray
 ) -> np.ndarray:
-    """This function shuffles the state vector, with the result representing the same state
-    but the qubit order is changed according to the qubit_map.
+    """This function shuffles the state vector (`state`) with a given qubit order
+    (`old_qubit_order`), returns a new state vector representing the same state
+    but the qubit order  is the new one (`new_qubit_order`).
+
+    Note: Little-Endian is used in the qubit order, i.e., the least significant
+    qubit is at index 0, and the most significant bit is at index n - 1.
+
+    Parameters:
+    old_qubit_order (list): The old qubit order, e.g., [0, 1, 2].
+    new_qubit_order (list): The new qubit order, e.g., [1, 2, 0].
+    state (np.ndarray): The state vector to shuffle.
+
+    Returns:
+    np.ndarray: The new state vector with the new qubit order.
 
     q0, q1, q2  ->  q2, q0, q1
     0   0   0   ->   0   0   0
@@ -128,22 +138,15 @@ def shuffle_qubits_in_state(
 
     so, new_state[new_idx] = state[old_idx], where new_idx = idx_map[old_idx]
     """
-    verify_qubit_map(qubit_map)
-    num_qubits = len(qubit_map)
+    verify_qubit_map(old_qubit_order, new_qubit_order)
+    num_qubits = len(old_qubit_order)
 
     old_qubit_idx = {old_qubit_order[i]: i for i in range(num_qubits)}
+    new_qubit_idx = {new_qubit_order[i]: i for i in range(num_qubits)}
 
-    # qubit name list in the new order
-    new_qubit_order = [qubit_map[k] for k in old_qubit_order]
-
-    # dict: qubit name -> new qubit index
-    new_qubit_idx = {new_qubit_order[i]: i for i in range(len(new_qubit_order))}
-
-    # dict: old qubit index -> new qubit index
-    idx_map = {}
-    for i in range(num_qubits):
-        qubit_name = old_qubit_order[i]
-        this_old_qubit_idx = old_qubit_idx[qubit_name]
+    idx_map = {}  # old qubit index -> new qubit index
+    for this_old_qubit_idx in range(num_qubits):
+        qubit_name = old_qubit_order[this_old_qubit_idx]
         this_new_qubit_idx = new_qubit_idx[qubit_name]
         idx_map[this_old_qubit_idx] = this_new_qubit_idx
 
