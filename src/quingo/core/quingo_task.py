@@ -5,6 +5,7 @@ import tempfile
 from quingo.backend.backend_hub import BackendType
 from quingo.backend.qisa import Qisa
 from quingo.utils import ensure_path
+import time
 
 DEBUG_MODE = False
 
@@ -15,8 +16,30 @@ def create_empty_dir(dir_path: Path):
     dir_path.mkdir()
 
 
+def get_cur_time_as_str():
+    cur_time = time.localtime()
+    return "{:04}{:02}{:02}_{:02}{:02}{:02}".format(
+        cur_time.tm_year,
+        cur_time.tm_mon,
+        cur_time.tm_mday,
+        cur_time.tm_hour,
+        cur_time.tm_min,
+        cur_time.tm_sec,
+    )
+
+
 class Quingo_task:
-    def __init__(self, called_qu_fn: Path, called_func: str, **kwargs) -> None:
+    def __init__(
+        self,
+        called_qu_fn: Path,
+        called_func: str,
+        build_under=None,
+        delete_build_dir=False,
+        debug_mode=False,
+        qisa=None,
+        backend=BackendType.QUANTUM_SIM,
+        qubits_info=None,
+    ) -> None:
         """
         Define a quingo task by specifying the quingo file and the entry function.
 
@@ -45,11 +68,40 @@ class Quingo_task:
         self._called_func = called_func
         self._build_dir = None
 
-        self._qubits_info = kwargs.get("qubits_info", None)
-        self.debug_mode = kwargs.get("debug_mode", False)
+        self.debug_mode = debug_mode
+
         # qisa and backend
-        self._qisa = kwargs.get("qisa", None)
-        self._backend = kwargs.get("backend", BackendType.QUANTUM_SIM)
+        self._qisa = qisa
+        self._backend = backend
+        self._qubits_info = qubits_info
+
+        # build_under=None,
+        # keep_build_dir=False,
+        # debug_mode=False,
+
+        if self.debug_mode:
+            if build_under is None:
+                self.parent_work_dir = Path.cwd() / gc.build_dirname
+            else:
+                self.parent_work_dir = build_under
+        else:
+            self.parent_work_dir = build_under
+
+        if self.parent_work_dir is None:  # system default temporary dir will be used
+            self.delete_build_dir = True
+        else:
+            self.delete_build_dir = delete_build_dir
+
+        if self.parent_work_dir is not None:
+            build_dir_prefix = get_cur_time_as_str()
+        else:
+            build_dir_prefix = "qg" + get_cur_time_as_str() + "-"
+
+        self.tmp_build_dir = tempfile.TemporaryDirectory(
+            dir=self.parent_work_dir,
+            delete=self.delete_build_dir,
+            prefix=build_dir_prefix,
+        )
 
     @property
     def qubits_info(self):
