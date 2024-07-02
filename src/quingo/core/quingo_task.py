@@ -6,6 +6,7 @@ from quingo.backend.backend_hub import BackendType
 from quingo.backend.qisa import Qisa
 from quingo.utils import ensure_path
 import time
+import os
 
 DEBUG_MODE = False
 
@@ -34,39 +35,39 @@ class Quingo_task:
         called_qu_fn: Path,
         called_func: str,
         build_under=None,
-        delete_build_dir=False,
         debug_mode=False,
+        delete_build_dir=True,
         qisa=None,
         backend=BackendType.QUANTUM_SIM,
         qubits_info=None,
     ) -> None:
         """
-        Define a quingo task by specifying the quingo file and the entry function.
+        Initializes a Quingo task object.
 
-        Note, this task only stores the following five elements:
-        - the path of the called Quingo file (called_qu_fn)
-        - the name of the entry function (called_func)
-        - the path of the build directory (build_dir)
-        - debug_mode
-        - the target qisa (qisa) if specified upon initialization
-        - the target backend (backend) if specified upon initialization
+        This constructor defines a Quingo task by specifying the Quingo file and the entry function. It stores essential information required for executing the Quingo task, including paths, debug mode, target qisa, and backend. Other properties are calculated on-demand to minimize stored information and reduce inconsistency risks.
 
-        If `qisa` and `backend` are not specified, then the value of them will be infered
-        when required.
+        Parameters:
+        - called_qu_fn (Path): The path of the Quingo file to be called.
+        - called_func (str): The name of the entry function within the Quingo file.
+        - build_under (Optional[Path]): The path under which the build directory should be created.
+            If None, the build directory's location is determined based on the debug mode.
+        - debug_mode (bool): If True, the task runs in debug mode, affecting the location of the
+            build directory and possibly other behaviors.
+        - delete_build_dir (bool): delete the build directory after task is completed.
+            Defaults to True
+        - qisa (Optional[Any]): The target assembly specification.
+        - backend (BackendType): The target backend for the Quingo task. Defaults to QuantumSim.
+        - qubits_info (Optional[Any]): Information about the qubits used in the task.
 
-        The `build_dir` is calculated at the first time it is called. If the debug mode is
-        on, then the build_dir is under the same directory as the called Quingo file.
-        Otherwise, the build_dir is a temporary directory.
-
-        Except them, all other properties are calculated when they are called. By doing so,
-        only a minimal amount of information is stored in the task object, which reduces the
-        risk of inconsistency when using this object.
+        Note:
+        The `build_dir` is calculated the first time it is needed.
+        In debug mode, it is located in the `build` dir under the current working directory.
+        Otherwise, it is a temporary directory (like `/tmp/`).
         """
         # file name and function name
         called_qu_fn = ensure_path(called_qu_fn)
         self._called_qu_fn = called_qu_fn
         self._called_func = called_func
-        self._build_dir = None
 
         self.debug_mode = debug_mode
 
@@ -75,33 +76,53 @@ class Quingo_task:
         self._backend = backend
         self._qubits_info = qubits_info
 
-        # build_under=None,
-        # keep_build_dir=False,
-        # debug_mode=False,
+        self.create_build_dir(build_under, delete_build_dir, debug_mode)
 
-        if self.debug_mode:
-            if build_under is None:
-                self.parent_work_dir = Path.cwd() / gc.build_dirname
-            else:
-                self.parent_work_dir = build_under
+    def create_build_dir(
+        self, build_under=None, delete_build_dir=True, debug_mode=False
+    ):
+        """It specifies a temporary build directory for this task.
+        By default, this build directory will be deleted when the task is destroyed.
+
+        When `build_under` is None, the build directory is under system temporary directory.
+        Otherwise, a new build directory will be created under this given directory.
+
+        When `debug_mode` is True, and `build_under` is None, a build directory will be created under `<cwd>/build/`.
+
+        中文版需求说明：
+          - 每个task对应一个build文件夹，还是每个task的每次执行对应一个文件夹？
+            - 每个task对应一个文件夹
+            - 如果一个task要进行多次执行，目前直接覆盖
+
+          - 用户应当可以指定build文件夹的位置。
+            - 使用特定的位置：在指定文件夹下创建临时文件夹
+            - 若没有指定，则使用/tmp/。使用tmp时，该文件夹被使用完之后，会被删除
+
+          - 文件夹用完之后默认被删除，但在用户指定下，临时文件夹用完之后可以被保留
+        """
+        if debug_mode and build_under is None:
+            self.parent_work_dir = Path.cwd() / gc.build_dirname
         else:
             self.parent_work_dir = build_under
 
-        if self.parent_work_dir is None:  # system default temporary dir will be used
-            self.delete_build_dir = True
-        else:
-            self.delete_build_dir = delete_build_dir
+        self.delete_build_dir = delete_build_dir
+        build_dir_prefix = "qg-" + get_cur_time_as_str() + "-"
 
         if self.parent_work_dir is not None:
-            build_dir_prefix = get_cur_time_as_str()
-        else:
-            build_dir_prefix = "qg" + get_cur_time_as_str() + "-"
+            if not self.parent_work_dir.exists():
+                self.parent_work_dir.mkdir()
 
-        self.tmp_build_dir = tempfile.TemporaryDirectory(
+        self.working_dir = tempfile.mkdtemp(
             dir=self.parent_work_dir,
-            delete=self.delete_build_dir,
             prefix=build_dir_prefix,
         )
+
+        assert Path(self.working_dir).exists()
+
+    def __del__(self):
+        print(os.path.exists(self.working_dir))
+        if self.delete_build_dir:
+            shutil.rmtree(str(self.working_dir))
 
     @property
     def qubits_info(self):
@@ -127,24 +148,8 @@ class Quingo_task:
 
     @property
     def build_dir(self):
-        """The path of the build directory.
-
-        - In Debug mode, the build directory is under the current directory.
-        - Otherwise, the build directory is a temporary directory.
-        """
-        # since build_dir can be a temporary directory, we need to record it instead of
-        # calculating it every time.
-        if self._build_dir is not None:
-            return self._build_dir
-
-        if self.debug_mode:  # debug mode create `build` dir under the current dir
-            self._build_dir = Path.cwd() / gc.build_dirname
-            create_empty_dir(self._build_dir)
-
-        else:
-            self._build_dir = Path(tempfile.mkdtemp(prefix="quingo-"))
-
-        return self._build_dir
+        """The path of the build directory. see `create_build_dir` for more details."""
+        return Path(self.working_dir).absolute()
 
     @property
     def qisa_type(self):
