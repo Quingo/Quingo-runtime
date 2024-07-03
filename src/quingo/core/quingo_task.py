@@ -105,7 +105,7 @@ class Quingo_task:
         else:
             self.parent_work_dir = build_under
 
-        self.delete_build_dir = delete_build_dir
+        self.delete_build_dir = False if debug_mode else delete_build_dir
         build_dir_prefix = "qg-" + get_cur_time_as_str() + "-"
 
         if self.parent_work_dir is not None:
@@ -120,7 +120,6 @@ class Quingo_task:
         assert Path(self.working_dir).exists()
 
     def __del__(self):
-        print(os.path.exists(self.working_dir))
         if self.delete_build_dir:
             shutil.rmtree(str(self.working_dir))
 
