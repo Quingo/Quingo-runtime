@@ -11,7 +11,7 @@ from typing import Dict
 def get_corr_exp_value_for_full_matrix_model(
     n_qubits: int,
     noisy_circ_prob: Dict[int, float],
-    calibration_matrix: np.ndarray[float],
+    calibration_matrix,
 ) -> float:
     """
     Correct the unbiased estimator of expectation value

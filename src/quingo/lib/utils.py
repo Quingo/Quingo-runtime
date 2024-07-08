@@ -6,7 +6,7 @@ from typing import List, Dict
 
 def cal_noise_matrix_for_full_matrix_model(
     n_qubits: int, cali_circs_prob: List[Dict[int, float]]
-) -> np.ndarray[float]:
+):
     """
     Calculate the noise matrix through measuring the probability distribution of calibration circuits
 
