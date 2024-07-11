@@ -67,16 +67,18 @@ class QuaLeSim(If_backend):
                 )
 
         if exe_config.mode == ExeMode.SimFinalResult:
-            measure_mod = "one_shot"
+            measure_mod = "state_vector"
             try:
                 self.sim.simulate()
-                res = self.sim.run(
-                    measure_mod=measure_mod, num_shots=exe_config.num_shots
-                )
+                res = self.sim.run(measure_mod=measure_mod)
                 self.sim.stop()
-                final_state = res["res"]
-                final_state["quantum"] = tuple(final_state["quantum"])
-                return final_state["quantum"]
+                final_state = eval(res["res"])
+                result = dict()
+                qubit_list = list(final_state["classical"].keys())
+                value = [list(final_state["classical"].values())]
+                result["classical"] = (qubit_list, value)
+                result["quantum"] = tuple(final_state["quantum"])
+                return result
 
             except Exception as e:
                 raise ValueError(
