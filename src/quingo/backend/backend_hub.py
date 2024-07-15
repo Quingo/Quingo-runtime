@@ -50,13 +50,13 @@ class Backend_hub:
                 Qisa.QCIS,
             ),
             BackendType.QUALESIM_TEQUILA: (
-                "QuaLeSim",
+                "QuaLeSim_tequila",
                 "qualesim",
                 True,
                 Qisa.QCIS,
             ),
             BackendType.QUALESIM_QUANTUMSIM: (
-                "QuaLeSim",
+                "QuaLeSim_quantumsim",
                 "qualesim",
                 True,
                 Qisa.QCIS,

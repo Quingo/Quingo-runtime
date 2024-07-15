@@ -8,7 +8,7 @@ from quingo.core.exe_config import ExeConfig, ExeMode
 import numpy as np
 
 
-class QuaLeSim(If_backend):
+class QuaLeSim_base(If_backend):
 
     def __init__(self, backend_type=BackendType.QUALESIM_QUANTUMSIM):
         super().__init__(backend_type)
@@ -74,10 +74,10 @@ class QuaLeSim(If_backend):
                 self.sim.stop()
                 final_state = eval(res["res"])
                 result = dict()
-                qubit_list = list(final_state["classical"].keys())
-                value = [list(final_state["classical"].values())]
-                result["classical"] = (qubit_list, value)
-                result["quantum"] = tuple(final_state["quantum"])
+                result["classical"] = final_state["classical"]
+                result["quantum"] = tuple(
+                    (final_state["quantum"][0], np.array(final_state["quantum"][1]))
+                )
                 return result
 
             except Exception as e:
@@ -108,3 +108,13 @@ class QuaLeSim(If_backend):
                 exe_config.mode
             )
         )
+
+
+class QuaLeSim_tequila(QuaLeSim_base):
+    def __init__(self):
+        super().__init__(BackendType.QUALESIM_TEQUILA)
+
+
+class QuaLeSim_quantumsim(QuaLeSim_base):
+    def __init__(self):
+        super().__init__(BackendType.QUALESIM_QUANTUMSIM)

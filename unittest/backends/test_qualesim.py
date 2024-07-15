@@ -1,6 +1,6 @@
 import pytest
 from quingo.backend.backend_hub import BackendType
-from quingo.backend.qualesim import QuaLeSim
+from quingo.backend.qualesim import QuaLeSim_quantumsim, QuaLeSim_tequila
 from quingo.core.exe_config import ExeConfig, ExeMode
 from quingo import execute
 from quingo.utils import number_distance
@@ -21,27 +21,14 @@ bell_qasm_fns = [
 ]
 
 
-@pytest.fixture(
-    scope="module",
-    params=[BackendType.QUALESIM_QUANTUMSIM, BackendType.QUALESIM_TEQUILA],
-)
-def get_backend_type(request):
-    return request.param
-
-
-@pytest.fixture(scope="module")
-def get_qualesim(get_backend_type):
-    backend_type = get_backend_type
-    return QuaLeSim(backend_type)
-
-
 @pytest.fixture(params=bell_qasm_fns)
 def get_bell_qasm_fn(request):
     return request.param
 
 
-def test_call_qualesim(get_qualesim, get_bell_qasm_fn):
-    simulator = get_qualesim
+@pytest.fixture(params=[QuaLeSim_quantumsim, QuaLeSim_tequila])
+def test_call_qualesim(params, get_bell_qasm_fn):
+    simulator = params
     simulator.upload_program(get_bell_qasm_fn)
     num_shots = 10
     exe_config = ExeConfig(ExeMode.SimShots, num_shots)
