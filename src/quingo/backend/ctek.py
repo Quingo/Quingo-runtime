@@ -51,7 +51,7 @@ class Ctek(If_backend):
             self.qcis_circuit,
             num_shots=exe_config.num_shots,
             exp_name=exe_config.exp_name,
-            version=str(time.time()),
+            version="version_circuit_" + str(int(time.time())),
         )
 
         # invalid query
@@ -60,7 +60,6 @@ class Ctek(If_backend):
 
         # read result
         result = self.account.query_experiment(query_id, max_wait_time=360000)
-        print(result)
         result = self.format_result(result)
         return result
 
@@ -72,4 +71,8 @@ class Ctek(If_backend):
 
     def format_result(self, result):
         origin_result = result[0]["resultStatus"]
-        return {"qubits": origin_result[0], "results": origin_result[1:]}
+        return {
+            "qubits": origin_result[0],
+            "results": origin_result[1:],
+            "probability": result[0]["probability"],
+        }
