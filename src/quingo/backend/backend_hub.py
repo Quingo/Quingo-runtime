@@ -10,6 +10,7 @@ class BackendType(enum.Enum):
     SYMQC = enum.auto()
     QUANTIFY = enum.auto()
     XIAOHONG = enum.auto()
+    CTEK = enum.auto()
     QUALESIM_TEQUILA = enum.auto()
     QUALESIM_QUANTUMSIM = enum.auto()
     QOS = enum.auto()
@@ -46,6 +47,12 @@ class Backend_hub:
             BackendType.XIAOHONG: (
                 "XiaoHong",
                 "xiaohong",
+                False,
+                Qisa.QCIS,
+            ),
+            BackendType.CTEK: (
+                "Ctek",
+                "ctek",
                 False,
                 Qisa.QCIS,
             ),

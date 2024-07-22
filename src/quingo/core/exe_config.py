@@ -29,6 +29,7 @@ class ExeConfig:
         xh_machine_name: str = None,  # use for connecting XIAOHONG
         qos_circuit_times: int = 100,  # use for connecting QOS
         noise_config=None,
+        exp_name: str = "exp0",
     ):
         self.mode = mode
         self.num_shots = num_shots
@@ -36,6 +37,7 @@ class ExeConfig:
         self.xh_machine_name = xh_machine_name
         self.qos_circuit_times = qos_circuit_times
         self.noise_config = noise_config
+        self.exp_name = exp_name
 
     def __str__(self) -> str:
         return str(self.mode)
