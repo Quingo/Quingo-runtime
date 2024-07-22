@@ -26,6 +26,16 @@ def cal_noise_matrix_for_full_matrix_model(
 
 
 def get_prob_noisy(task: Quingo_task, noise_config, n_qubits, params=(), shots=32000):
+    cfg = ExeConfig(ExeMode.SimProbability, num_shots=shots, noise_config=noise_config)
+    qasm_fn = compile(task, params=params)
+    sim_result = execute(qasm_fn, BackendType.TEQUILA, cfg)
+    dic = {}
+    for i in range(len(sim_result[1])):
+        dic[i] = sim_result[1][i].real
+    return dic
+
+
+def b_get_prob_noisy(task: Quingo_task, noise_config, n_qubits, params=(), shots=32000):
     cfg = ExeConfig(ExeMode.SimShots, num_shots=shots, noise_config=noise_config)
     qasm_fn = compile(task, params=params)
     sim_result = execute(qasm_fn, BackendType.TEQUILA, cfg)
@@ -63,7 +73,7 @@ def calibration_matrix(calibration_circ, nqubits, observable, noise_config):
         paramsi = (nqubits, observable, int_to_list(ii, nqubits))
         cali_circs_fm.append(paramsi)
     cali_circs_prob_fm = [
-        get_prob_noisy(calibration_circ, noise_config, nqubits, params, shots=100)
+        b_get_prob_noisy(calibration_circ, noise_config, nqubits, params, shots=100)
         for params in cali_circs_fm
     ]
     cali_matrix_fm = cal_noise_matrix_for_full_matrix_model(nqubits, cali_circs_prob_fm)
