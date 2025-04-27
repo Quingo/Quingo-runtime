@@ -1,8 +1,9 @@
-from quingo.utils import ensure_path
-from .backend_hub import BackendType
-from .if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
 from quingo.lib.pyezQ import Account
+from quingo.utils import ensure_path
+
+from .backend_hub import BackendType
+from .if_backend import If_backend
 
 
 class XiaoHong(If_backend):
@@ -41,7 +42,9 @@ class XiaoHong(If_backend):
             )
 
         # connect XiaoHong
-        self.set_account(exe_config.xh_login_key, exe_config.xh_machine_name)
+        self.set_account(
+            exe_config.qcloud_platform_login_key, exe_config.qcloud_machine_name
+        )
 
         # submit job
         print(f"Start execute:")
