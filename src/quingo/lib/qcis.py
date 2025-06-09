@@ -31,18 +31,25 @@ class BaseUtil():
             retrun_qasm = ''
         elif isinstance(gate_tranform, list):
             gate = gate_tranform[0]
+            qcis_parts = self.qcis.split()
             if len(gate_tranform) == 2:
                 gate_param = gate_tranform[1]
                 retrun_qasm += f'{gate}({gate_param}) '
             elif len(gate_tranform) == 1:
-                qcis_param = self.qcis.split(' ')[2]
-                retrun_qasm += f'{gate}({qcis_param}) '
+                if len(qcis_parts) > 2:
+                    qcis_param = qcis_parts[2]
+                    retrun_qasm += f'{gate}({qcis_param}) '
+                else:
+                    retrun_qasm += f'{gate} '
             elif len(gate_tranform) == 3:
                 gate_param = gate_tranform[1:]
-                qcis_param1 = self.qcis.split(' ')[3]
-                qcis_param2 = float(self.qcis.split(' ')[2]) + gate_param[0]
-                qcis_param3 = gate_param[1] - float(self.qcis.split(' ')[2])
-                retrun_qasm += f'{gate}({qcis_param1},{qcis_param2},{qcis_param3}) '
+                if len(qcis_parts) > 3:
+                    qcis_param1 = qcis_parts[3]
+                    qcis_param2 = float(qcis_parts[2]) + gate_param[0]
+                    qcis_param3 = gate_param[1] - float(qcis_parts[2])
+                    retrun_qasm += f'{gate}({qcis_param1},{qcis_param2},{qcis_param3}) '
+                else:
+                    retrun_qasm += f'{gate} '
             retrun_qasm = self.package_qcis(qubit_idx, retrun_qasm)
         return retrun_qasm
 
