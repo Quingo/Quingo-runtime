@@ -103,6 +103,7 @@ def compose_cl_cmd(
 
     cmd_eles = [
         cl_path,
+        "-u",
         cl_entry_fn,
         opt_inc_dirs,
         config_fn,
@@ -113,6 +114,7 @@ def compose_cl_cmd(
         opt_qubit_map,
         opt_out_fn,
     ]
+
 
     compile_cmd = " ".join([ele for ele in cmd_eles if ele.strip() != ""])
 
