@@ -1,6 +1,8 @@
 from pathlib import Path
 
-qgrtsys_root_dir = Path(__file__).absolute().parent
+qgrtsys_root_dir = Path(__file__).absolute().parent  # corresponds to `<quingo-runtime>/src/quingo`
+qgrtsys_repo_dir = qgrtsys_root_dir.parent.parent  # corresponds to `<quingo-runtime>`
+
 mlir_compiler_config_path = qgrtsys_root_dir / "core" / "mlir_compiler_path.txt"
 
 default_mlir_compiler_path = Path.home() / ".quingo" / "quingoc"
