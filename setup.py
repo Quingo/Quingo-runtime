@@ -1,12 +1,11 @@
 from setuptools import setup, find_packages
-import platform
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="quingo",
-    version="0.3.5",
+    version="0.4.0",
     author="Xiang Fu",
     author_email="gtaifu@gmail.com",
     description="Quingo Runtime System",
@@ -26,6 +25,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "numpy",
+        "scipy",
         "pyqcisim >= 1.3.1",
         "symqc >= 1.1.1",
         "colorama",
@@ -33,6 +33,7 @@ setup(
         "requests",
         "tqdm",
         "pyquiet >= 0.0.4",
+        "pycim-simulator"
     ],
     extras_require={
         ':sys_platform == "linux"': [
