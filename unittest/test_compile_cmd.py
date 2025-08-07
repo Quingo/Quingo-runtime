@@ -25,13 +25,14 @@ class TestCompileCmd:
         mlir_path = Path(get_mlir_path())
         cmd = compose_cl_cmd(task, qasm_fn, mlir_path)
         cmd_eles = cmd.split()
-        assert len(cmd_eles) == 10
+        assert len(cmd_eles) == 13
         assert mlir_path.resolve().samefile(cmd_eles[0].strip('"'))
-        assert cmd_eles[1] == '"{}"'.format(task.cl_entry_fn.resolve())
-        assert cmd_eles[2] == "-I"
-        assert cmd_eles[4] == "-I"
-        assert cmd_eles[7] == "--isa=qcis"
-        assert cmd_eles[8] == "-o"
+        assert cmd_eles[1] == '-u'
+        assert cmd_eles[2] == '"{}"'.format(task.cl_entry_fn.resolve())
+        assert cmd_eles[3] == "-I"
+        assert cmd_eles[5] == "-I"
+        assert cmd_eles[10] == "--isa=qcis"
+        assert cmd_eles[11] == "-o"
         # assert Path(qasm_fn).samefile(cmd_eles[8].strip('"'))
 
     def test_compile(self):
@@ -40,8 +41,8 @@ class TestCompileCmd:
         qasm_fn = compile(task, ())
         with qasm_fn.open("r") as f:
             lines = f.readlines()
-        assert lines[0].strip() == "H    Q0"
-        assert lines[2].strip() == "CZ    Q0           Q1"
+        assert lines[0].strip().split() == ["H", "Q0"]
+        assert lines[1].strip().split() == ["CNOT", "Q0", "Q1"]
 
     def test_compile2(self):
         bell_fn = qu_dir / "bell.qu"
@@ -50,8 +51,8 @@ class TestCompileCmd:
         assert qasm_fn.samefile(unittest_dir / "out_bell.qcis")
         with qasm_fn.open("r") as f:
             lines = f.readlines()
-        assert lines[0].strip() == "H    Q0"
-        assert lines[2].strip() == "CZ    Q0           Q1"
+        assert lines[0].strip().split() == ["H", "Q0"]
+        assert lines[1].strip().split() == ["CNOT", "Q0", "Q1"]
 
 
 if __name__ == "__main__":

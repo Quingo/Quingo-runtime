@@ -1,6 +1,6 @@
-from quingo import *
 from pathlib import Path
 
+from quingo import *
 
 qu_file = Path(__file__).parent / "kernel.qu"
 
@@ -10,10 +10,10 @@ def routine(circ_name, num_shots=1):
     cfg = ExeConfig(
         ExeMode.RealMachine,
         num_shots,
-        xh_login_key="7e6999bab11453428b8ded1fac00b3ea",
-        xh_machine_name="Transponder",
+        qcloud_platform_login_key="7e6999bab11453428b8ded1fac00b3ea",
+        qcloud_machine_name="Transpose",
     )
-    qasm_fn = compile(task, params=(), config_file="")
+    qasm_fn = compile(task, params=(), config_file="", target="qcloud_sh")
     res = execute(qasm_fn, BackendType.XIAOHONG, cfg)
     print("result: ", res)
 

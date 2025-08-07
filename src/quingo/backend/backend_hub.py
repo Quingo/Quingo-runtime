@@ -10,8 +10,10 @@ class BackendType(enum.Enum):
     SYMQC = enum.auto()
     QUANTIFY = enum.auto()
     XIAOHONG = enum.auto()
+    TIANYAN = enum.auto()
     QUALESIM_TEQUILA = enum.auto()
     QUALESIM_QUANTUMSIM = enum.auto()
+    QOS = enum.auto()
 
 
 @singleton
@@ -48,16 +50,28 @@ class Backend_hub:
                 False,
                 Qisa.QCIS,
             ),
+            BackendType.TIANYAN: (
+                "ZDXLZ_Tianyan",
+                "tianyan",
+                False,
+                Qisa.QCIS,
+            ),
             BackendType.QUALESIM_TEQUILA: (
-                "QuaLeSim",
+                "QuaLeSim_tequila",
                 "qualesim",
                 True,
                 Qisa.QCIS,
             ),
             BackendType.QUALESIM_QUANTUMSIM: (
-                "QuaLeSim",
+                "QuaLeSim_quantumsim",
                 "qualesim",
                 True,
+                Qisa.QCIS,
+            ),
+            BackendType.QOS: (
+                "QOS",
+                "qos",
+                False,
                 Qisa.QCIS,
             ),
         }

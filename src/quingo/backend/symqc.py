@@ -3,6 +3,7 @@ from .backend_hub import BackendType
 from .if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
 from symqc.simulator import SymQC
+import numpy as np
 
 
 class IfSymQC(If_backend):
@@ -25,6 +26,10 @@ class IfSymQC(If_backend):
         else:
             raise TypeError("The SymQC simulator can only accept QCIS instructions.")
 
+    def upload_program_str(self, program: str):
+        """upload the program string to the simulator."""
+        self.sim.compile(program)
+
     def execute(self, exe_config: ExeConfig):
         """Execute the given quantum circuit.
         Args:
@@ -38,6 +43,12 @@ class IfSymQC(If_backend):
 
         if exe_config.mode == ExeMode.SimFinalResult:
             raw_res = self.sim.simulate("final_state")
+            raw_res["quantum"] = (
+                raw_res["quantum"][0],
+                np.array(raw_res["quantum"][1]).reshape(
+                    -1,
+                ),
+            )
             return raw_res
 
         if exe_config.mode == ExeMode.SimStateVector:

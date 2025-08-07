@@ -1,8 +1,9 @@
+from quingo.core.exe_config import ExeConfig, ExeMode
+from quingo.lib.pyezQ import Account
 from quingo.utils import ensure_path
+
 from .backend_hub import BackendType
 from .if_backend import If_backend
-from quingo.core.exe_config import ExeConfig, ExeMode
-import pyezQ
 
 
 class XiaoHong(If_backend):
@@ -21,6 +22,10 @@ class XiaoHong(If_backend):
         prog_fn = ensure_path(prog_fn)
         self.qcis_circuit = prog_fn.open("r").read()
 
+    def upload_program_str(self, program: str):
+        """upload the program string to the simulator."""
+        self.qcis_circuit = program
+
     def execute(self, exe_config: ExeConfig):
         """Execute the given quantum circuit.
         Args:
@@ -37,7 +42,9 @@ class XiaoHong(If_backend):
             )
 
         # connect XiaoHong
-        self.set_account(exe_config.xh_login_key, exe_config.xh_machine_name)
+        self.set_account(
+            exe_config.qcloud_platform_login_key, exe_config.qcloud_machine_name
+        )
 
         # submit job
         print(f"Start execute:")
@@ -56,7 +63,7 @@ class XiaoHong(If_backend):
         return result
 
     def set_account(self, login_key, machine_name):
-        self.account = pyezQ.Account(login_key=login_key, machine_name=machine_name)
+        self.account = Account(login_key=login_key, machine_name=machine_name)
         print(f"Set account successfully:")
         print(f"   login key = {login_key[0:5]}" + "*" * (len(login_key) - 5))
         print(f"   machine name = {machine_name}")

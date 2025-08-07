@@ -5,14 +5,16 @@ from pathlib import Path
 from quingo.backend.backend_hub import BackendType
 from quingo.backend.if_backend import If_backend
 from quingo.core.exe_config import ExeConfig, ExeMode
-from qualesim.plugin import Loglevel
-from qualesim.host import Simulator
+import numpy as np
 
 
-class QuaLeSim(If_backend):
+class QuaLeSim_base(If_backend):
 
     def __init__(self, backend_type=BackendType.QUALESIM_QUANTUMSIM):
         super().__init__(backend_type)
+        from qualesim.plugin import Loglevel
+        from qualesim.host import Simulator
+
         self.sim = Simulator(stderr_verbosity=Loglevel.OFF)
         if backend_type == BackendType.QUALESIM_QUANTUMSIM:
             self.sim.with_backend("quantumsim", verbosity=Loglevel.OFF)
@@ -29,12 +31,17 @@ class QuaLeSim(If_backend):
         prog_fn = ensure_path(prog_fn)
 
         if prog_fn.suffix in [".qcis", ".qi"]:
+            from qualesim.plugin import Loglevel
+
             self.sim.with_frontend(str(prog_fn), verbosity=Loglevel.OFF)
         else:
             raise TypeError(
                 "found unsupported file suffix ({}). Currently supported are "
                 "'.qcis' (for QCIS) and '.qi' (for QUIET-s)".format(prog_fn.suffix)
             )
+
+    def upload_program_str(self, program: str):
+        pass
 
     def execute(self, exe_config: ExeConfig):
         if exe_config.mode == ExeMode.SimShots:
@@ -60,16 +67,18 @@ class QuaLeSim(If_backend):
                 )
 
         if exe_config.mode == ExeMode.SimFinalResult:
-            measure_mod = "one_shot"
+            measure_mod = "state_vector"
             try:
                 self.sim.simulate()
-                res = self.sim.run(
-                    measure_mod=measure_mod, num_shots=exe_config.num_shots
-                )
+                res = self.sim.run(measure_mod=measure_mod)
                 self.sim.stop()
-                final_state = res["res"]
-                final_state["quantum"] = tuple(final_state["quantum"])
-                return final_state["quantum"]
+                final_state = eval(res["res"])
+                result = dict()
+                result["classical"] = final_state["classical"]
+                result["quantum"] = tuple(
+                    (final_state["quantum"][0], np.array(final_state["quantum"][1]))
+                )
+                return result
 
             except Exception as e:
                 raise ValueError(
@@ -99,3 +108,13 @@ class QuaLeSim(If_backend):
                 exe_config.mode
             )
         )
+
+
+class QuaLeSim_tequila(QuaLeSim_base):
+    def __init__(self):
+        super().__init__(BackendType.QUALESIM_TEQUILA)
+
+
+class QuaLeSim_quantumsim(QuaLeSim_base):
+    def __init__(self):
+        super().__init__(BackendType.QUALESIM_QUANTUMSIM)
