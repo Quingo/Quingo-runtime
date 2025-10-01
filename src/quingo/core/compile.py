@@ -1,12 +1,13 @@
+import logging
+import subprocess
 from pathlib import Path
-import subprocess, logging
-from quingo.core.compiler_config import get_mlir_path
-from quingo.core.quingo_task import Quingo_task
-from quingo.core.preparation import gen_main_file
-from quingo.core.quingo_logger import quingo_err, get_logger
-from quingo.utils import ensure_path
-from quingo.backend.qisa import Qisa, get_qisa_name, get_suffix
 
+from quingo.backend.qisa import Qisa, get_qisa_name, get_suffix
+from quingo.core.compiler_config import get_mlir_path
+from quingo.core.preparation import gen_main_file
+from quingo.core.quingo_logger import get_logger, quingo_err
+from quingo.core.quingo_task import Quingo_task
+from quingo.utils import ensure_path
 
 logger = get_logger((__name__).split(".")[-1])
 
@@ -94,11 +95,11 @@ def compose_cl_cmd(
 
     opt_out_fn = '-o "{}"'.format(str(qasm_fn))
 
-    config_fn = '--config-fn="{}"'.format(str(configfile))
+    config_fn = '--config-fn="{}"'.format(str(configfile)) if len(configfile) > 0 else ""
 
-    chip_path_ = '--chip-config="{}"'.format(str(chip_path))
+    chip_path_ = '--chip-config="{}"'.format(str(chip_path)) if len(chip_path) > 0 else ""
 
-    target_ = '--target="{}"'.format(str(target))
+    target_ = '--target="{}"'.format(str(target)) if len(target) > 0 else ""
     # mq_path = '--mq-path="{}"'.format(str(mq_fn))
 
     cmd_eles = [
@@ -114,7 +115,6 @@ def compose_cl_cmd(
         opt_qubit_map,
         opt_out_fn,
     ]
-
 
     compile_cmd = " ".join([ele for ele in cmd_eles if ele.strip() != ""])
 
