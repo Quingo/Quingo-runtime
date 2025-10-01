@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="quingo",
-    version="0.4.0",
+    version="0.4.1",
     author="Xiang Fu",
     author_email="gtaifu@gmail.com",
     description="Quingo Runtime System",
