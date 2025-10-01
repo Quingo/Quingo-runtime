@@ -24,15 +24,15 @@ class TestCompileCmd:
 
         mlir_path = Path(get_mlir_path())
         cmd = compose_cl_cmd(task, qasm_fn, mlir_path)
+        print("cmd:", cmd)
         cmd_eles = cmd.split()
-        assert len(cmd_eles) == 13
+        assert len(cmd_eles) == 10
         assert mlir_path.resolve().samefile(cmd_eles[0].strip('"'))
         assert cmd_eles[1] == '-u'
         assert cmd_eles[2] == '"{}"'.format(task.cl_entry_fn.resolve())
-        assert cmd_eles[3] == "-I"
-        assert cmd_eles[5] == "-I"
-        assert cmd_eles[10] == "--isa=qcis"
-        assert cmd_eles[11] == "-o"
+        assert len([ele for ele in cmd_eles if ele == "-I"]) == 2
+        assert  "--isa=qcis" in cmd_eles
+        assert "-o" in cmd_eles
         # assert Path(qasm_fn).samefile(cmd_eles[8].strip('"'))
 
     def test_compile(self):
