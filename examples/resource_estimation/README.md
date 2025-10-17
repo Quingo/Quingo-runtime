@@ -1,10 +1,15 @@
 # 量子电路资源估算演示
 
-本目录包含演示如何使用 `quingo.lib.qiskit_tools` 模块中的 `estimate_resource` 函数来分析量子电路资源使用情况的示例。
+本目录包含演示如何使用资源估算功能来分析量子电路资源使用情况的示例。
 
 ## 功能说明
 
-`estimate_resource` 函数可以分析 QCIS 格式的量子电路文件，并返回以下信息：
+Quingo Runtime 提供两种方式进行资源估算：
+
+1. **直接调用 `estimate_resource` 函数**：用于独立的资源分析
+2. **通过 `execute` 函数**：在执行量子电路的同时获取资源信息
+
+资源估算可以分析 QCIS 格式的量子电路文件，并返回以下信息：
 
 - **电路深度 (Depth)**: 电路在并行执行时所需的最少时间步数
 - **量子比特数 (Qubits)**: 电路使用的量子比特数量
@@ -13,9 +18,9 @@
 ## 文件说明
 
 - `demo.py`: 主演示脚本，包含三个示例：
-  1. 单个电路资源分析
-  2. 多个电路对比分析
-  3. 自定义分析（双量子比特门比例计算）
+  1. 单个电路资源分析（使用 `estimate_resource` 函数）
+  2. 多个电路对比分析（使用 `estimate_resource` 函数）
+  3. **在 execute 函数中使用资源估算（新增）**
 
 ## 前置条件
 
@@ -32,7 +37,7 @@
    # 编译 bell_state 示例
    cd examples/bell_state
    # 使用 quingoc 编译器编译 kernel.qu 生成 QCIS 文件
-   
+
    # 编译 ghz 示例
    cd examples/ghz
    # 使用 quingoc 编译器编译 kernel.qu 生成 QCIS 文件
@@ -80,6 +85,8 @@ python examples/resource_estimation/demo.py
 
 ## API 使用示例
 
+### 方式 1: 直接使用 estimate_resource 函数
+
 ```python
 from pathlib import Path
 from quingo.lib.qiskit_tools import estimate_resource
@@ -95,6 +102,41 @@ print(f"电路深度: {depth}")
 print(f"量子比特数: {num_qubits}")
 print(f"门操作统计: {dict(ops_count)}")
 ```
+
+### 方式 2: 通过 execute 函数使用资源估算
+
+```python
+from quingo import BackendType, ExeConfig, ExeMode, execute
+from pathlib import Path
+
+# 指定 QCIS 文件路径
+qcis_file = Path("path/to/your/circuit.qcis")
+
+# 配置执行参数，启用资源估算
+config = ExeConfig(
+    mode=ExeMode.SimShots,
+    num_shots=100,
+    enable_resource_estimation=True  # 启用资源估算
+)
+
+# 执行并获取结果
+result, resource_info = execute(qcis_file, BackendType.QUANTUM_SIM, config)
+
+# 解包资源信息
+depth, num_qubits, ops_count = resource_info
+
+# 使用执行结果和资源信息
+print(f"执行结果: {result}")
+print(f"电路深度: {depth}")
+print(f"量子比特数: {num_qubits}")
+print(f"门操作统计: {dict(ops_count)}")
+```
+
+**优点**：
+- 一次调用同时完成量子电路执行和资源估算
+- 向后兼容：默认情况下资源估算是关闭的
+- 支持所有执行模式（SimShots、SimStateVector、SimFinalResult 等）
+- 支持 QCIS 文件和 QCIS 字符串两种输入方式
 
 ## 注意事项
 

@@ -29,6 +29,7 @@ class ExeConfig:
         qcloud_machine_name: str = None,  # use for connecting XIAOHONG
         qos_circuit_times: int = 100,  # use for connecting QOS
         noise_config=None,
+        enable_resource_estimation: bool = False,
     ):
         self.mode = mode
         self.num_shots = num_shots
@@ -36,6 +37,7 @@ class ExeConfig:
         self.qcloud_machine_name = qcloud_machine_name
         self.qos_circuit_times = qos_circuit_times
         self.noise_config = noise_config
+        self.enable_resource_estimation = enable_resource_estimation
 
     def __str__(self) -> str:
         return str(self.mode)
