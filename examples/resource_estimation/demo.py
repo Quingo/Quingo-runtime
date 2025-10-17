@@ -1,11 +1,15 @@
 """量子电路资源估算演示
 
-本脚本演示如何使用 quingo.lib.qiskit_tools 中的 estimate_resource 函数
-来分析量子电路的资源使用情况，包括电路深度、量子比特数和门操作统计。
+本脚本演示如何使用资源估算功能来分析量子电路的资源使用情况，包括电路深度、量子比特数和门操作统计。
+
+提供两种方式：
+1. 直接使用 quingo.lib.qiskit_tools.estimate_resource 函数
+2. 通过 execute 函数的 ExeConfig 配置启用资源估算
 """
 
 from pathlib import Path
 from quingo.lib.qiskit_tools import estimate_resource
+from quingo import BackendType, ExeConfig, ExeMode, execute
 
 
 def print_separator(char="=", length=70):
@@ -137,11 +141,91 @@ def demo_multiple_circuits_comparison():
             )
 
 
+def demo_execute_with_resource_estimation():
+    """演示：通过 execute 函数使用资源估算"""
+    print_separator()
+    print("示例 3: 在 execute 函数中使用资源估算")
+    print_separator()
+
+    # 定义 QCIS 文件路径
+    bell_qcis = Path(__file__).parent.parent / "bell_state/build/bell_state.qcis"
+
+    # 检查文件是否存在
+    if not bell_qcis.exists():
+        print(f"错误: QCIS 文件不存在: {bell_qcis}")
+        print("请先编译 bell_state 示例以生成 QCIS 文件")
+        return
+
+    print(f"\n正在执行文件: {bell_qcis}")
+    print("\n方法 1: 不启用资源估算（默认行为）")
+    print("-" * 70)
+
+    # 方法 1: 默认执行，不进行资源估算
+    cfg_no_resource = ExeConfig(
+        mode=ExeMode.SimShots,
+        num_shots=10,
+        enable_resource_estimation=False,  # 默认值，可以省略
+    )
+
+    result = execute(bell_qcis, BackendType.QUANTUM_SIM, cfg_no_resource)
+    print(f"执行结果: {result}")
+    print(f"结果类型: 普通执行结果")
+
+    print("\n方法 2: 启用资源估算")
+    print("-" * 70)
+
+    # 方法 2: 启用资源估算
+    cfg_with_resource = ExeConfig(
+        mode=ExeMode.SimShots,
+        num_shots=10,
+        enable_resource_estimation=True,  # 启用资源估算
+    )
+
+    result_with_resource = execute(
+        bell_qcis, BackendType.QUANTUM_SIM, cfg_with_resource
+    )
+
+    # 解包结果
+    execution_result, resource_info = result_with_resource
+    depth, num_qubits, ops_count = resource_info
+
+    print(f"执行结果: {execution_result}")
+    print(f"\n资源估算信息:")
+    print_resource_info("Bell State", depth, num_qubits, ops_count)
+
+    print("\n方法 3: 使用 QCIS 字符串执行并估算资源")
+    print("-" * 70)
+
+    # 方法 3: 直接使用 QCIS 字符串
+    qcis_string = "H Q1\nCNOT Q1 Q2\nM Q1\nM Q2"
+
+    cfg_string = ExeConfig(
+        mode=ExeMode.SimShots, num_shots=5, enable_resource_estimation=True
+    )
+
+    result_str, resource_str = execute(qcis_string, BackendType.QUANTUM_SIM, cfg_string)
+    depth_str, num_qubits_str, ops_count_str = resource_str
+
+    print(f"执行结果: {result_str}")
+    print(f"\n资源估算信息:")
+    print_resource_info(
+        "Bell State (from string)", depth_str, num_qubits_str, ops_count_str
+    )
+
+    print("\n使用建议:")
+    print("-" * 70)
+    print("1. 默认情况下，资源估算是关闭的，不会影响性能")
+    print("2. 需要资源统计时，设置 enable_resource_estimation=True")
+    print("3. 资源估算仅支持 QCIS 格式的量子电路")
+    print("4. 返回的资源信息包括：电路深度、量子比特数、门操作统计")
+    print("5. 资源估算在所有执行模式下都可用（SimShots、SimStateVector 等）")
+
+
 def main():
     """主函数：运行所有演示"""
     print("\n")
     print("=" * 70)
-    print("  量子电路资源估算演示 (estimate_resource)")
+    print("  量子电路资源估算演示")
     print("=" * 70)
 
     # 示例 1: 单个电路分析
@@ -151,6 +235,11 @@ def main():
 
     # 示例 2: 多电路对比
     demo_multiple_circuits_comparison()
+
+    print("\n\n")
+
+    # 示例 3: 在 execute 函数中使用资源估算
+    demo_execute_with_resource_estimation()
 
     print("\n\n")
 
