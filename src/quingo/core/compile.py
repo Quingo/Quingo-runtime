@@ -2,6 +2,7 @@ import logging
 import subprocess
 from pathlib import Path
 
+from quingo.backend.backend_hub import BackendType
 from quingo.backend.qisa import Qisa, get_qisa_name, get_suffix
 from quingo.core.compiler_config import get_mlir_path
 from quingo.core.preparation import gen_main_file
@@ -29,8 +30,17 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None, **kwargs):
     else:
         chip_path = ""
 
+    device_config_path = kwargs.get("device_config_path", None)
+    wf_impl_dir = kwargs.get("wf_impl_dir", None)
+
     logger.setLevel(logging.INFO)
-    gen_main_file(task.called_qu_fn, task.called_func, task.cl_entry_fn, params)
+    gen_main_file(
+        task.called_qu_fn,
+        task.called_func,
+        task.cl_entry_fn,
+        params,
+        qubit_alloc=task.qubit_alloc,
+    )
 
     if qasm_fn is None:
         suffix = get_suffix(task.qisa_type)
@@ -44,7 +54,15 @@ def compile(task: Quingo_task, params: tuple, qasm_fn: Path = None, **kwargs):
     quingoc_path = Path(get_mlir_path())
 
     compile_cmd = compose_cl_cmd(
-        task, qasm_fn, quingoc_path, config_file, target, chip_path, mq_fn
+        task,
+        qasm_fn,
+        quingoc_path,
+        config_file,
+        target,
+        chip_path,
+        mq_fn,
+        device_config_path=device_config_path,
+        wf_impl_dir=wf_impl_dir,
     )
     if task.debug_mode:
         logger.info(compile_cmd)
@@ -78,6 +96,8 @@ def compose_cl_cmd(
     target="",
     chip_path="",
     mq_fn="",
+    device_config_path=None,
+    wf_impl_dir=None,
 ):
     qasm_fn = ensure_path(qasm_fn)
     quingoc_path = ensure_path(quingoc_path)
@@ -99,8 +119,29 @@ def compose_cl_cmd(
 
     chip_path_ = '--chip-config="{}"'.format(str(chip_path)) if len(chip_path) > 0 else ""
 
-    target_ = '--target="{}"'.format(str(target)) if len(target) > 0 else ""
+    target_name = target
+    if isinstance(target, BackendType):
+        backend_name_to_quingoc_target_name = {
+            BackendType.SISQ_PULSE_EXP: "sisq-pulse-exp",
+        }
+        target_name = backend_name_to_quingoc_target_name.get(target, "")
+
+    target_ = '--target="{}"'.format(str(target_name)) if len(target_name) > 0 else ""
+    if target_:
+        opt_isa = ""
     # mq_path = '--mq-path="{}"'.format(str(mq_fn))
+
+    device_config_ = (
+        '--device-config="{}"'.format(str(ensure_path(device_config_path)))
+        if device_config_path
+        else ""
+    )
+
+    wf_impl_dir_ = (
+        '--wf-impl-dir="{}"'.format(str(ensure_path(wf_impl_dir)))
+        if wf_impl_dir
+        else ""
+    )
 
     cmd_eles = [
         cl_path,
@@ -112,6 +153,8 @@ def compose_cl_cmd(
         target_,
         # mq_path,
         opt_isa,
+        device_config_,
+        wf_impl_dir_,
         opt_qubit_map,
         opt_out_fn,
     ]

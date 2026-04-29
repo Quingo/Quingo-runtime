@@ -7,6 +7,7 @@ class Qisa(enum.Enum):
     BRANCH_QUIET = enum.auto()
     eQASM = enum.auto()
     Quantify = enum.auto()
+    SISQ = enum.auto()
 
 
 def get_qisa_name(qisa: Qisa):
@@ -23,6 +24,8 @@ def get_qisa_name(qisa: Qisa):
         return "eqasm"
     if qisa == Qisa.Quantify:
         return "quantify"
+    if qisa == Qisa.SISQ:
+        return "sisq"
 
     raise ValueError("unknown qisa type: {}".format(qisa))
 
@@ -39,5 +42,7 @@ def get_suffix(qisa: Qisa):
         return ".eqasm"
     if qisa == Qisa.Quantify:
         return ".json"
+    if qisa == Qisa.SISQ:
+        return ".sisq"
 
     raise ValueError("unknown qisa type: {}".format(qisa))

@@ -82,8 +82,51 @@ operation foo(a: int, b: int): int {
         lines[0].startswith("import")
         lines[1].startswith("operation main() : int")
 
+    def test_gen_main_func_with_single_qubit_alloc(self):
+        """When `qubit_alloc=["cq30"]` is given, the generated main must:
+        1. wrap the entry call in `using (cq30: qubit) { ... }`;
+        2. prepend `cq30` as the first positional argument of the call.
+        """
+        mock_fn = """
+operation t1_experiment(q: qubit, t1_delay: time): unit {
+    wait(q, t1_delay);
+}"""
+        main_func = gen_main_func(
+            mock_fn, "t1_experiment", (1.0,), qubit_alloc=["cq30"]
+        )
+        non_empty = [ln.strip() for ln in main_func.split("\n") if ln.strip()]
+        assert non_empty[0].startswith("operation main() : unit")
+        assert "double var0_double;" in non_empty
+        assert "var0_double = 1.0;" in non_empty
+        using_lines = [ln for ln in non_empty if ln.startswith("using")]
+        assert len(using_lines) == 1
+        assert using_lines[0] == "using (cq30: qubit) {"
+        call_lines = [ln for ln in non_empty if "t1_experiment(" in ln]
+        assert call_lines == ["t1_experiment(cq30, var0_double);"]
+
+    def test_gen_main_func_with_multi_qubit_alloc(self):
+        """Multiple qubits should appear in declaration & call order."""
+        mock_fn = """
+operation cz_pair(qa: qubit, qb: qubit): unit { CZ(qa, qb); }"""
+        main_func = gen_main_func(mock_fn, "cz_pair", (), qubit_alloc=["cq30", "cq31"])
+        non_empty = [ln.strip() for ln in main_func.split("\n") if ln.strip()]
+        assert "using (cq30: qubit, cq31: qubit) {" in non_empty
+        assert "cz_pair(cq30, cq31);" in non_empty
+
+    def test_gen_main_func_qubit_alloc_none_is_legacy(self):
+        """qubit_alloc=None must reproduce the exact legacy behaviour."""
+        mock_fn = """
+operation foo(a: int): int { return a; }"""
+        legacy = gen_main_func(mock_fn, "foo", (5,))
+        with_none = gen_main_func(mock_fn, "foo", (5,), qubit_alloc=None)
+        with_empty = gen_main_func(mock_fn, "foo", (5,), qubit_alloc=[])
+        assert legacy == with_none == with_empty
+
 
 if __name__ == "__main__":
     TestPrepareMain().test_get_type()
     TestPrepareMain().test_gen_main_func()
     TestPrepareMain().test_gen_main_file()
+    TestPrepareMain().test_gen_main_func_with_single_qubit_alloc()
+    TestPrepareMain().test_gen_main_func_with_multi_qubit_alloc()
+    TestPrepareMain().test_gen_main_func_qubit_alloc_none_is_legacy()

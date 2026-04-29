@@ -14,6 +14,9 @@ class BackendType(enum.Enum):
     QUALESIM_TEQUILA = enum.auto()
     QUALESIM_QUANTUMSIM = enum.auto()
     QOS = enum.auto()
+    QUANTA_SC = enum.auto()
+    SISQ = enum.auto()
+    SISQ_PULSE_EXP = enum.auto()
 
 
 @singleton
@@ -73,6 +76,24 @@ class Backend_hub:
                 "qos",
                 False,
                 Qisa.QCIS,
+            ),
+            BackendType.QUANTA_SC: (
+                "QuantaSC",
+                "quantasc",
+                False,
+                Qisa.QCIS,
+            ),
+            BackendType.SISQ: (
+                None,  # SISQ 是纯编译目标，无运行时后端
+                None,
+                False,
+                Qisa.SISQ,
+            ),
+            BackendType.SISQ_PULSE_EXP: (
+                None,  # 脉冲级 SISQ，纯编译目标
+                None,
+                False,
+                Qisa.SISQ,
             ),
         }
 

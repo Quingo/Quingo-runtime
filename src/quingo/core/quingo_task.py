@@ -40,6 +40,8 @@ class Quingo_task:
         qisa=None,
         backend=BackendType.QUANTUM_SIM,
         qubits_info=None,
+        flat_build=False,
+        qubit_alloc=None,
     ) -> None:
         """
         Initializes a Quingo task object.
@@ -58,6 +60,17 @@ class Quingo_task:
         - qisa (Optional[Any]): The target assembly specification.
         - backend (BackendType): The target backend for the Quingo task. Defaults to QuantumSim.
         - qubits_info (Optional[Any]): Information about the qubits used in the task.
+        - flat_build (bool): If True and `build_under` is specified, use `build_under`
+            directly as the build directory without creating a nested temp subdirectory.
+            Useful when the caller manages the directory lifecycle (e.g., QuantaCS cl_dir).
+            Defaults to False.
+        - qubit_alloc (Optional[List[str]]): Ordered physical qubit names to bind to
+            the entry function. When provided, the generated main wraps the entry
+            call in `using (cqXX: qubit, ...) { entry(cqXX, ..., <user-params>); }`,
+            so the user can write a fully qubit-agnostic .qu (taking `qubit` typed
+            parameters) and run the same file on different qubits without editing
+            the source. None preserves the legacy behaviour where the .qu file
+            itself declares its qubits via `using`.
 
         Note:
         The `build_dir` is calculated the first time it is needed.
@@ -75,11 +88,16 @@ class Quingo_task:
         self._qisa = qisa
         self._backend = backend
         self._qubits_info = qubits_info
+        self._qubit_alloc = list(qubit_alloc) if qubit_alloc else None
 
-        self.create_build_dir(build_under, delete_build_dir, debug_mode)
+        self.create_build_dir(build_under, delete_build_dir, debug_mode, flat_build)
 
     def create_build_dir(
-        self, build_under=None, delete_build_dir=True, debug_mode=False
+        self,
+        build_under=None,
+        delete_build_dir=True,
+        debug_mode=False,
+        flat_build=False,
     ):
         """It specifies a temporary build directory for this task.
         By default, this build directory will be deleted when the task is destroyed.
@@ -88,6 +106,9 @@ class Quingo_task:
         Otherwise, a new build directory will be created under this given directory.
 
         When `debug_mode` is True, and `build_under` is None, a build directory will be created under `<cwd>/build/`.
+
+        When `flat_build` is True and `build_under` is specified, `build_under` is used
+        directly as the build directory without creating a nested temp subdirectory.
 
         中文版需求说明：
           - 每个task对应一个build文件夹，还是每个task的每次执行对应一个文件夹？
@@ -106,16 +127,22 @@ class Quingo_task:
             self.parent_work_dir = build_under
 
         self.delete_build_dir = False if debug_mode else delete_build_dir
-        build_dir_prefix = "qg-" + get_cur_time_as_str() + "-"
 
-        if self.parent_work_dir is not None:
-            if not self.parent_work_dir.exists():
-                self.parent_work_dir.mkdir()
+        if flat_build and build_under is not None:
+            build_under = ensure_path(build_under)
+            build_under.mkdir(parents=True, exist_ok=True)
+            self.working_dir = str(build_under)
+        else:
+            build_dir_prefix = "qg-" + get_cur_time_as_str() + "-"
 
-        self.working_dir = tempfile.mkdtemp(
-            dir=self.parent_work_dir,
-            prefix=build_dir_prefix,
-        )
+            if self.parent_work_dir is not None:
+                if not self.parent_work_dir.exists():
+                    self.parent_work_dir.mkdir()
+
+            self.working_dir = tempfile.mkdtemp(
+                dir=self.parent_work_dir,
+                prefix=build_dir_prefix,
+            )
 
         assert Path(self.working_dir).exists()
 
@@ -127,6 +154,11 @@ class Quingo_task:
     def qubits_info(self):
         """The path of the qubits information file."""
         return self._qubits_info
+
+    @property
+    def qubit_alloc(self):
+        """Ordered physical qubit names to allocate inside the generated main."""
+        return self._qubit_alloc
 
     @property
     def cl_entry_fn(self):
@@ -170,6 +202,9 @@ class Quingo_task:
 
         if self._backend in [BackendType.QUANTIFY]:
             return Qisa.Quantify
+
+        if self._backend in [BackendType.SISQ, BackendType.SISQ_PULSE_EXP]:
+            return Qisa.SISQ
 
         raise ValueError(f"Found unknown backend {self._backend}")
 
